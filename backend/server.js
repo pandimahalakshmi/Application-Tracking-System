@@ -1,0 +1,85 @@
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import authRoutes from "./routes/authRoutes.js";
+import candidateRoutes from "./routes/candidateRoutes.js";
+import jobRoutes from "./routes/jobRoutes.js";
+
+dotenv.config();
+
+const app = express();
+const PORT = Number(process.env.PORT) || 5000;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/candidates", candidateRoutes);
+app.use("/api/jobs", jobRoutes);
+
+// Health Check Endpoint
+app.get("/api/health", (req, res) => {
+  res.json({ message: "Backend Server is Running!", timestamp: new Date() });
+});
+
+// Root Endpoint
+app.get("/", (req, res) => {
+  res.json({
+    message: " ATS Backend API",
+    version: "1.0.0",
+    endpoints: {
+      health: "/api/health",
+      auth: "/api/auth",
+      candidates: "/api/candidates",
+      jobs: "/api/jobs",
+    },
+  });
+});
+
+// Error Handling
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: err.message });
+});
+
+import http from "http";
+
+let currentServer = null;
+
+const startServer = (port, retries = 5) => {
+  if (currentServer) {
+    currentServer.close();
+    currentServer = null;
+  }
+
+  const server = http.createServer(app);
+
+  const onListening = () => {
+    console.log(`\n ATS Backend Server running on http://localhost:${port}`);
+    console.log(` API Documentation: http://localhost:${port}`);
+    console.log(`\n CORS enabled for frontend communication\n`);
+  };
+
+  server.on("error", (err) => {
+    if (err.code === "EADDRINUSE") {
+      const nextPort = Number(port) + 1;
+      console.warn(`Port ${port} is already in use. Trying port ${nextPort}...`);
+      if (retries > 0) {
+        startServer(nextPort, retries - 1);
+      } else {
+        console.error("Failed to start server: all ports in the retry range are in use.");
+        process.exit(1);
+      }
+    } else {
+      console.error(err);
+      process.exit(1);
+    }
+  });
+
+  server.listen(port, onListening);
+  currentServer = server;
+};
+
+startServer(PORT);
