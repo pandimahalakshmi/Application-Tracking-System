@@ -1,11 +1,13 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import candidateRoutes from "./routes/candidateRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
 
 dotenv.config();
+connectDB();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 5000;
@@ -64,14 +66,9 @@ const startServer = (port, retries = 5) => {
 
   server.on("error", (err) => {
     if (err.code === "EADDRINUSE") {
-      const nextPort = Number(port) + 1;
-      console.warn(`Port ${port} is already in use. Trying port ${nextPort}...`);
-      if (retries > 0) {
-        startServer(nextPort, retries - 1);
-      } else {
-        console.error("Failed to start server: all ports in the retry range are in use.");
-        process.exit(1);
-      }
+      console.error(`\n Port ${port} is already in use.`);
+      console.error(` Run this to free it: npx kill-port ${port}\n`);
+      process.exit(1);
     } else {
       console.error(err);
       process.exit(1);

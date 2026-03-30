@@ -1,4 +1,6 @@
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+const token = () => localStorage.getItem("token");
 
 // Auth Service
 export const authService = {
@@ -9,9 +11,10 @@ export const authService = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(signupData),
       });
-      return await response.json();
+      const data = await response.json();
+      if (data.token) localStorage.setItem("token", data.token);
+      return data;
     } catch (error) {
-      console.error("Signup error:", error);
       return { error: error.message };
     }
   },
@@ -23,31 +26,57 @@ export const authService = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      return await response.json();
+      const data = await response.json();
+      if (data.token) localStorage.setItem("token", data.token);
+      return data;
     } catch (error) {
-      console.error("Login error:", error);
       return { error: error.message };
     }
   },
 
   logout: async () => {
+    localStorage.removeItem("token");
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/logout`, {
-        method: "POST",
-      });
+      const response = await fetch(`${API_BASE_URL}/auth/logout`, { method: "POST" });
       return await response.json();
     } catch (error) {
-      console.error("Logout error:", error);
       return { error: error.message };
     }
   },
 
   getProfile: async (userId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/profile/${userId}`);
+      const response = await fetch(`${API_BASE_URL}/auth/profile/${userId}`, {
+        headers: { Authorization: `Bearer ${token()}` },
+      });
       return await response.json();
     } catch (error) {
-      console.error("Get profile error:", error);
+      return { error: error.message };
+    }
+  },
+
+  updateProfile: async (userId, data) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/profile/${userId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
+        body: JSON.stringify(data),
+      });
+      return await response.json();
+    } catch (error) {
+      return { error: error.message };
+    }
+  },
+
+  applyForJob: async (userId, jobData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/profile/${userId}/apply`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
+        body: JSON.stringify(jobData),
+      });
+      return await response.json();
+    } catch (error) {
       return { error: error.message };
     }
   },

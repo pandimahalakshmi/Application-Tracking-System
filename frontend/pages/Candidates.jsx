@@ -1,406 +1,169 @@
 import Sidebar from "../components/Sidebar";
-import {
-  Box,
-  Card,
-  TextField,
-  Button,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  Avatar,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { Box, Card, TextField, Button, Typography, Table, TableBody, TableCell,
+  TableContainer, TableHead, TableRow, Chip, Avatar, IconButton,
+  Dialog, DialogTitle, DialogContent, DialogActions, Select, MenuItem,
+  FormControl, InputLabel, InputAdornment, CircularProgress } from "@mui/material";
 import { useState, useEffect } from "react";
 import { Eye, Edit, Trash2, Download, Search } from "lucide-react";
 import { candidateService } from "../services/api";
+import { C, fieldSx, cardSx, menuPropsSx } from "../theme";
 
-const Candidates = () => {
+const statusColors = {
+  Applied:     { bg:`rgba(99,102,241,0.15)`,  color:'#6366F1' },
+  Shortlisted: { bg:`rgba(245,158,11,0.15)`,  color:'#F59E0B' },
+  Interview:   { bg:`rgba(6,182,212,0.15)`,   color:'#06B6D4' },
+  Selected:    { bg:`rgba(16,185,129,0.15)`,  color:'#10B981' },
+  Rejected:    { bg:`rgba(248,113,113,0.15)`, color:'#F87171' },
+};
+
+export default function Candidates() {
   const role = localStorage.getItem("role");
+  const navigate = useNavigate();
   const [candidates, setCandidates] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [openDetail, setOpenDetail] = useState(false);
   const [openStatus, setOpenStatus] = useState(false);
-  const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [selected, setSelected] = useState(null);
   const [newStatus, setNewStatus] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Fetch candidates from backend
   useEffect(() => {
-    fetchCandidates();
+    candidateService.getAllCandidates("All","")
+      .then(r => r.success ? setCandidates(r.candidates) : setError(r.error))
+      .finally(() => setLoading(false));
   }, []);
 
-  const fetchCandidates = async () => {
-    try {
-      setLoading(true);
-      setError("");
-      const result = await candidateService.getAllCandidates("All", "");
-      
-      if (result.success) {
-        setCandidates(result.candidates);
-      } else {
-        setError(result.error || "Failed to load candidates");
-      }
-    } catch (err) {
-      setError("Connection error: Backend not running on port 5000");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this candidate?")) return;
+    const r = await candidateService.deleteCandidate(id);
+    if (r.success) setCandidates(c => c.filter(x => x.id !== id));
   };
 
-  const handleDeleteCandidate = async (id) => {
-    try {
-      const result = await candidateService.deleteCandidate(id);
-      if (result.success) {
-        setCandidates(candidates.filter(c => c.id !== id));
-      }
-    } catch (err) {
-      setError("Failed to delete candidate");
-    }
+  const handleDownload = (c) => {
+    const csv = `Name,Email,Position,Status\n"${c.name}","${c.email}","${c.position}","${c.status}"`;
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], { type:"text/csv" }));
+    a.download = `${c.name.replace(/\s+/g,"_")}.csv`;
+    a.click();
   };
 
-  const handleStatusUpdate = async (candidate) => {
-    setSelectedCandidate(candidate);
-    setNewStatus(candidate.status);
-    setOpenStatus(true);
+  const confirmStatus = async () => {
+    const r = await candidateService.updateCandidateStatus(selected.id, newStatus);
+    if (r.success) { setCandidates(c => c.map(x => x.id === selected.id ? {...x, status: newStatus} : x)); setOpenStatus(false); }
   };
 
-  const confirmStatusUpdate = async () => {
-    try {
-      const result = await candidateService.updateCandidateStatus(
-        selectedCandidate.id,
-        newStatus
-      );
+  if (role !== "admin") return (
+    <Box sx={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh", background: C.bg }}>
+      <Card sx={{ p:4, textAlign:"center", ...cardSx }}>
+        <Typography variant="h5" sx={{ color: C.danger, fontWeight:700 }}>Access Denied</Typography>
+        <Typography sx={{ color: C.muted, mt:1 }}>Only admins can view candidates</Typography>
+      </Card>
+    </Box>
+  );
 
-      if (result.success) {
-        setCandidates(
-          candidates.map(c =>
-            c.id === selectedCandidate.id ? { ...c, status: newStatus } : c
-          )
-        );
-        setOpenStatus(false);
-      }
-    } catch (err) {
-      setError("Failed to update status");
-    }
-  };
-
-  const handleViewDetail = (candidate) => {
-    setSelectedCandidate(candidate);
-    setOpenDetail(true);
-  };
-
-  if (role !== "admin") {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100vh",
-          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        }}
-      >
-        <Card sx={{ p: 4, textAlign: "center" }}>
-          <Typography variant="h5" sx={{ color: "red", fontWeight: "bold" }}>
-            Access Denied
-          </Typography>
-          <Typography>Only admins can view candidates</Typography>
-        </Card>
-      </Box>
-    );
-  }
-
-  if (loading) {
-    return (
-      <Box sx={{ display: "flex" }}>
-        <Sidebar />
-        <Box
-          sx={{
-            marginLeft: "260px",
-            padding: "30px",
-            width: "100%",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "100vh",
-          }}
-        >
-          <Typography variant="h6">Loading candidates...</Typography>
-        </Box>
-      </Box>
-    );
-  }
-
-  const filteredCandidates = candidates.filter((candidate) => {
-    const matchSearch =
-      candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      candidate.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchStatus = statusFilter === "All" || candidate.status === statusFilter;
-    return matchSearch && matchStatus;
+  const filtered = candidates.filter(c => {
+    const s = (c.name+c.email).toLowerCase().includes(searchTerm.toLowerCase());
+    const f = statusFilter === "All" || c.status === statusFilter;
+    return s && f;
   });
 
-  const getStatusColor = (status) => {
-    const colors = {
-      Applied: "#667eea",
-      Shortlisted: "#f59e0b",
-      Interview: "#06b6d4",
-      Selected: "#10b981",
-      Rejected: "#ef4444",
-    };
-    return colors[status] || "#667eea";
-  };
-
-  const getStatusBg = (status) => {
-    const bgs = {
-      Applied: "#f0f4ff",
-      Shortlisted: "#fffbf0",
-      Interview: "#f0fffe",
-      Selected: "#f0fff4",
-      Rejected: "#fef2f2",
-    };
-    return bgs[status] || "#f0f4ff";
-  };
-
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display:"flex", background: C.bg, minHeight:"100vh" }}>
       <Sidebar />
-      <Box
-        sx={{
-          marginLeft: "260px",
-          padding: "30px",
-          width: "100%",
-          background: "#f8f9fa",
-          minHeight: "100vh",
-        }}
-      >
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h4" sx={{ fontWeight: "bold", mb: 1 }}>
-            Candidates Management
-          </Typography>
-          <Typography variant="body2" sx={{ color: "#666" }}>
-            Total: {filteredCandidates.length} candidates
-          </Typography>
+      <Box sx={{ marginLeft:"240px", width:"100%", p:"32px" }}>
+        <Box sx={{ mb:4 }}>
+          <Typography variant="h4" sx={{ fontWeight:700, color: C.text }}>Candidates</Typography>
+          <Typography sx={{ color: C.muted, mt:0.5 }}>{filtered.length} candidates found</Typography>
         </Box>
 
-        {error && (
-          <Card
-            sx={{
-              mb: 3,
-              p: 2,
-              background: "#fee",
-              border: "1px solid #fcc",
-              color: "#c33",
-            }}
-          >
-            <Typography variant="body2">{error}</Typography>
-          </Card>
-        )}
+        {error && <Box sx={{ mb:3, p:2, borderRadius:2, background:"rgba(248,113,113,0.1)", border:"1px solid rgba(248,113,113,0.3)", color: C.danger }}>{error}</Box>}
 
         {/* Filters */}
-        <Card sx={{ p: 2, mb: 3, display: "flex", gap: 2, flexWrap: "wrap" }}>
-          <TextField
-            placeholder="Search by name or email..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            InputProps={{
-              startAdornment: <Search size={18} style={{ marginRight: "10px" }} />,
-            }}
-            variant="outlined"
-            size="small"
-            sx={{ minWidth: "250px" }}
-          />
-
-          <FormControl sx={{ minWidth: "150px" }} size="small">
-            <InputLabel>Status</InputLabel>
-            <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-              <MenuItem value="All">All Status</MenuItem>
-              <MenuItem value="Applied">Applied</MenuItem>
-              <MenuItem value="Shortlisted">Shortlisted</MenuItem>
-              <MenuItem value="Interview">Interview</MenuItem>
-              <MenuItem value="Selected">Selected</MenuItem>
-              <MenuItem value="Rejected">Rejected</MenuItem>
+        <Card sx={{ ...cardSx, p:2, mb:3, display:"flex", gap:2, flexWrap:"wrap" }}>
+          <TextField placeholder="Search by name or email..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
+            size="small" sx={{ ...fieldSx, minWidth:260 }}
+            InputProps={{ startAdornment: <InputAdornment position="start"><Search size={16} color={C.muted}/></InputAdornment> }} />
+          <FormControl size="small" sx={{ minWidth:150 }}>
+            <InputLabel sx={{ color: C.muted }}>Status</InputLabel>
+            <Select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+              sx={{ ...fieldSx['& .MuiOutlinedInput-root'], color: C.text }} MenuProps={menuPropsSx}>
+              {["All","Applied","Shortlisted","Interview","Selected","Rejected"].map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
             </Select>
           </FormControl>
-
-          <Button
-            variant="contained"
-            sx={{
-              background: "#667eea",
-              textTransform: "none",
-              borderRadius: 2,
-            }}
-          >
-            Download CSV
-          </Button>
         </Card>
 
-        {/* Candidates Table */}
-        <Card>
-          <TableContainer>
-            <Table>
-              <TableHead sx={{ background: "#f8f9fa" }}>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: "bold" }}>Candidate</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>Position</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>Status</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>Experience</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>Rating</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", textAlign: "center" }}>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredCandidates.map((candidate) => (
-                  <TableRow key={candidate.id} sx={{ "&:hover": { background: "#f9f9f9" } }}>
-                    <TableCell>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                        <Avatar sx={{ background: "#667eea" }}>
-                          {candidate.name.charAt(0)}
-                        </Avatar>
-                        <Box>
-                          <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
-                            {candidate.name}
-                          </Typography>
-                          <Typography variant="caption" sx={{ color: "#999" }}>
-                            {candidate.email}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </TableCell>
-                    <TableCell>{candidate.position}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={candidate.status}
-                        size="small"
-                        sx={{
-                          background: getStatusBg(candidate.status),
-                          color: getStatusColor(candidate.status),
-                          fontWeight: "bold",
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell>{candidate.experience}</TableCell>
-                    <TableCell>⭐ {candidate.rating}</TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleViewDetail(candidate)}
-                        title="View"
-                      >
-                        <Eye size={18} color="#667eea" />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleStatusUpdate(candidate)}
-                        title="Update Status"
-                      >
-                        <Edit size={18} color="#f59e0b" />
-                      </IconButton>
-                      <IconButton size="small" title="Download Resume">
-                        <Download size={18} color="#10b981" />
-                      </IconButton>
-                      <IconButton size="small" title="Delete">
-                        <Trash2 size={18} color="#ef4444" />
-                      </IconButton>
-                    </TableCell>
+        {/* Table */}
+        <Card sx={cardSx}>
+          {loading ? (
+            <Box sx={{ display:"flex", justifyContent:"center", p:6 }}><CircularProgress sx={{ color: C.primary }}/></Box>
+          ) : (
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ '& th':{ background: C.surface2, color: C.muted, fontWeight:600, fontSize:13, borderBottom:`1px solid ${C.border}` } }}>
+                    <TableCell>Candidate</TableCell>
+                    <TableCell>Position</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Experience</TableCell>
+                    <TableCell>Rating</TableCell>
+                    <TableCell align="center">Actions</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {filtered.map(c => (
+                    <TableRow key={c.id} sx={{ '& td':{ borderBottom:`1px solid ${C.border}`, color: C.text },
+                      '&:hover':{ background:`${C.primary}08` } }}>
+                      <TableCell>
+                        <Box sx={{ display:"flex", alignItems:"center", gap:2 }}>
+                          <Avatar sx={{ width:36, height:36, background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, fontSize:14, fontWeight:700 }}>
+                            {c.name.charAt(0)}
+                          </Avatar>
+                          <Box>
+                            <Typography sx={{ fontWeight:600, fontSize:14, color: C.text }}>{c.name}</Typography>
+                            <Typography sx={{ fontSize:12, color: C.muted }}>{c.email}</Typography>
+                          </Box>
+                        </Box>
+                      </TableCell>
+                      <TableCell sx={{ color: C.muted, fontSize:13 }}>{c.position}</TableCell>
+                      <TableCell>
+                        <Chip label={c.status} size="small" sx={{ background: statusColors[c.status]?.bg, color: statusColors[c.status]?.color, fontWeight:600, fontSize:11 }} />
+                      </TableCell>
+                      <TableCell sx={{ color: C.muted, fontSize:13 }}>{c.experience}</TableCell>
+                      <TableCell sx={{ color: C.warning, fontSize:13 }}>⭐ {c.rating}</TableCell>
+                      <TableCell align="center">
+                        <Box sx={{ display:"flex", justifyContent:"center", gap:0.5 }}>
+                          <IconButton size="small" onClick={() => navigate(`/candidates/${c.id}`)} sx={{ color: C.primary, '&:hover':{ background:`${C.primary}22` } }}><Eye size={16}/></IconButton>
+                          <IconButton size="small" onClick={() => { setSelected(c); setNewStatus(c.status); setOpenStatus(true); }} sx={{ color: C.warning, '&:hover':{ background:`${C.warning}22` } }}><Edit size={16}/></IconButton>
+                          <IconButton size="small" onClick={() => handleDownload(c)} sx={{ color: C.success, '&:hover':{ background:`${C.success}22` } }}><Download size={16}/></IconButton>
+                          <IconButton size="small" onClick={() => handleDelete(c.id)} sx={{ color: C.danger, '&:hover':{ background:`${C.danger}22` } }}><Trash2 size={16}/></IconButton>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
         </Card>
 
-        {/* View Detail Dialog */}
-        <Dialog open={openDetail} onClose={() => setOpenDetail(false)} maxWidth="sm" fullWidth>
-          <DialogTitle sx={{ fontWeight: "bold" }}>Candidate Details</DialogTitle>
+        {/* Status Dialog */}
+        <Dialog open={openStatus} onClose={() => setOpenStatus(false)} PaperProps={{ sx:{ background: C.surface, border:`1px solid ${C.border}`, borderRadius:3 } }}>
+          <DialogTitle sx={{ color: C.text, fontWeight:700 }}>Update Status — {selected?.name}</DialogTitle>
           <DialogContent>
-            {selectedCandidate && (
-              <Box sx={{ pt: 2 }}>
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" sx={{ color: "#666", mb: 0.5 }}>
-                    Name
-                  </Typography>
-                  <Typography sx={{ fontWeight: "bold" }}>{selectedCandidate.name}</Typography>
-                </Box>
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" sx={{ color: "#666", mb: 0.5 }}>
-                    Email
-                  </Typography>
-                  <Typography sx={{ fontWeight: "bold" }}>{selectedCandidate.email}</Typography>
-                </Box>
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" sx={{ color: "#666", mb: 0.5 }}>
-                    Position Applied
-                  </Typography>
-                  <Typography sx={{ fontWeight: "bold" }}>
-                    {selectedCandidate.position}
-                  </Typography>
-                </Box>
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" sx={{ color: "#666", mb: 0.5 }}>
-                    Status
-                  </Typography>
-                  <Chip
-                    label={selectedCandidate.status}
-                    sx={{
-                      background: getStatusBg(selectedCandidate.status),
-                      color: getStatusColor(selectedCandidate.status),
-                      fontWeight: "bold",
-                    }}
-                  />
-                </Box>
-              </Box>
-            )}
+            <FormControl fullWidth sx={{ mt:1 }}>
+              <InputLabel sx={{ color: C.muted }}>Status</InputLabel>
+              <Select value={newStatus} onChange={e => setNewStatus(e.target.value)}
+                sx={{ color: C.text, '& fieldset':{ borderColor: C.border } }} MenuProps={menuPropsSx}>
+                {["Applied","Shortlisted","Interview","Selected","Rejected"].map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+              </Select>
+            </FormControl>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setOpenDetail(false)}>Close</Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* Update Status Dialog */}
-        <Dialog open={openStatus} onClose={() => setOpenStatus(false)} maxWidth="xs" fullWidth>
-          <DialogTitle sx={{ fontWeight: "bold" }}>Update Candidate Status</DialogTitle>
-          <DialogContent>
-            {selectedCandidate && (
-              <Box sx={{ pt: 2 }}>
-                <Typography variant="subtitle2" sx={{ mb: 2 }}>
-                  {selectedCandidate.name}
-                </Typography>
-                <FormControl fullWidth>
-                  <InputLabel>Status</InputLabel>
-                  <Select value={newStatus} onChange={(e) => setNewStatus(e.target.value)}>
-                    <MenuItem value="Applied">Applied</MenuItem>
-                    <MenuItem value="Shortlisted">Shortlisted</MenuItem>
-                    <MenuItem value="Interview">Interview</MenuItem>
-                    <MenuItem value="Selected">Selected</MenuItem>
-                    <MenuItem value="Rejected">Rejected</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setOpenStatus(false)}>Cancel</Button>
-            <Button
-              onClick={confirmStatusUpdate}
-              variant="contained"
-              sx={{ background: "#667eea" }}
-            >
+          <DialogActions sx={{ px:3, pb:2 }}>
+            <Button onClick={() => setOpenStatus(false)} sx={{ color: C.muted, textTransform:"none" }}>Cancel</Button>
+            <Button onClick={confirmStatus} variant="contained"
+              sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, textTransform:"none", borderRadius:2, boxShadow:"none" }}>
               Update
             </Button>
           </DialogActions>
@@ -408,6 +171,4 @@ const Candidates = () => {
       </Box>
     </Box>
   );
-};
-
-export default Candidates;
+}

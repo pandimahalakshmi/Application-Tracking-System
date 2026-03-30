@@ -3,9 +3,12 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserDashboard from "./pages/UserDashboard";
+import UserProfile from "./pages/UserProfile";
 import JobForm from "./pages/JobForm";
 import Jobs from "./pages/Jobs";
 import Candidates from "./pages/Candidates";
+import CandidateDetailPage from "./pages/CandidateDetailPage";
+import ScheduleInterviewPage from "./pages/ScheduleInterviewPage";
 
 function App() {
   return (
@@ -15,9 +18,12 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/dashboard" element={<AdminDashboard />} />
         <Route path="/userdashboard" element={<UserDashboard />} />
+        <Route path="/user-profile" element={<UserProfile />} />
         <Route path="/jobs" element={<Jobs />} />
         <Route path="/jobform" element={<JobForm />} />
         <Route path="/candidates" element={<Candidates />} />
+        <Route path="/candidates/:id" element={<CandidateDetailPage />} />
+        <Route path="/schedule-interview" element={<ScheduleInterviewPage />} />
         <Route path="*" element={<h2>Page Not Found</h2>} />
       </Routes>
     </BrowserRouter>

@@ -1,15 +1,22 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Box, Card, CardContent, Typography, Button } from "@mui/material";
 import { Users, Briefcase, FileText, Upload, Calendar } from "lucide-react";
 
 const QuickActions = () => {
+  const navigate = useNavigate();
+
   const actions = [
-    { title: "View Candidates", icon: Users },
-    { title: "Create Job", icon: Briefcase },
-    { title: "Post Job", icon: FileText },
-    { title: "Upload Resume", icon: Upload },
-    { title: "Schedule Interview", icon: Calendar },
+    { title: "View Candidates", icon: Users, path: "/candidates" },
+    { title: "Create Job", icon: Briefcase, path: "/jobform" },
+    { title: "Post Job", icon: FileText, path: "/jobform" },
+    { title: "Upload Resume", icon: Upload, path: "/resume-upload" },
+    { title: "Schedule Interview", icon: Calendar, path: "/schedule-interview" },
   ];
+
+  const handleActionClick = (path) => {
+    navigate(path);
+  };
 
   return (
     <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mt: 3 }}>
@@ -18,6 +25,7 @@ const QuickActions = () => {
         return (
           <Card
             key={index}
+            onClick={() => handleActionClick(action.path)}
             sx={{
               flex: "1 1 180px",
               minWidth: 180,

@@ -1,197 +1,136 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import {
-  Container,
-  Box,
-  Card,
-  TextField,
-  Button,
-  Typography,
-} from "@mui/material";
-import { Briefcase } from "lucide-react";
+import { Box, Card, TextField, Button, Typography, InputAdornment, IconButton } from "@mui/material";
+import { Briefcase, Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { authService } from "../services/api";
 
-const Login = () => {
+const C = { bg:'#0F172A', surface:'#1E293B', border:'#334155', primary:'#6366F1', secondary:'#8B5CF6', text:'#F1F5F9', muted:'#94A3B8' };
+
+const fieldSx = {
+  mb: 2,
+  '& .MuiOutlinedInput-root': {
+    borderRadius: 2, background: '#1E293B', color: '#F1F5F9',
+    '& fieldset': { borderColor: '#334155' },
+    '&:hover fieldset': { borderColor: '#6366F1' },
+    '&.Mui-focused fieldset': { borderColor: '#6366F1', borderWidth: 2 },
+  },
+  '& .MuiInputLabel-root': { color: '#94A3B8' },
+  '& .MuiInputLabel-root.Mui-focused': { color: '#6366F1' },
+  '& input:-webkit-autofill': {
+    WebkitBoxShadow: '0 0 0 100px #1E293B inset',
+    WebkitTextFillColor: '#F1F5F9',
+    caretColor: '#F1F5F9',
+  },
+};
+
+export default function Login() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail]       = useState('');
+  const [password, setPassword] = useState('');
+  const [showPw, setShowPw]     = useState(false);
+  const [error, setError]       = useState('');
+  const [loading, setLoading]   = useState(false);
 
   const login = async () => {
-    if (!email || !password) {
-      setError("Please fill in all fields");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-
+    if (!email || !password) { setError('Please fill in all fields'); return; }
+    setLoading(true); setError('');
     try {
       const result = await authService.login(email, password);
-
       if (result.success) {
-        // Save user info to localStorage
-        localStorage.setItem("role", result.user.role);
-        localStorage.setItem("userId", result.user.id);
-        localStorage.setItem("userName", result.user.name);
-        localStorage.setItem("userEmail", result.user.email);
-
-        // Navigate based on role
-        if (result.user.role === "admin") {
-          navigate("/dashboard");
-        } else {
-          navigate("/userdashboard");
-        }
+        localStorage.setItem('user', JSON.stringify(result.user));
+        localStorage.setItem('role', result.user.role);
+        navigate(result.user.role === 'admin' ? '/dashboard' : '/userdashboard');
       } else {
-        setError(result.error || "Login failed");
+        setError(result.error || 'Login failed');
       }
-    } catch (err) {
-      setError("Connection error. Make sure backend is running on port 5000");
+    } catch {
+      setError('Connection error. Make sure backend is running.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      login();
-    }
-  };
-
   return (
-    <div
-      style={{
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <Container maxWidth="sm">
-        <Card
-          sx={{
-            boxShadow: "0 10px 45px rgba(0,0,0,0.2)",
-            borderRadius: 3,
-            overflow: "hidden",
-          }}
-        >
-          <Box
-            sx={{
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              color: "white",
-              padding: "40px 20px",
-              textAlign: "center",
-            }}
-          >
-            <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-              <Briefcase size={40} />
+    <Box sx={{ display:'flex', minHeight:'100vh', background: C.bg }}>
+      <style>{`
+        @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none} }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+        .login-card { animation: fadeUp 0.5s ease; }
+      `}</style>
+
+      {/* Left panel */}
+      <Box sx={{ flex:1, display:{ xs:'none', md:'flex' }, flexDirection:'column', justifyContent:'center', alignItems:'center',
+        background:`linear-gradient(135deg, ${C.primary}22, ${C.secondary}11)`,
+        borderRight:`1px solid ${C.border}`, p:6 }}>
+        <Box sx={{ animation:'float 4s ease-in-out infinite', mb:4 }}>
+          <Box sx={{ width:80, height:80, borderRadius:20, background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`,
+            display:'flex', alignItems:'center', justifyContent:'center', boxShadow:`0 16px 48px ${C.primary}44` }}>
+            <Briefcase size={40} color="#fff" />
+          </Box>
+        </Box>
+        <Typography variant="h3" sx={{ fontWeight:800, color: C.text, textAlign:'center', mb:2 }}>
+          ATS System
+        </Typography>
+        <Typography sx={{ color: C.muted, textAlign:'center', maxWidth:320, lineHeight:1.8 }}>
+          Streamline your hiring process with our modern Applicant Tracking System
+        </Typography>
+        <Box sx={{ mt:6, display:'flex', gap:3 }}>
+          {['248 Candidates','32 Jobs','18 Hired'].map(s => (
+            <Box key={s} sx={{ textAlign:'center', p:2, borderRadius:2, background:`${C.surface}`, border:`1px solid ${C.border}` }}>
+              <Typography sx={{ color: C.text, fontWeight:700, fontSize:18 }}>{s.split(' ')[0]}</Typography>
+              <Typography sx={{ color: C.muted, fontSize:12 }}>{s.split(' ')[1]}</Typography>
             </Box>
-            <Typography variant="h4" sx={{ fontWeight: "bold" }}>
-              ATS System
-            </Typography>
-            <Typography variant="body2" sx={{ mt: 1, opacity: 0.9 }}>
-              Applicant Tracking System
-            </Typography>
+          ))}
+        </Box>
+      </Box>
+
+      {/* Right panel */}
+      <Box sx={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', p:4 }}>
+        <Box className="login-card" sx={{ width:'100%', maxWidth:420 }}>
+          <Box sx={{ mb:4 }}>
+            <Typography variant="h4" sx={{ fontWeight:800, color: C.text, mb:1 }}>Welcome back</Typography>
+            <Typography sx={{ color: C.muted }}>Sign in to your account to continue</Typography>
           </Box>
 
-          <Box sx={{ padding: "40px 30px" }}>
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }}
-            >
-              Login to Your Account
-            </Typography>
+          <TextField fullWidth label="Email" type="email" value={email}
+            onChange={e => setEmail(e.target.value)} sx={fieldSx}
+            InputProps={{ startAdornment: <InputAdornment position="start"><Mail size={18} color={C.muted} /></InputAdornment> }} />
 
-            <TextField
-              fullWidth
-              label="Email"
-              type="email"
-              placeholder="admin@gmail.com or user@gmail.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              margin="normal"
-              variant="outlined"
-              sx={{ mb: 2 }}
-            />
+          <TextField fullWidth label="Password" type={showPw ? 'text' : 'password'} value={password}
+            onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && login()} sx={fieldSx}
+            InputProps={{
+              startAdornment: <InputAdornment position="start"><Lock size={18} color={C.muted} /></InputAdornment>,
+              endAdornment: <InputAdornment position="end">
+                <IconButton onClick={() => setShowPw(p => !p)} size="small" sx={{ color: C.muted }}>
+                  {showPw ? <EyeOff size={18}/> : <Eye size={18}/>}
+                </IconButton>
+              </InputAdornment>,
+            }} />
 
-            <TextField
-              fullWidth
-              label="Password"
-              type="password"
-              placeholder="Enter password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyPress={handleKeyPress}
-              margin="normal"
-              variant="outlined"
-              sx={{ mb: 2 }}
-              disabled={loading}
-            />
-
-            {error && (
-              <Box
-                sx={{
-                  mb: 2,
-                  p: 2,
-                  background: "#fee",
-                  border: "1px solid #fcc",
-                  borderRadius: 2,
-                  color: "#c33",
-                }}
-              >
-                <Typography variant="body2">{error}</Typography>
-              </Box>
-            )}
-
-            <Button
-              fullWidth
-              variant="contained"
-              sx={{
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                padding: "12px",
-                fontSize: "16px",
-                fontWeight: "bold",
-                textTransform: "none",
-                borderRadius: 2,
-              }}
-              onClick={login}
-              disabled={loading}
-            >
-              {loading ? "Signing In..." : "Sign In"}
-            </Button>
-
-            <Box sx={{ mt: 2, textAlign: "center" }}>
-              <Typography variant="body2">
-                Don’t have an account?{' '}
-                <Box component="span" sx={{ color: "#667eea", fontWeight: "bold", cursor: "pointer" }} onClick={() => navigate("/signup")}>Sign Up</Box>
-              </Typography>
+          {error && (
+            <Box sx={{ mb:2, p:1.5, borderRadius:2, background:'rgba(248,113,113,0.1)', border:'1px solid rgba(248,113,113,0.3)' }}>
+              <Typography sx={{ color:'#F87171', fontSize:13 }}>{error}</Typography>
             </Box>
+          )}
 
-            <Box
-              sx={{
-                mt: 3,
-                p: 2,
-                background: "#f5f5f5",
-                borderRadius: 2,
-              }}
-            >
-              <Typography variant="body2" sx={{ mb: 1, fontWeight: "bold" }}>
-                Test Credentials:
-              </Typography>
-              <Typography variant="caption" display="block">
-                <strong>Admin:</strong> admin@gmail.com
-              </Typography>
-              <Typography variant="caption" display="block">
-                <strong>User:</strong> user@gmail.com
-              </Typography>
+          <Button fullWidth onClick={login} disabled={loading} endIcon={<ArrowRight size={18}/>}
+            sx={{ py:1.5, borderRadius:2, fontWeight:700, fontSize:16, textTransform:'none',
+              background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`,
+              color:'#fff', boxShadow:`0 4px 24px ${C.primary}44`,
+              transition:'all 0.2s', '&:hover':{ transform:'translateY(-1px)', boxShadow:`0 8px 32px ${C.primary}66` },
+              '&:disabled':{ opacity:0.6 } }}>
+            {loading ? 'Signing in…' : 'Sign In'}
+          </Button>
+
+          <Typography sx={{ textAlign:'center', mt:3, color: C.muted, fontSize:14 }}>
+            Don't have an account?{' '}
+            <Box component="span" onClick={() => navigate('/signup')}
+              sx={{ color: C.primary, fontWeight:700, cursor:'pointer', '&:hover':{ textDecoration:'underline' } }}>
+              Sign Up
             </Box>
-          </Box>
-        </Card>
-      </Container>
-    </div>
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
   );
-};
-
-export default Login;
+}
