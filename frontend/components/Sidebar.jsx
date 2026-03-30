@@ -2,37 +2,41 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
   LayoutDashboard, Briefcase, PlusCircle, Users,
-  User, LogOut, ChevronRight, Menu, X,
+  User, LogOut, ChevronRight, ClipboardList, Star,
 } from "lucide-react";
+import NotificationBell from "./NotificationBell";
 
 const C = {
   bg:      '#0F172A',
   surface: '#1E293B',
   border:  '#334155',
   primary: '#6366F1',
-  accent:  '#06B6D4',
   text:    '#F1F5F9',
   muted:   '#94A3B8',
 };
 
 const adminMenu = [
-  { label: 'Dashboard',   route: '/dashboard',   icon: LayoutDashboard },
-  { label: 'Jobs',        route: '/jobs',         icon: Briefcase },
-  { label: 'Create Job',  route: '/jobform',      icon: PlusCircle },
-  { label: 'Candidates',  route: '/candidates',   icon: Users },
+  { label: 'Dashboard',     route: '/dashboard',           icon: LayoutDashboard },
+  { label: 'Jobs',          route: '/jobs',                icon: Briefcase },
+  { label: 'Create Job',    route: '/jobform',             icon: PlusCircle },
+  { label: 'Candidates',    route: '/candidates',          icon: Users },
+  { label: 'Applications',  route: '/admin/applications',  icon: ClipboardList },
 ];
 
 const userMenu = [
-  { label: 'Dashboard',   route: '/userdashboard', icon: LayoutDashboard },
-  { label: 'View Jobs',   route: '/jobs',           icon: Briefcase },
-  { label: 'My Profile',  route: '/user-profile',   icon: User },
+  { label: 'Dashboard',        route: '/userdashboard',  icon: LayoutDashboard },
+  { label: 'View Jobs',        route: '/jobs',           icon: Briefcase },
+  { label: 'Saved Jobs',       route: '/saved-jobs',     icon: Star },
+  { label: 'My Applications',  route: '/my-applications',icon: ClipboardList },
+  { label: 'My Profile',       route: '/user-profile',   icon: User },
 ];
 
 export default function Sidebar() {
   const navigate  = useNavigate();
   const location  = useLocation();
   const role      = localStorage.getItem('role');
-  const userName  = JSON.parse(localStorage.getItem('user') || '{}')?.name || 'User';
+  const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const userName  = storedUser?.name || 'User';
   const [open, setOpen] = useState(false);
 
   const menu = role === 'admin' ? adminMenu : userMenu;
@@ -46,7 +50,7 @@ export default function Sidebar() {
     const active = location.pathname === route;
     return (
       <div
-        onClick={() => { navigate(route); setOpen(false); }}
+        onClick={() => navigate(route)}
         style={{
           display: 'flex', alignItems: 'center', gap: 12,
           padding: '11px 14px', borderRadius: 10, marginBottom: 4,
@@ -91,16 +95,17 @@ export default function Sidebar() {
         {menu.map(item => <Item key={item.route} {...item} />)}
       </div>
 
-      {/* User + Logout */}
+      {/* User + Notifications + Logout */}
       <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 16, marginTop: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, paddingLeft: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, paddingLeft: 4 }}>
           <div style={{ width: 34, height: 34, borderRadius: '50%', background: `linear-gradient(135deg, ${C.primary}, #8B5CF6)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 14 }}>
             {userName.charAt(0).toUpperCase()}
           </div>
-          <div>
+          <div style={{ flex: 1 }}>
             <div style={{ color: C.text, fontSize: 13, fontWeight: 600 }}>{userName}</div>
             <div style={{ color: C.muted, fontSize: 11, textTransform: 'capitalize' }}>{role}</div>
           </div>
+          <NotificationBell userId={storedUser?.id || storedUser?._id} />
         </div>
         <div
           onClick={logout}
@@ -117,12 +122,7 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile toggle */}
-      <button onClick={() => setOpen(o => !o)} style={{ display: 'none', position: 'fixed', top: 16, left: 16, zIndex: 1100, background: C.primary, border: 'none', borderRadius: 8, padding: 8, cursor: 'pointer', '@media(maxWidth:900px)': { display: 'block' } }}>
-        {open ? <X size={20} color="#fff" /> : <Menu size={20} color="#fff" />}
-      </button>
-
-      {/* Desktop */}
+      {/* Desktop sidebar */}
       <div style={{ position: 'fixed', top: 0, left: 0, zIndex: 1000 }}>
         {sidebarContent}
       </div>

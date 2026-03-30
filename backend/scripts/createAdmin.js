@@ -6,12 +6,13 @@ dotenv.config();
 
 const createAdmin = async () => {
   await mongoose.connect(process.env.MONGO_URI);
+  console.log('MongoDB connected');
 
-  // Remove existing admin to recreate cleanly
+  // Remove existing admin
   await User.deleteOne({ email: 'admin@gmail.com' });
 
-  // Let the model's pre('save') hook hash the password
-  await User.create({
+  // Create fresh — model's pre('save') will hash the password
+  const admin = new User({
     name: 'Admin User',
     email: 'admin@gmail.com',
     password: 'admin123',
@@ -20,13 +21,13 @@ const createAdmin = async () => {
     gender: 'male',
   });
 
-  console.log('✅ Admin created successfully!');
+  await admin.save();
+
+  console.log('✅ Admin created!');
   console.log('   Email:    admin@gmail.com');
   console.log('   Password: admin123');
+  console.log('   Role:     admin');
   process.exit(0);
 };
 
-createAdmin().catch(err => {
-  console.error(err);
-  process.exit(1);
-});
+createAdmin().catch(err => { console.error(err); process.exit(1); });

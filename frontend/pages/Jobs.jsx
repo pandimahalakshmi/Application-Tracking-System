@@ -2,44 +2,41 @@ import Sidebar from "../components/Sidebar";
 import {
   Box, Grid, Card, Typography, Button, TextField, Chip,
   InputAdornment, CircularProgress, Dialog, DialogTitle,
-  DialogContent, DialogActions, Divider, IconButton,
+  DialogContent, DialogActions, Divider, IconButton, Tooltip,
 } from "@mui/material";
-import { MapPin, DollarSign, Search, Briefcase, X, Upload, Send } from "lucide-react";
+import { MapPin, Search, Briefcase, X, Upload, Send, Star, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { jobService, authService } from "../services/api";
+import { jobService, applicationService, savedJobService } from "../services/api";
 import { C, fieldSx, cardSx } from "../theme";
 
 const fSx = {
-  ...fieldSx,
-  mb: 2,
-  '& input:-webkit-autofill': {
-    WebkitBoxShadow: '0 0 0 100px #1E293B inset',
-    WebkitTextFillColor: '#F1F5F9',
-  },
+  ...fieldSx, mb: 2,
+  '& input:-webkit-autofill': { WebkitBoxShadow: '0 0 0 100px #1E293B inset', WebkitTextFillColor: '#F1F5F9' },
 };
-
 const emptyForm = { fullName:'', email:'', phone:'', coverLetter:'', portfolioLink:'', resume:null };
 
 export default function Jobs() {
   const role = localStorage.getItem("role");
   const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const userId = user?.id || user?._id;
 
   const [searchTerm, setSearchTerm] = useState("");
   const [jobs, setJobs]             = useState([]);
   const [loading, setLoading]       = useState(true);
-
-  // Modal state
-  const [open, setOpen]           = useState(false);
+  const [savedIds, setSavedIds]     = useState(new Set());
+  const [open, setOpen]             = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
-  const [form, setForm]           = useState(emptyForm);
+  const [form, setForm]             = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted]   = useState(false);
 
   useEffect(() => {
-    jobService.getAllJobs("").then(r => r.success && setJobs(r.jobs)).finally(() => setLoading(false));
-  }, []);
+    jobService.getAll("").then(r => r.success && setJobs(r.jobs)).finally(() => setLoading(false));
+    if (userId && role === 'user') {
+      savedJobService.getIds(userId).then(r => r.success && setSavedIds(new Set(r.savedIds)));
+    }
+  }, [userId]);
 
-  // Pre-fill from logged-in user
   const openModal = (job) => {
     setSelectedJob(job);
     setForm({ ...emptyForm, fullName: user?.name || '', email: user?.email || '' });
@@ -49,33 +46,43 @@ export default function Jobs() {
 
   const handleChange = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
+  const handleToggleSave = async (e, jobId) => {
+    e.stopPropagation();
+    if (!userId) return;
+    const r = await savedJobService.toggle(userId, jobId);
+    if (r.success) {
+      setSavedIds(prev => {
+        const next = new Set(prev);
+        r.saved ? next.add(jobId) : next.delete(jobId);
+        return next;
+      });
+    }
+  };
+
+  const handleDelete = async (e, jobId) => {
+    e.stopPropagation();
+    if (!window.confirm("Delete this job?")) return;
+    const r = await jobService.remove(jobId);
+    if (r.success) setJobs(prev => prev.filter(j => (j._id || j.id) !== jobId));
+  };
+
   const handleSubmit = async () => {
     if (!form.fullName || !form.email || !form.phone) return;
     setSubmitting(true);
     try {
-      const userId = user?.id || user?._id;
-      const result = await authService.applyForJob(userId, {
-        jobId:    String(selectedJob?.id || selectedJob?._id),
-        jobTitle: selectedJob?.title,
-        company:  selectedJob?.company,
+      const r = await applicationService.apply(userId, {
+        jobId: selectedJob?._id || selectedJob?.id,
+        coverLetter: form.coverLetter, portfolioLink: form.portfolioLink,
+        resumeFile: form.resume?.name || '', userPhone: form.phone,
       });
-      if (result.success) {
-        setSubmitted(true);
-      } else {
-        alert(result.error || 'Failed to submit application');
-      }
-    } catch {
-      alert('Network error. Please try again.');
-    } finally {
-      setSubmitting(false);
-    }
+      r.success ? setSubmitted(true) : alert(r.error || 'Failed to submit');
+    } catch { alert('Network error'); }
+    finally { setSubmitting(false); }
   };
 
-  const handleClose = () => { setOpen(false); setSubmitted(false); };
-
   const filtered = jobs.filter(j =>
-    j.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    j.company.toLowerCase().includes(searchTerm.toLowerCase())
+    j.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    j.company?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const typeColor = (t) => t === 'Full-time'
@@ -98,34 +105,56 @@ export default function Jobs() {
   // ── Admin view ────────────────────────────────────────────────────────────
   if (role === "admin") return pageWrap(
     <>
-      <Box sx={{ mb:4 }}>
-        <Typography variant="h4" sx={{ fontWeight:700, color: C.text }}>Job Applications Overview</Typography>
-        <Typography sx={{ color: C.muted, mt:0.5 }}>Monitor applications across all job postings</Typography>
+      <Box sx={{ mb:4, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight:700, color: C.text }}>Job Listings</Typography>
+          <Typography sx={{ color: C.muted, mt:0.5 }}>{jobs.length} jobs posted</Typography>
+        </Box>
+        <Button variant="contained" onClick={() => window.location.href='/jobform'}
+          sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, borderRadius:2, textTransform:'none', fontWeight:600, boxShadow:'none' }}>
+          + Post New Job
+        </Button>
       </Box>
       <Grid container spacing={3}>
-        {jobs.map(job => (
-          <Grid item xs={12} sm={6} md={4} key={job.id}>
-            <Card sx={{ ...cardSx, p:3, height:"100%", display:"flex", flexDirection:"column", justifyContent:"space-between",
-              '&:hover':{ borderColor: C.primary, transform:"translateY(-4px)", boxShadow:`0 12px 32px rgba(0,0,0,0.4)` } }}>
-              <Box>
-                <Box sx={{ display:"flex", alignItems:"center", gap:2, mb:2 }}>
-                  <Box sx={{ p:1.5, borderRadius:2, background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})` }}>
-                    <Briefcase size={18} color="#fff" />
-                  </Box>
-                  <Box>
-                    <Typography sx={{ fontWeight:700, color: C.text, fontSize:15 }}>{job.title}</Typography>
-                    <Typography sx={{ color: C.muted, fontSize:12 }}>{job.company}</Typography>
-                  </Box>
-                </Box>
-                <Typography sx={{ color: C.muted, fontSize:13, mb:2 }}>{job.description}</Typography>
-              </Box>
-              <Box sx={{ display:"flex", gap:1 }}>
-                <Chip label={`${job.applications} applied`} size="small" sx={{ background:`${C.accent}22`, color: C.accent, fontWeight:600 }} />
-                <Chip label={job.type} size="small" sx={{ background: typeColor(job.type).bg, color: typeColor(job.type).color, fontWeight:600 }} />
-              </Box>
+        {jobs.length === 0 && (
+          <Grid item xs={12}>
+            <Card sx={{ ...cardSx, p:6, textAlign:'center' }}>
+              <Briefcase size={48} color={C.border} style={{ marginBottom:16 }}/>
+              <Typography sx={{ color: C.muted }}>No jobs posted yet. Click "Post New Job" to get started.</Typography>
             </Card>
           </Grid>
-        ))}
+        )}
+        {jobs.map(job => {
+          const jid = job._id || job.id;
+          return (
+            <Grid item xs={12} sm={6} md={4} key={jid}>
+              <Card sx={{ ...cardSx, p:3, height:"100%", display:"flex", flexDirection:"column",
+                '&:hover':{ borderColor: C.primary, transform:"translateY(-3px)", boxShadow:`0 12px 32px rgba(0,0,0,0.4)` } }}>
+                <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", mb:2 }}>
+                  <Box sx={{ flex:1 }}>
+                    <Typography sx={{ fontWeight:700, color: C.text, fontSize:16 }}>{job.title}</Typography>
+                    <Typography sx={{ color: C.muted, fontSize:13 }}>{job.company}</Typography>
+                  </Box>
+                  <Tooltip title="Delete job">
+                    <IconButton size="small" onClick={e => handleDelete(e, jid)}
+                      sx={{ color: C.danger, '&:hover':{ background:`${C.danger}22` } }}>
+                      <Trash2 size={16}/>
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+                <Chip label={job.type} size="small" sx={{ background: typeColor(job.type).bg, color: typeColor(job.type).color, fontWeight:600, mb:1.5, alignSelf:'flex-start' }} />
+                <Typography sx={{ color: C.muted, fontSize:13, mb:2, flexGrow:1 }}>{job.description}</Typography>
+                <Box sx={{ display:"flex", gap:2, mb:2 }}>
+                  <Box sx={{ display:"flex", alignItems:"center", gap:0.5, color: C.muted, fontSize:12 }}><MapPin size={13} color={C.accent}/>{job.location}</Box>
+                  <Box sx={{ display:"flex", alignItems:"center", gap:0.5, color: C.muted, fontSize:12 }}>{job.salary}</Box>
+                </Box>
+                <Box sx={{ display:"flex", gap:1, flexWrap:"wrap" }}>
+                  {(job.skills||[]).map((s,i) => <Chip key={i} label={s} size="small" sx={{ background:`${C.primary}22`, color: C.primary, fontSize:11 }}/>)}
+                </Box>
+              </Card>
+            </Grid>
+          );
+        })}
       </Grid>
     </>
   );
@@ -133,7 +162,6 @@ export default function Jobs() {
   // ── User view ─────────────────────────────────────────────────────────────
   return pageWrap(
     <>
-      {/* Header */}
       <Box sx={{ mb:4, display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:2 }}>
         <Box>
           <Typography variant="h4" sx={{ fontWeight:700, color: C.text }}>Available Jobs</Typography>
@@ -144,135 +172,122 @@ export default function Jobs() {
           InputProps={{ startAdornment: <InputAdornment position="start"><Search size={16} color={C.muted}/></InputAdornment> }} />
       </Box>
 
-      {/* Job Cards */}
-      <Grid container spacing={3}>
-        {filtered.map(job => (
-          <Grid item xs={12} sm={6} md={4} key={job.id}>
-            <Card sx={{ ...cardSx, p:3, height:"100%", display:"flex", flexDirection:"column",
-              '&:hover':{ borderColor: C.primary, transform:"translateY(-4px)", boxShadow:`0 12px 32px rgba(0,0,0,0.4)` } }}>
-              <Box sx={{ display:"flex", justifyContent:"space-between", mb:2 }}>
-                <Box>
-                  <Typography sx={{ fontWeight:700, color: C.text, fontSize:16 }}>{job.title}</Typography>
-                  <Typography sx={{ color: C.muted, fontSize:13 }}>{job.company}</Typography>
+      {filtered.length === 0 && !loading && (
+        <Card sx={{ ...cardSx, p:6, textAlign:'center' }}>
+          <Briefcase size={48} color={C.border} style={{ marginBottom:16 }}/>
+          <Typography sx={{ color: C.muted }}>No jobs available right now. Check back later!</Typography>
+        </Card>
+      )}
+
+      <Grid container spacing={3} sx={{ alignItems:'stretch' }}>
+        {filtered.map(job => {
+          const jid = job._id || job.id;
+          const isSaved = savedIds.has(jid);
+          return (
+            <Grid item xs={12} sm={6} md={4} key={jid}>
+              <Card sx={{ ...cardSx, p:3, height:"100%", display:"flex", flexDirection:"column", position:'relative',
+                '&:hover':{ borderColor: C.primary, transform:"translateY(-4px)", boxShadow:`0 12px 32px rgba(0,0,0,0.4)` } }}>
+
+                {/* Star save button */}
+                <Tooltip title={isSaved ? "Unsave job" : "Save job"}>
+                  <IconButton size="small" onClick={e => handleToggleSave(e, jid)}
+                    sx={{ position:'absolute', top:12, right:12, zIndex:1,
+                      color: isSaved ? C.warning : C.muted,
+                      '&:hover':{ color: C.warning, background:`${C.warning}22` },
+                      transition:'all 0.2s' }}>
+                    <Star size={18} fill={isSaved ? C.warning : 'none'} />
+                  </IconButton>
+                </Tooltip>
+
+                <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", mb:1.5, pr:4 }}>
+                  <Box>
+                    <Typography sx={{ fontWeight:700, color: C.text, fontSize:15 }}>{job.title}</Typography>
+                    <Typography sx={{ color: C.muted, fontSize:12, mt:0.3 }}>{job.company}</Typography>
+                  </Box>
+                  <Chip label={job.type} size="small" sx={{ background: typeColor(job.type).bg, color: typeColor(job.type).color, fontWeight:600, flexShrink:0 }} />
                 </Box>
-                <Chip label={job.type} size="small" sx={{ background: typeColor(job.type).bg, color: typeColor(job.type).color, fontWeight:600 }} />
-              </Box>
-              <Typography sx={{ color: C.muted, fontSize:13, mb:2, flexGrow:1 }}>{job.description}</Typography>
-              <Box sx={{ display:"flex", gap:2, mb:2 }}>
-                <Box sx={{ display:"flex", alignItems:"center", gap:0.5, color: C.muted, fontSize:13 }}>
-                  <MapPin size={14} color={C.accent}/>{job.location}
+
+                <Typography sx={{ color: C.muted, fontSize:12, mb:1.5, flexGrow:1 }}>{job.description}</Typography>
+
+                <Box sx={{ display:"flex", gap:2, mb:1.5 }}>
+                  <Box sx={{ display:"flex", alignItems:"center", gap:0.5, color: C.muted, fontSize:12 }}>
+                    <MapPin size={13} color={C.accent}/>{job.location}
+                  </Box>
+                  <Box sx={{ color: C.muted, fontSize:12 }}>{job.salary}</Box>
                 </Box>
-                <Box sx={{ display:"flex", alignItems:"center", gap:0.5, color: C.muted, fontSize:13 }}>
-                  <DollarSign size={14} color={C.accent}/>{job.salary}
+
+                <Box sx={{ display:"flex", gap:0.5, flexWrap:"wrap", mb:1.5 }}>
+                  {(job.skills||job.tags||[]).map((t,i) => (
+                    <Chip key={i} label={t} size="small" sx={{ background:`${C.primary}22`, color: C.primary, fontSize:11 }}/>
+                  ))}
                 </Box>
-              </Box>
-              <Box sx={{ display:"flex", gap:1, flexWrap:"wrap", mb:2 }}>
-                {(job.tags||[]).map((tag,i) => (
-                  <Chip key={i} label={tag} size="small" sx={{ background:`${C.primary}22`, color: C.primary, fontSize:11 }} />
-                ))}
-              </Box>
-              <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                <Typography sx={{ color: C.muted, fontSize:12 }}>{job.applications} applications</Typography>
-                <Button size="small" onClick={() => openModal(job)}
-                  sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:"#fff",
-                    borderRadius:1.5, textTransform:"none", fontWeight:600, px:2,
-                    boxShadow:`0 4px 12px ${C.primary}44`,
-                    '&:hover':{ transform:"translateY(-1px)", boxShadow:`0 6px 18px ${C.primary}66` },
-                    transition:"all 0.2s" }}>
-                  Apply Now
-                </Button>
-              </Box>
-            </Card>
-          </Grid>
-        ))}
+
+                <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                  <Typography sx={{ color: C.muted, fontSize:11 }}>{job.applications} applicants</Typography>
+                  <Button size="small" onClick={() => openModal(job)}
+                    sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:"#fff",
+                      borderRadius:1.5, textTransform:"none", fontWeight:600, px:2,
+                      boxShadow:`0 4px 12px ${C.primary}44`, '&:hover':{ opacity:0.9 } }}>
+                    Apply Now
+                  </Button>
+                </Box>
+              </Card>
+            </Grid>
+          );
+        })}
       </Grid>
 
-      {/* ── Application Modal ─────────────────────────────────────────── */}
-      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth
+      {/* Application Modal */}
+      <Dialog open={open} onClose={() => { setOpen(false); setSubmitted(false); }} maxWidth="sm" fullWidth
         PaperProps={{ sx:{ background: C.surface, border:`1px solid ${C.border}`, borderRadius:3 } }}>
-
-        {/* Header */}
         <DialogTitle sx={{ p:3, pb:0 }}>
           <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
             <Box>
-              <Typography variant="h6" sx={{ fontWeight:700, color: C.text }}>
-                Apply for {selectedJob?.title}
-              </Typography>
-              <Typography sx={{ color: C.muted, fontSize:13, mt:0.5 }}>
-                {selectedJob?.company} · {selectedJob?.location}
-              </Typography>
+              <Typography variant="h6" sx={{ fontWeight:700, color: C.text }}>Apply for {selectedJob?.title}</Typography>
+              <Typography sx={{ color: C.muted, fontSize:13, mt:0.5 }}>{selectedJob?.company} · {selectedJob?.location}</Typography>
             </Box>
-            <IconButton onClick={handleClose} size="small" sx={{ color: C.muted, '&:hover':{ color: C.text } }}>
-              <X size={18}/>
-            </IconButton>
+            <IconButton onClick={() => setOpen(false)} size="small" sx={{ color: C.muted }}><X size={18}/></IconButton>
           </Box>
           <Divider sx={{ borderColor: C.border, mt:2 }} />
         </DialogTitle>
-
         <DialogContent sx={{ p:3 }}>
           {submitted ? (
-            /* Success state */
             <Box sx={{ textAlign:"center", py:4 }}>
-              <Box sx={{ width:64, height:64, borderRadius:"50%", background:`${C.success}22`,
-                display:"flex", alignItems:"center", justifyContent:"center", mx:"auto", mb:2 }}>
+              <Box sx={{ width:64, height:64, borderRadius:"50%", background:`${C.success}22`, display:"flex", alignItems:"center", justifyContent:"center", mx:"auto", mb:2 }}>
                 <Send size={28} color={C.success}/>
               </Box>
-              <Typography variant="h6" sx={{ fontWeight:700, color: C.text, mb:1 }}>
-                Application Submitted!
-              </Typography>
+              <Typography variant="h6" sx={{ fontWeight:700, color: C.text, mb:1 }}>Application Submitted!</Typography>
               <Typography sx={{ color: C.muted, fontSize:14 }}>
-                Your application for <strong style={{ color: C.text }}>{selectedJob?.title}</strong> at{" "}
-                <strong style={{ color: C.text }}>{selectedJob?.company}</strong> has been sent successfully.
+                Your application for <strong style={{ color: C.text }}>{selectedJob?.title}</strong> has been sent.
               </Typography>
-              <Button onClick={handleClose} variant="contained" sx={{ mt:3, background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`,
-                borderRadius:2, textTransform:"none", fontWeight:600, boxShadow:"none" }}>
-                Close
-              </Button>
+              <Button onClick={() => setOpen(false)} variant="contained" sx={{ mt:3, background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, borderRadius:2, textTransform:"none", fontWeight:600, boxShadow:"none" }}>Close</Button>
             </Box>
           ) : (
-            /* Form */
             <Box sx={{ pt:1 }}>
-              <TextField fullWidth label="Full Name *" value={form.fullName}
-                onChange={e => handleChange('fullName', e.target.value)} sx={fSx} />
-              <TextField fullWidth label="Email *" type="email" value={form.email}
-                onChange={e => handleChange('email', e.target.value)} sx={fSx} />
-              <TextField fullWidth label="Phone Number *" value={form.phone}
-                onChange={e => handleChange('phone', e.target.value)} sx={fSx} />
-
-              {/* Resume Upload */}
+              <TextField fullWidth label="Full Name *" value={form.fullName} onChange={e => handleChange('fullName', e.target.value)} sx={fSx} />
+              <TextField fullWidth label="Email *" type="email" value={form.email} onChange={e => handleChange('email', e.target.value)} sx={fSx} />
+              <TextField fullWidth label="Phone Number *" value={form.phone} onChange={e => handleChange('phone', e.target.value)} sx={fSx} />
               <Box sx={{ mb:2 }}>
                 <Typography sx={{ color: C.muted, fontSize:13, mb:1 }}>Resume</Typography>
                 <Button variant="outlined" component="label" startIcon={<Upload size={16}/>} fullWidth
-                  sx={{ borderColor: C.border, color: form.resume ? C.success : C.muted, borderRadius:2,
-                    textTransform:"none", py:1.5, justifyContent:"flex-start",
-                    background: form.resume ? `${C.success}11` : 'transparent',
-                    '&:hover':{ borderColor: C.primary, color: C.primary } }}>
+                  sx={{ borderColor: form.resume ? C.success : C.border, color: form.resume ? C.success : C.muted,
+                    borderRadius:2, textTransform:"none", py:1.5, justifyContent:"flex-start",
+                    background: form.resume ? `${C.success}11` : 'transparent', '&:hover':{ borderColor: C.primary, color: C.primary } }}>
                   {form.resume ? form.resume.name : "Upload Resume (PDF, DOC)"}
-                  <input type="file" hidden accept=".pdf,.doc,.docx"
-                    onChange={e => handleChange('resume', e.target.files[0])} />
+                  <input type="file" hidden accept=".pdf,.doc,.docx" onChange={e => handleChange('resume', e.target.files[0])} />
                 </Button>
               </Box>
-
-              <TextField fullWidth label="Cover Letter" multiline rows={3} value={form.coverLetter}
-                onChange={e => handleChange('coverLetter', e.target.value)}
-                placeholder="Tell us why you're a great fit..." sx={fSx} />
-              <TextField fullWidth label="Portfolio Link (optional)" value={form.portfolioLink}
-                onChange={e => handleChange('portfolioLink', e.target.value)}
-                placeholder="https://yourportfolio.com" sx={{ ...fSx, mb:0 }} />
+              <TextField fullWidth label="Cover Letter" multiline rows={3} value={form.coverLetter} onChange={e => handleChange('coverLetter', e.target.value)} placeholder="Tell us why you're a great fit..." sx={fSx} />
+              <TextField fullWidth label="Portfolio Link (optional)" value={form.portfolioLink} onChange={e => handleChange('portfolioLink', e.target.value)} sx={{ ...fSx, mb:0 }} />
             </Box>
           )}
         </DialogContent>
-
         {!submitted && (
           <DialogActions sx={{ px:3, pb:3, pt:2, gap:1 }}>
-            <Button onClick={handleClose} sx={{ color: C.muted, textTransform:"none", borderRadius:2 }}>
-              Cancel
-            </Button>
+            <Button onClick={() => setOpen(false)} sx={{ color: C.muted, textTransform:"none", borderRadius:2 }}>Cancel</Button>
             <Button onClick={handleSubmit} variant="contained" disabled={submitting || !form.fullName || !form.email || !form.phone}
               startIcon={submitting ? <CircularProgress size={16} color="inherit"/> : <Send size={16}/>}
-              sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`,
-                borderRadius:2, textTransform:"none", fontWeight:700, px:4, py:1.2,
-                boxShadow:`0 4px 16px ${C.primary}44`, '&:disabled':{ opacity:0.5 } }}>
+              sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, borderRadius:2, textTransform:"none", fontWeight:700, px:4, py:1.2, boxShadow:`0 4px 16px ${C.primary}44`, '&:disabled':{ opacity:0.5 } }}>
               {submitting ? "Submitting…" : "Submit Application"}
             </Button>
           </DialogActions>

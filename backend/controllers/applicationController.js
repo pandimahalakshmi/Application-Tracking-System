@@ -1,0 +1,124 @@
+import Application from '../models/Application.js';
+import Job from '../models/Job.js';
+import User from '../models/User.js';
+import Notification from '../models/Notification.js';
+
+// POST /api/applications — user applies for a job
+export const applyForJob = async (req, res) => {
+  try {
+    const { jobId, coverLetter, portfolioLink, resumeFile, userPhone } = req.body;
+    const userId = req.params.userId;
+
+    const job = await Job.findById(jobId);
+    if (!job) return res.status(404).json({ error: 'Job not found' });
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Check duplicate
+    const existing = await Application.findOne({ userId, jobId });
+    if (existing) return res.status(400).json({ error: 'You have already applied for this job' });
+
+    const application = await Application.create({
+      userId, jobId,
+      userName:  user.name,
+      userEmail: user.email,
+      userPhone: userPhone || user.phoneNumber,
+      jobTitle:  job.title,
+      company:   job.company,
+      coverLetter, portfolioLink, resumeFile,
+    });
+
+    // Increment job application count
+    await Job.findByIdAndUpdate(jobId, { $inc: { applications: 1 } });
+
+    // Notify all admins
+    const admins = await User.find({ role: 'admin' });
+    const adminNotifs = admins.map(admin => ({
+      recipientId:   admin._id,
+      recipientRole: 'admin',
+      message:       `New application received for "${job.title}" from ${user.name}`,
+      type:          'application',
+      relatedId:     application._id.toString(),
+    }));
+    if (adminNotifs.length) await Notification.insertMany(adminNotifs);
+
+    res.status(201).json({ success: true, message: 'Application submitted!', application });
+  } catch (err) {
+    if (err.code === 11000) return res.status(400).json({ error: 'Already applied for this job' });
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// GET /api/applications/user/:userId — get user's applications
+export const getUserApplications = async (req, res) => {
+  try {
+    const apps = await Application.find({ userId: req.params.userId })
+      .populate('jobId', 'title company location type salary')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, applications: apps });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// GET /api/applications/admin — get all applications (admin)
+export const getAllApplications = async (req, res) => {
+  try {
+    const { jobId, status } = req.query;
+    const filter = {};
+    if (jobId)  filter.jobId  = jobId;
+    if (status) filter.status = status;
+
+    const apps = await Application.find(filter)
+      .populate('userId', 'name email phoneNumber')
+      .populate('jobId', 'title company location')
+      .sort({ createdAt: -1 });
+
+    res.json({ success: true, applications: apps });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// PUT /api/applications/:id/status — admin updates status
+export const updateApplicationStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const app = await Application.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    ).populate('userId', 'name email');
+
+    if (!app) return res.status(404).json({ error: 'Application not found' });
+
+    // Notify the user
+    await Notification.create({
+      recipientId:   app.userId._id,
+      recipientRole: 'user',
+      message:       `Your application for "${app.jobTitle}" has been ${status.toLowerCase()}`,
+      type:          'status_update',
+      relatedId:     app._id.toString(),
+    });
+
+    res.json({ success: true, message: 'Status updated', application: app });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// GET /api/applications/stats — admin dashboard stats
+export const getStats = async (req, res) => {
+  try {
+    const [totalJobs, totalUsers, totalApplications, activeJobs] = await Promise.all([
+      Job.countDocuments(),
+      User.countDocuments({ role: 'user' }),
+      Application.countDocuments(),
+      Job.countDocuments({ status: 'active' }),
+    ]);
+    res.json({ success: true, stats: { totalJobs, totalUsers, totalApplications, activeJobs } });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

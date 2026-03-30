@@ -51,7 +51,7 @@ export default function JobForm() {
     e.preventDefault();
     if (!form.title || !form.company || !form.description) { setError("Please fill required fields"); return; }
     setLoading(true); setError("");
-    const r = await jobService.createJob({ ...form, tags, skills });
+    const r = await jobService.create({ ...form, tags, skills });
     if (r.success) {
       setSubmitted(true);
       setForm({ title:"", company:"", location:"", type:"Full-time", salary:"", description:"", requirements:"" });

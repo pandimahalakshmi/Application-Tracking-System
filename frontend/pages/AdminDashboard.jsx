@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Box, Grid, Card, Typography, Button, Chip, Avatar, LinearProgress } from "@mui/material";
 import { Users, Briefcase, CheckCircle, Clock, TrendingUp, PlusCircle, Eye, Calendar } from "lucide-react";
 import { useState, useEffect } from "react";
-import { jobService } from "../services/api";
+import { jobService, applicationService } from "../services/api";
+import NotificationBell from "../components/NotificationBell";
 
 const C = {
   bg:      '#0F172A',
@@ -19,25 +20,30 @@ const C = {
   muted:   '#94A3B8',
 };
 
-const statCards = (jobs) => [
-  { title: 'Total Candidates', value: '248', change: '+12%', icon: Users,       gradient: `linear-gradient(135deg, ${C.primary}, ${C.secondary})` },
-  { title: 'Active Jobs',      value: jobs.length, change: '+3',   icon: Briefcase,  gradient: `linear-gradient(135deg, ${C.accent}, #0EA5E9)` },
-  { title: 'Applications',     value: jobs.reduce((s,j)=>s+j.applications,0), change: '+18%', icon: CheckCircle, gradient: `linear-gradient(135deg, ${C.success}, #059669)` },
-  { title: 'Interviews Today', value: '7',  change: '+2',   icon: Calendar,   gradient: `linear-gradient(135deg, ${C.warning}, #D97706)` },
-];
-
 export default function AdminDashboard() {
   const role = localStorage.getItem('role');
   const navigate = useNavigate();
-  const [jobs, setJobs] = useState([]);
+  const [jobs, setJobs]   = useState([]);
+  const [stats, setStats] = useState({ totalJobs:0, totalUsers:0, totalApplications:0, activeJobs:0 });
+  const [loading, setLoading] = useState(true);
+  const adminUser = JSON.parse(localStorage.getItem('user') || '{}');
 
   useEffect(() => {
-    jobService.getAllJobs('').then(r => r.success && setJobs(r.jobs));
+    Promise.all([
+      jobService.getAll('').then(r => { if (r.success) setJobs(r.jobs); }),
+      applicationService.getStats().then(r => { if (r.success) setStats(r.stats); }),
+    ]).finally(() => setLoading(false));
   }, []);
+
+  // Not logged in at all
+  if (!role) {
+    navigate('/');
+    return null;
+  }
 
   if (role !== 'admin') return (
     <Box sx={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh', background: C.bg }}>
-      <Card sx={{ p:4, textAlign:'center', background: C.surface, border:`1px solid ${C.border}` }}>
+      <Card sx={{ p:4, textAlign:'center', background: C.surface, border:`1px solid ${C.border}`, borderRadius:3 }}>
         <Typography variant="h5" sx={{ color: C.danger, fontWeight:700 }}>Access Denied</Typography>
         <Typography sx={{ color: C.muted, mt:1 }}>You don't have permission to view this page.</Typography>
         <Button onClick={() => navigate('/')} sx={{ mt:2, background: C.primary, color:'#fff', borderRadius:2, textTransform:'none' }}>Go to Login</Button>
@@ -45,7 +51,23 @@ export default function AdminDashboard() {
     </Box>
   );
 
-  const cards = statCards(jobs);
+  if (loading) return (
+    <Box sx={{ display:'flex', height:'100vh', alignItems:'center', justifyContent:'center', background: C.bg }}>
+      <Box sx={{ textAlign:'center' }}>
+        <Box sx={{ width:48, height:48, borderRadius:'50%', border:`3px solid ${C.primary}`, borderTopColor:'transparent',
+          animation:'spin 0.8s linear infinite', mx:'auto', mb:2 }}/>
+        <Typography sx={{ color: C.muted }}>Loading dashboard...</Typography>
+      </Box>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </Box>
+  );
+
+  const cards = [
+    { title:'Total Jobs',         value: stats.totalJobs,         change:'+3',   icon: Briefcase,  gradient:`linear-gradient(135deg, ${C.primary}, ${C.secondary})` },
+    { title:'Active Jobs',        value: stats.activeJobs,        change:'live', icon: TrendingUp, gradient:`linear-gradient(135deg, ${C.accent}, #0EA5E9)` },
+    { title:'Total Applications', value: stats.totalApplications, change:'+18%', icon: CheckCircle,gradient:`linear-gradient(135deg, ${C.success}, #059669)` },
+    { title:'Total Users',        value: stats.totalUsers,        change:'+12%', icon: Users,      gradient:`linear-gradient(135deg, ${C.warning}, #D97706)` },
+  ];
 
   return (
     <Box sx={{ display:'flex', background: C.bg, minHeight:'100vh' }}>
@@ -58,10 +80,13 @@ export default function AdminDashboard() {
             <Typography variant="h4" sx={{ fontWeight:700, color: C.text }}>Admin Dashboard</Typography>
             <Typography sx={{ color: C.muted, mt:0.5 }}>Welcome back, Administrator</Typography>
           </Box>
-          <Button onClick={() => navigate('/jobform')} startIcon={<PlusCircle size={16}/>}
+          <Box sx={{ display:'flex', alignItems:'center', gap:2 }}>
+            <NotificationBell userId={adminUser?.id || adminUser?._id} />
+            <Button onClick={() => navigate('/jobform')} startIcon={<PlusCircle size={16}/>}
             sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:'#fff', borderRadius:2, textTransform:'none', fontWeight:600, px:3, boxShadow:`0 4px 16px ${C.primary}44` }}>
             Post New Job
           </Button>
+          </Box>
         </Box>
 
         {/* Stat Cards */}
@@ -127,9 +152,10 @@ export default function AdminDashboard() {
             <Card sx={{ p:3, background: C.surface, border:`1px solid ${C.border}`, borderRadius:3, mb:3 }}>
               <Typography variant="h6" sx={{ fontWeight:700, color: C.text, mb:3 }}>Quick Actions</Typography>
               {[
-                { label:'View Candidates', icon: Users,    route:'/candidates', gradient:`linear-gradient(135deg, ${C.primary}, ${C.secondary})` },
-                { label:'Post New Job',    icon: PlusCircle, route:'/jobform',   gradient:`linear-gradient(135deg, ${C.accent}, #0EA5E9)` },
-                { label:'Schedule Interview', icon: Calendar, route:'/schedule-interview', gradient:`linear-gradient(135deg, ${C.warning}, #D97706)` },
+                { label:'View Candidates',    icon: Users,    route:'/candidates',          gradient:`linear-gradient(135deg, ${C.primary}, ${C.secondary})` },
+                { label:'All Applications',   icon: CheckCircle, route:'/admin/applications', gradient:`linear-gradient(135deg, ${C.success}, #059669)` },
+                { label:'Post New Job',        icon: PlusCircle, route:'/jobform',            gradient:`linear-gradient(135deg, ${C.accent}, #0EA5E9)` },
+                { label:'Schedule Interview',  icon: Calendar, route:'/schedule-interview',   gradient:`linear-gradient(135deg, ${C.warning}, #D97706)` },
               ].map(({ label, icon: Icon, route, gradient }) => (
                 <Button key={label} fullWidth onClick={() => navigate(route)}
                   startIcon={<Icon size={16}/>}

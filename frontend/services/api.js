@@ -1,226 +1,64 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-
+const BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 const token = () => localStorage.getItem("token");
+const authHeader = () => ({ "Content-Type": "application/json", Authorization: `Bearer ${token()}` });
 
-// Auth Service
+const req = async (method, path, body) => {
+  try {
+    const res = await fetch(`${BASE}${path}`, {
+      method,
+      headers: authHeader(),
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    return await res.json();
+  } catch (err) {
+    return { error: err.message };
+  }
+};
+
 export const authService = {
-  signup: async (signupData) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(signupData),
-      });
-      const data = await response.json();
-      if (data.token) localStorage.setItem("token", data.token);
-      return data;
-    } catch (error) {
-      return { error: error.message };
-    }
-  },
-
-  login: async (email, password) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await response.json();
-      if (data.token) localStorage.setItem("token", data.token);
-      return data;
-    } catch (error) {
-      return { error: error.message };
-    }
-  },
-
-  logout: async () => {
-    localStorage.removeItem("token");
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/logout`, { method: "POST" });
-      return await response.json();
-    } catch (error) {
-      return { error: error.message };
-    }
-  },
-
-  getProfile: async (userId) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/profile/${userId}`, {
-        headers: { Authorization: `Bearer ${token()}` },
-      });
-      return await response.json();
-    } catch (error) {
-      return { error: error.message };
-    }
-  },
-
-  updateProfile: async (userId, data) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/profile/${userId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
-        body: JSON.stringify(data),
-      });
-      return await response.json();
-    } catch (error) {
-      return { error: error.message };
-    }
-  },
-
-  applyForJob: async (userId, jobData) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/profile/${userId}/apply`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
-        body: JSON.stringify(jobData),
-      });
-      return await response.json();
-    } catch (error) {
-      return { error: error.message };
-    }
-  },
+  signup:        (data)        => req("POST", "/auth/signup", data).then(d => { if (d.token) localStorage.setItem("token", d.token); return d; }),
+  login:         (email, pass) => req("POST", "/auth/login", { email, password: pass }).then(d => { if (d.token) localStorage.setItem("token", d.token); return d; }),
+  logout:        ()            => { localStorage.removeItem("token"); return req("POST", "/auth/logout"); },
+  getProfile:    (id)          => req("GET",  `/auth/profile/${id}`),
+  updateProfile: (id, data)    => req("PUT",  `/auth/profile/${id}`, data),
 };
 
-// Candidates Service
-export const candidateService = {
-  getAllCandidates: async (status = "All", search = "") => {
-    try {
-      const params = new URLSearchParams();
-      if (status !== "All") params.append("status", status);
-      if (search) params.append("search", search);
-
-      const response = await fetch(`${API_BASE_URL}/candidates?${params}`);
-      return await response.json();
-    } catch (error) {
-      console.error("Get candidates error:", error);
-      return { error: error.message };
-    }
-  },
-
-  getCandidateById: async (id) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/candidates/${id}`);
-      return await response.json();
-    } catch (error) {
-      console.error("Get candidate error:", error);
-      return { error: error.message };
-    }
-  },
-
-  updateCandidateStatus: async (id, status) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/candidates/${id}/status`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
-      });
-      return await response.json();
-    } catch (error) {
-      console.error("Update candidate status error:", error);
-      return { error: error.message };
-    }
-  },
-
-  addCandidate: async (candidateData) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/candidates`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(candidateData),
-      });
-      return await response.json();
-    } catch (error) {
-      console.error("Add candidate error:", error);
-      return { error: error.message };
-    }
-  },
-
-  deleteCandidate: async (id) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/candidates/${id}`, {
-        method: "DELETE",
-      });
-      return await response.json();
-    } catch (error) {
-      console.error("Delete candidate error:", error);
-      return { error: error.message };
-    }
-  },
-};
-
-// Jobs Service
 export const jobService = {
-  getAllJobs: async (search = "") => {
-    try {
-      const params = new URLSearchParams();
-      if (search) params.append("search", search);
+  getAll:  (search = "", status) => req("GET", `/jobs?search=${search}${status ? `&status=${status}` : ""}`),
+  getById: (id)                  => req("GET", `/jobs/${id}`),
+  create:  (data)                => req("POST",   "/jobs", data),
+  update:  (id, data)            => req("PUT",    `/jobs/${id}`, data),
+  remove:  (id)                  => req("DELETE", `/jobs/${id}`),
+};
 
-      const response = await fetch(`${API_BASE_URL}/jobs?${params}`);
-      return await response.json();
-    } catch (error) {
-      console.error("Get jobs error:", error);
-      return { error: error.message };
-    }
-  },
+export const applicationService = {
+  apply:        (userId, data) => req("POST", `/applications/apply/${userId}`, data),
+  getMyApps:    (userId)       => req("GET",  `/applications/user/${userId}`),
+  getAll:       (filters = {}) => { const q = new URLSearchParams(filters).toString(); return req("GET", `/applications/admin${q ? `?${q}` : ""}`); },
+  updateStatus: (id, status)   => req("PUT",  `/applications/${id}/status`, { status }),
+  getStats:     ()             => req("GET",  "/applications/stats"),
+};
 
-  getJobById: async (id) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/jobs/${id}`);
-      return await response.json();
-    } catch (error) {
-      console.error("Get job error:", error);
-      return { error: error.message };
-    }
-  },
+export const notificationService = {
+  getAll:      (userId) => req("GET", `/notifications/${userId}`),
+  markAllRead: (userId) => req("PUT", `/notifications/${userId}/read-all`),
+};
 
-  createJob: async (jobData) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/jobs`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(jobData),
-      });
-      return await response.json();
-    } catch (error) {
-      console.error("Create job error:", error);
-      return { error: error.message };
-    }
-  },
+export const savedJobService = {
+  toggle: (userId, jobId) => req("POST", "/saved-jobs/toggle", { userId, jobId }),
+  getAll: (userId)        => req("GET",  `/saved-jobs/user/${userId}`),
+  getIds: (userId)        => req("GET",  `/saved-jobs/ids/${userId}`),
+};
 
-  updateJob: async (id, jobData) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/jobs/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(jobData),
-      });
-      return await response.json();
-    } catch (error) {
-      console.error("Update job error:", error);
-      return { error: error.message };
-    }
+export const candidateService = {
+  getAllCandidates:       (status = "All", search = "") => {
+    const params = new URLSearchParams();
+    if (status !== "All") params.append("status", status);
+    if (search) params.append("search", search);
+    return req("GET", `/candidates?${params}`);
   },
-
-  deleteJob: async (id) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/jobs/${id}`, {
-        method: "DELETE",
-      });
-      return await response.json();
-    } catch (error) {
-      console.error("Delete job error:", error);
-      return { error: error.message };
-    }
-  },
-
-  getStats: async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/jobs/stats`);
-      return await response.json();
-    } catch (error) {
-      console.error("Get stats error:", error);
-      return { error: error.message };
-    }
-  },
+  getCandidateById:      (id)          => req("GET",    `/candidates/${id}`),
+  updateCandidateStatus: (id, status)  => req("PUT",    `/candidates/${id}/status`, { status }),
+  addCandidate:          (data)        => req("POST",   `/candidates`, data),
+  deleteCandidate:       (id)          => req("DELETE", `/candidates/${id}`),
 };
