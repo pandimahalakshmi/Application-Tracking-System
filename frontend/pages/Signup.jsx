@@ -17,6 +17,15 @@ const fieldSx = {
   '& .MuiInputLabel-root.Mui-focused': { color: '#6366F1' },
   '& .MuiSelect-icon': { color: '#94A3B8' },
   '& .MuiMenuItem-root': { background: '#1E293B' },
+  '& input:-webkit-autofill': {
+    WebkitBoxShadow: '0 0 0 100px #0F172A inset',
+    WebkitTextFillColor: '#F1F5F9',
+    caretColor: '#F1F5F9',
+  },
+  '& input:-webkit-autofill:hover, & input:-webkit-autofill:focus': {
+    WebkitBoxShadow: '0 0 0 100px #0F172A inset',
+    WebkitTextFillColor: '#F1F5F9',
+  },
 };
 
 const genderOptions = [

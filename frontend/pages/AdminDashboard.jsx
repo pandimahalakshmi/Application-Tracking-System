@@ -1,10 +1,11 @@
 import Sidebar from "../components/Sidebar";
 import { useNavigate } from "react-router-dom";
-import { Box, Grid, Card, Typography, Button, Chip, Avatar, LinearProgress } from "@mui/material";
-import { Users, Briefcase, CheckCircle, Clock, TrendingUp, PlusCircle, Eye, Calendar } from "lucide-react";
+import { Box, Grid, Card, Typography, Button, Chip } from "@mui/material";
+import { Users, Briefcase, CheckCircle, TrendingUp, PlusCircle, Calendar } from "lucide-react";
 import { useState, useEffect } from "react";
 import { jobService, applicationService } from "../services/api";
 import NotificationBell from "../components/NotificationBell";
+import AnalyticsCharts from "../components/AnalyticsCharts";
 
 const C = {
   bg:      '#0F172A',
@@ -23,15 +24,17 @@ const C = {
 export default function AdminDashboard() {
   const role = localStorage.getItem('role');
   const navigate = useNavigate();
-  const [jobs, setJobs]   = useState([]);
-  const [stats, setStats] = useState({ totalJobs:0, totalUsers:0, totalApplications:0, activeJobs:0 });
-  const [loading, setLoading] = useState(true);
+  const [jobs, setJobs]         = useState([]);
+  const [stats, setStats]       = useState({ totalJobs:0, totalUsers:0, totalApplications:0, activeJobs:0 });
+  const [allApps, setAllApps]   = useState([]);
+  const [loading, setLoading]   = useState(true);
   const adminUser = JSON.parse(localStorage.getItem('user') || '{}');
 
   useEffect(() => {
     Promise.all([
       jobService.getAll('').then(r => { if (r.success) setJobs(r.jobs); }),
       applicationService.getStats().then(r => { if (r.success) setStats(r.stats); }),
+      applicationService.getAll().then(r => { if (r.success) setAllApps(r.applications); }),
     ]).finally(() => setLoading(false));
   }, []);
 
@@ -115,47 +118,15 @@ export default function AdminDashboard() {
         </Grid>
 
         <Grid container spacing={3}>
-          {/* Job Listings */}
-          <Grid item xs={12} md={8}>
-            <Card sx={{ p:3, background: C.surface, border:`1px solid ${C.border}`, borderRadius:3 }}>
-              <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:3 }}>
-                <Typography variant="h6" sx={{ fontWeight:700, color: C.text }}>Active Job Listings</Typography>
-                <Button onClick={() => navigate('/jobs')} size="small" endIcon={<Eye size={14}/>}
-                  sx={{ color: C.accent, textTransform:'none', fontWeight:600 }}>View All</Button>
-              </Box>
-              {jobs.slice(0,5).map((job, i) => (
-                <Box key={i} sx={{ display:'flex', alignItems:'center', justifyContent:'space-between', p:2, mb:1.5,
-                  borderRadius:2, background:`${C.bg}`, border:`1px solid ${C.border}`,
-                  transition:'all 0.2s', '&:hover':{ borderColor: C.primary, background:`${C.primary}08` } }}>
-                  <Box sx={{ display:'flex', alignItems:'center', gap:2 }}>
-                    <Box sx={{ width:40, height:40, borderRadius:2, background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, display:'flex', alignItems:'center', justifyContent:'center' }}>
-                      <Briefcase size={18} color="#fff" />
-                    </Box>
-                    <Box>
-                      <Typography sx={{ fontWeight:600, color: C.text, fontSize:14 }}>{job.title}</Typography>
-                      <Typography sx={{ color: C.muted, fontSize:12 }}>{job.company} · {job.location}</Typography>
-                    </Box>
-                  </Box>
-                  <Box sx={{ textAlign:'right' }}>
-                    <Chip label={`${job.applications} apps`} size="small"
-                      sx={{ background:`${C.accent}22`, color: C.accent, fontWeight:600, fontSize:11 }} />
-                    <Typography sx={{ color: C.muted, fontSize:11, mt:0.5 }}>{job.type}</Typography>
-                  </Box>
-                </Box>
-              ))}
-              {jobs.length === 0 && <Typography sx={{ color: C.muted, textAlign:'center', py:4 }}>No jobs posted yet.</Typography>}
-            </Card>
-          </Grid>
-
-          {/* Quick Actions */}
+          {/* Quick Actions only */}
           <Grid item xs={12} md={4}>
-            <Card sx={{ p:3, background: C.surface, border:`1px solid ${C.border}`, borderRadius:3, mb:3 }}>
+            <Card sx={{ p:3, background: C.surface, border:`1px solid ${C.border}`, borderRadius:3 }}>
               <Typography variant="h6" sx={{ fontWeight:700, color: C.text, mb:3 }}>Quick Actions</Typography>
               {[
-                { label:'View Candidates',    icon: Users,    route:'/candidates',          gradient:`linear-gradient(135deg, ${C.primary}, ${C.secondary})` },
+                { label:'View Candidates',    icon: Users,       route:'/candidates',         gradient:`linear-gradient(135deg, ${C.primary}, ${C.secondary})` },
                 { label:'All Applications',   icon: CheckCircle, route:'/admin/applications', gradient:`linear-gradient(135deg, ${C.success}, #059669)` },
-                { label:'Post New Job',        icon: PlusCircle, route:'/jobform',            gradient:`linear-gradient(135deg, ${C.accent}, #0EA5E9)` },
-                { label:'Schedule Interview',  icon: Calendar, route:'/schedule-interview',   gradient:`linear-gradient(135deg, ${C.warning}, #D97706)` },
+                { label:'Post New Job',        icon: PlusCircle,  route:'/jobform',            gradient:`linear-gradient(135deg, ${C.accent}, #0EA5E9)` },
+                { label:'Schedule Interview',  icon: Calendar,    route:'/schedule-interview', gradient:`linear-gradient(135deg, ${C.warning}, #D97706)` },
               ].map(({ label, icon: Icon, route, gradient }) => (
                 <Button key={label} fullWidth onClick={() => navigate(route)}
                   startIcon={<Icon size={16}/>}
@@ -166,29 +137,11 @@ export default function AdminDashboard() {
                 </Button>
               ))}
             </Card>
-
-            {/* Pipeline */}
-            <Card sx={{ p:3, background: C.surface, border:`1px solid ${C.border}`, borderRadius:3 }}>
-              <Typography variant="h6" sx={{ fontWeight:700, color: C.text, mb:3 }}>Hiring Pipeline</Typography>
-              {[
-                { label:'Applied',   value:65, color: C.primary },
-                { label:'Screening', value:40, color: C.accent },
-                { label:'Interview', value:25, color: C.warning },
-                { label:'Offered',   value:10, color: C.success },
-              ].map(({ label, value, color }) => (
-                <Box key={label} sx={{ mb:2 }}>
-                  <Box sx={{ display:'flex', justifyContent:'space-between', mb:0.5 }}>
-                    <Typography sx={{ color: C.muted, fontSize:13 }}>{label}</Typography>
-                    <Typography sx={{ color: C.text, fontSize:13, fontWeight:600 }}>{value}%</Typography>
-                  </Box>
-                  <LinearProgress variant="determinate" value={value}
-                    sx={{ height:6, borderRadius:3, background:`${C.border}`,
-                      '& .MuiLinearProgress-bar':{ background: color, borderRadius:3 } }} />
-                </Box>
-              ))}
-            </Card>
           </Grid>
         </Grid>
+        {/* Analytics Charts */}
+        <AnalyticsCharts stats={stats} jobs={jobs} applications={allApps} />
+
       </Box>
     </Box>
   );

@@ -10,7 +10,7 @@ import {
   User, Briefcase, GraduationCap, Code, FileText,
   CheckCircle, Settings, Edit, Upload, Save, X,
 } from 'lucide-react';
-import { authService } from '../services/api';
+import { authService, applicationService } from '../services/api';
 
 // ── Dark palette ──────────────────────────────────────────────────────────
 const D = {
@@ -124,6 +124,7 @@ export default function UserProfile() {
   const [snack, setSnack]         = useState({ open: false, msg: '', severity: 'success' });
   const [pwDialog, setPwDialog]   = useState(false);
   const [pwFields, setPwFields]   = useState({ current: '', next: '', confirm: '' });
+  const [myApps, setMyApps]       = useState([]);
 
   const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
   const userId = storedUser?.id || storedUser?._id;
@@ -137,10 +138,12 @@ export default function UserProfile() {
       })
       .catch(() => setSnack({ open: true, msg: 'Failed to load profile', severity: 'error' }))
       .finally(() => setLoading(false));
+    // Fetch real applications from Application collection
+    applicationService.getMyApps(userId).then(d => { if (d.success) setMyApps(d.applications); });
   }, [userId]);
 
-  const startEdit  = () => { setBackup(profile); setEditMode(true); };
-  const cancelEdit = () => { setProfile(backup); setEditMode(false); };
+  const startEdit  = () => { setBackup(profile); setEditMode(true); setSkillText({}); };
+  const cancelEdit = () => { setProfile(backup); setEditMode(false); setSkillText({}); };
 
   const saveProfile = async () => {
     setSaving(true);
@@ -149,6 +152,7 @@ export default function UserProfile() {
       if (data.success) {
         setSnack({ open: true, msg: 'Profile updated!', severity: 'success' });
         setEditMode(false);
+        setSkillText({});
       } else {
         setSnack({ open: true, msg: data.error || 'Update failed', severity: 'error' });
       }
@@ -160,6 +164,13 @@ export default function UserProfile() {
   const set = (section, field, value) => {
     if (section) setProfile(p => ({ ...p, [section]: { ...p[section], [field]: value } }));
     else         setProfile(p => ({ ...p, [field]: value }));
+  };
+
+  // Raw skill text state for editing (prevents comma-split while typing)
+  const [skillText, setSkillText] = useState({});
+
+  const handleSkillTextChange = (field, value) => {
+    setSkillText(p => ({ ...p, [field]: value }));
   };
 
   const setSkill = (field, value) =>
@@ -324,23 +335,36 @@ export default function UserProfile() {
             ['Frameworks','frameworks'],
             ['Databases','databases'],
             ['Tools','tools'],
-          ].map(([label, field]) => (
-            <Box key={field} sx={{ mb:2 }}>
-              <TextField fullWidth label={`${label} (comma-separated)`}
-                value={(profile.skills?.[field] || []).join(', ')}
-                disabled={!editMode} size="small"
-                onChange={e => setSkill(field, e.target.value)}
-                sx={fSx} />
-              {(profile.skills?.[field] || []).length > 0 && (
-                <Box sx={{ display:'flex', flexWrap:'wrap', gap:0.5, mt:0.5 }}>
-                  {profile.skills[field].map(s => (
-                    <Chip key={s} label={s} size="small"
-                      sx={{ background:`${D.warning}22`, color: D.warning, fontWeight:600, fontSize:11 }} />
-                  ))}
-                </Box>
-              )}
-            </Box>
-          ))}
+          ].map(([label, field]) => {
+            // Use raw text while editing, joined array when viewing
+            const rawVal = editMode
+              ? (skillText[field] !== undefined ? skillText[field] : (profile.skills?.[field] || []).join(', '))
+              : (profile.skills?.[field] || []).join(', ');
+            return (
+              <Box key={field} sx={{ mb:2 }}>
+                <TextField fullWidth label={`${label} (comma-separated)`}
+                  value={rawVal}
+                  disabled={!editMode}
+                  size="small"
+                  onChange={e => handleSkillTextChange(field, e.target.value)}
+                  onBlur={e => {
+                    // Only split into array on blur (when user leaves the field)
+                    setSkill(field, e.target.value);
+                    setSkillText(p => ({ ...p, [field]: undefined }));
+                  }}
+                  placeholder="e.g. React, Node.js, Python"
+                  sx={fSx} />
+                {(profile.skills?.[field] || []).length > 0 && (
+                  <Box sx={{ display:'flex', flexWrap:'wrap', gap:0.5, mt:0.5 }}>
+                    {profile.skills[field].map(s => (
+                      <Chip key={s} label={s} size="small"
+                        sx={{ background:`${D.warning}22`, color: D.warning, fontWeight:600, fontSize:11 }} />
+                    ))}
+                  </Box>
+                )}
+              </Box>
+            );
+          })}
         </Box>
       </Box>
     </Card>
@@ -399,44 +423,64 @@ export default function UserProfile() {
     </Card>
   );
 
-  const renderApplications = () => (
-    <Card sx={cardSx}>
-      <Typography variant="h6" sx={{ fontWeight:700, mb:3, color: D.text }}>Applied Jobs</Typography>
-      {(!profile.applications || profile.applications.length === 0) ? (
-        <Typography sx={{ color: D.muted, textAlign:'center', py:4 }}>No applications yet.</Typography>
-      ) : (
-        <List>
-          {profile.applications.map((app, i) => (
-            <React.Fragment key={i}>
-              <ListItem sx={{ px:0, py:1.5 }}>
-                <ListItemIcon>
-                  <Avatar sx={{ width:36, height:36, background:`linear-gradient(135deg, ${D.accent}, #0EA5E9)` }}>
-                    <Briefcase size={18} color="#fff"/>
-                  </Avatar>
-                </ListItemIcon>
-                <ListItemText
-                  primary={
-                    <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                      <Typography sx={{ fontWeight:700, color: D.text, fontSize:14 }}>{app.jobTitle}</Typography>
-                      <Chip label={app.status} size="small"
-                        sx={{ background:`${D.primary}22`, color: D.primary, fontWeight:600, fontSize:11 }} />
-                    </Box>
-                  }
-                  secondary={
-                    <Typography sx={{ color: D.muted, fontSize:12 }}>
-                      {app.company} · Applied: {app.appliedDate}
-                      {app.interviewDate && ` · Interview: ${app.interviewDate}`}
-                    </Typography>
-                  }
-                />
-              </ListItem>
-              {i < profile.applications.length - 1 && <Divider sx={{ borderColor: D.border }}/>}
-            </React.Fragment>
-          ))}
-        </List>
-      )}
-    </Card>
-  );
+  const renderApplications = () => {
+    const statusColor = {
+      Pending:              D.muted,
+      Shortlisted:          D.warning,
+      'Interview Scheduled':D.accent,
+      Selected:             D.success,
+      Rejected:             D.danger,
+      Applied:              D.primary,
+    };
+    return (
+      <Card sx={cardSx}>
+        <Typography variant="h6" sx={{ fontWeight:700, mb:3, color: D.text }}>Applied Jobs</Typography>
+        {myApps.length === 0 ? (
+          <Box sx={{ textAlign:'center', py:4 }}>
+            <Briefcase size={40} color={D.border} style={{ marginBottom:12 }}/>
+            <Typography sx={{ color: D.muted }}>No applications yet.</Typography>
+            <Typography sx={{ color: D.muted, fontSize:12, mt:0.5 }}>Browse jobs and click Apply Now to get started.</Typography>
+          </Box>
+        ) : (
+          <List>
+            {myApps.map((app, i) => {
+              const job = app.jobId;
+              const sc  = statusColor[app.status] || D.primary;
+              return (
+                <React.Fragment key={app._id || i}>
+                  <ListItem sx={{ px:0, py:1.5 }}>
+                    <ListItemIcon>
+                      <Avatar sx={{ width:36, height:36, background:`linear-gradient(135deg, ${D.accent}, #0EA5E9)` }}>
+                        <Briefcase size={18} color="#fff"/>
+                      </Avatar>
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                          <Typography sx={{ fontWeight:700, color: D.text, fontSize:14 }}>
+                            {job?.title || app.jobTitle}
+                          </Typography>
+                          <Chip label={app.status} size="small"
+                            sx={{ background:`${sc}22`, color: sc, fontWeight:600, fontSize:11 }} />
+                        </Box>
+                      }
+                      secondary={
+                        <Typography sx={{ color: D.muted, fontSize:12 }}>
+                          {job?.company || app.company}
+                          {' · Applied: '}{new Date(app.createdAt).toLocaleDateString('en-US', { day:'numeric', month:'short', year:'numeric' })}
+                        </Typography>
+                      }
+                    />
+                  </ListItem>
+                  {i < myApps.length - 1 && <Divider sx={{ borderColor: D.border }}/>}
+                </React.Fragment>
+              );
+            })}
+          </List>
+        )}
+      </Card>
+    );
+  };
 
   const renderSettings = () => (
     <Card sx={cardSx}>

@@ -16,6 +16,7 @@ const applicationSchema = new mongoose.Schema({
     enum: ['Pending','Shortlisted','Interview Scheduled','Rejected','Selected'],
     default: 'Pending',
   },
+  adminNotes: { type: String, default: '' },
 }, { timestamps: true });
 
 // Prevent duplicate applications

@@ -1,19 +1,22 @@
 import Sidebar from "../components/Sidebar";
 import {
   Box, Grid, Card, Typography, Button, TextField, Chip,
-  InputAdornment, CircularProgress, Dialog, DialogTitle,
+  CircularProgress, Dialog, DialogTitle,
   DialogContent, DialogActions, Divider, IconButton, Tooltip,
 } from "@mui/material";
-import { MapPin, Search, Briefcase, X, Upload, Send, Star, Trash2 } from "lucide-react";
+import { MapPin, Briefcase, X, Upload, Send, Star, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { jobService, applicationService, savedJobService } from "../services/api";
 import { C, fieldSx, cardSx } from "../theme";
+import JobFilters from "../components/JobFilters";
+import useSocket from "../hooks/useSocket";
 
 const fSx = {
   ...fieldSx, mb: 2,
   '& input:-webkit-autofill': { WebkitBoxShadow: '0 0 0 100px #1E293B inset', WebkitTextFillColor: '#F1F5F9' },
 };
 const emptyForm = { fullName:'', email:'', phone:'', coverLetter:'', portfolioLink:'', resume:null };
+const emptyFilters = { search:'', type:'', location:'', salary:'' };
 
 export default function Jobs() {
   const role = localStorage.getItem("role");
@@ -21,6 +24,7 @@ export default function Jobs() {
   const userId = user?.id || user?._id;
 
   const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters]       = useState(emptyFilters);
   const [jobs, setJobs]             = useState([]);
   const [loading, setLoading]       = useState(true);
   const [savedIds, setSavedIds]     = useState(new Set());
@@ -45,6 +49,13 @@ export default function Jobs() {
   };
 
   const handleChange = (k, v) => setForm(p => ({ ...p, [k]: v }));
+  const handleFilterChange = (k, v) => setFilters(p => ({ ...p, [k]: v }));
+
+  // Socket.IO real-time status updates
+  useSocket(userId, (data) => {
+    // Show a toast-like alert when status changes
+    alert(`📬 Update: Your application for "${data.jobTitle}" is now ${data.status}`);
+  });
 
   const handleToggleSave = async (e, jobId) => {
     e.stopPropagation();
@@ -70,20 +81,42 @@ export default function Jobs() {
     if (!form.fullName || !form.email || !form.phone) return;
     setSubmitting(true);
     try {
+      // Step 1: Upload resume file if selected
+      let uploadedFilename = '';
+      if (form.resume) {
+        const formData = new FormData();
+        formData.append('resume', form.resume);
+        const token = localStorage.getItem('token');
+        const uploadRes = await fetch(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/upload-resume`,
+          { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData }
+        );
+        const uploadData = await uploadRes.json();
+        if (uploadData.success) {
+          uploadedFilename = uploadData.filename;
+        }
+      }
+
+      // Step 2: Submit application with server filename
       const r = await applicationService.apply(userId, {
-        jobId: selectedJob?._id || selectedJob?.id,
-        coverLetter: form.coverLetter, portfolioLink: form.portfolioLink,
-        resumeFile: form.resume?.name || '', userPhone: form.phone,
+        jobId:        selectedJob?._id || selectedJob?.id,
+        coverLetter:  form.coverLetter,
+        portfolioLink:form.portfolioLink,
+        resumeFile:   uploadedFilename,
+        userPhone:    form.phone,
       });
       r.success ? setSubmitted(true) : alert(r.error || 'Failed to submit');
     } catch { alert('Network error'); }
     finally { setSubmitting(false); }
   };
 
-  const filtered = jobs.filter(j =>
-    j.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    j.company?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filtered = jobs.filter(j => {
+    const s = (filters.search || searchTerm).toLowerCase();
+    const matchSearch   = !s || j.title?.toLowerCase().includes(s) || j.company?.toLowerCase().includes(s);
+    const matchType     = !filters.type     || j.type === filters.type;
+    const matchLocation = !filters.location || j.location?.toLowerCase().includes(filters.location.toLowerCase());
+    return matchSearch && matchType && matchLocation;
+  });
 
   const typeColor = (t) => t === 'Full-time'
     ? { bg:`${C.success}22`, color: C.success }
@@ -162,15 +195,13 @@ export default function Jobs() {
   // ── User view ─────────────────────────────────────────────────────────────
   return pageWrap(
     <>
-      <Box sx={{ mb:4, display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:2 }}>
+      <Box sx={{ mb:2, display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:2 }}>
         <Box>
           <Typography variant="h4" sx={{ fontWeight:700, color: C.text }}>Available Jobs</Typography>
           <Typography sx={{ color: C.muted, mt:0.5 }}>{filtered.length} positions found</Typography>
         </Box>
-        <TextField placeholder="Search jobs..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
-          size="small" sx={{ ...fSx, mb:0, minWidth:280 }}
-          InputProps={{ startAdornment: <InputAdornment position="start"><Search size={16} color={C.muted}/></InputAdornment> }} />
       </Box>
+      <JobFilters filters={filters} onChange={handleFilterChange} onClear={() => setFilters(emptyFilters)} />
 
       {filtered.length === 0 && !loading && (
         <Card sx={{ ...cardSx, p:6, textAlign:'center' }}>

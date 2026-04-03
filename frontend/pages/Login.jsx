@@ -129,6 +129,12 @@ export default function Login() {
               Sign Up
             </Box>
           </Typography>
+          <Typography sx={{ textAlign:'center', mt:1.5, color: C.muted, fontSize:13 }}>
+            <Box component="span" onClick={() => navigate('/forgot-password')}
+              sx={{ color: C.muted, cursor:'pointer', '&:hover':{ color: C.primary, textDecoration:'underline' } }}>
+              Forgot your password?
+            </Box>
+          </Typography>
         </Box>
       </Box>
     </Box>

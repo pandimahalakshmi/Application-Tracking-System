@@ -2,7 +2,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
   LayoutDashboard, Briefcase, PlusCircle, Users,
-  User, LogOut, ChevronRight, ClipboardList, Star,
+  User, LogOut, ChevronRight, ClipboardList, Star, Calendar,
 } from "lucide-react";
 import NotificationBell from "./NotificationBell";
 
@@ -16,11 +16,12 @@ const C = {
 };
 
 const adminMenu = [
-  { label: 'Dashboard',     route: '/dashboard',           icon: LayoutDashboard },
-  { label: 'Jobs',          route: '/jobs',                icon: Briefcase },
-  { label: 'Create Job',    route: '/jobform',             icon: PlusCircle },
-  { label: 'Candidates',    route: '/candidates',          icon: Users },
-  { label: 'Applications',  route: '/admin/applications',  icon: ClipboardList },
+  { label: 'Dashboard',          route: '/dashboard',           icon: LayoutDashboard },
+  { label: 'Jobs',               route: '/jobs',                icon: Briefcase },
+  { label: 'Create Job',         route: '/jobform',             icon: PlusCircle },
+  { label: 'Candidates',         route: '/candidates',          icon: Users },
+  { label: 'Applications',       route: '/admin/applications',  icon: ClipboardList },
+  { label: 'Schedule Interview', route: '/schedule-interview',  icon: Calendar },
 ];
 
 const userMenu = [

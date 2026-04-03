@@ -18,6 +18,10 @@ dist-ssr
 .env.production
 backend/.env
 
+# Uploaded files
+backend/uploads/resumes/*
+!backend/uploads/resumes/.gitkeep
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

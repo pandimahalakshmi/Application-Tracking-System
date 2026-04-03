@@ -62,6 +62,8 @@ const userSchema = new mongoose.Schema({
     status:      { type: String, default: 'Applied' },
     appliedDate: { type: String, default: '' },
   }],
+  resetToken:       { type: String },
+  resetTokenExpiry: { type: Date },
 }, { timestamps: true });
 
 // Hash password before save

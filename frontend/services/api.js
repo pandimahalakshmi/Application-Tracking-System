@@ -36,6 +36,8 @@ export const applicationService = {
   getMyApps:    (userId)       => req("GET",  `/applications/user/${userId}`),
   getAll:       (filters = {}) => { const q = new URLSearchParams(filters).toString(); return req("GET", `/applications/admin${q ? `?${q}` : ""}`); },
   updateStatus: (id, status)   => req("PUT",  `/applications/${id}/status`, { status }),
+  updateNotes:  (id, notes)    => req("PUT",  `/applications/${id}/notes`, { notes }),
+  remove:       (id)           => req("DELETE", `/applications/${id}`),
   getStats:     ()             => req("GET",  "/applications/stats"),
 };
 

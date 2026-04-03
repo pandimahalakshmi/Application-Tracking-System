@@ -1,22 +1,32 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import http from "http";
+import path from "path";
+import { fileURLToPath } from "url";
 import connectDB from "./config/db.js";
+import { initSocket } from "./socket.js";
 import authRoutes from "./routes/authRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
 import candidateRoutes from "./routes/candidateRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import savedJobRoutes from "./routes/savedJobRoutes.js";
+import interviewRoutes from "./routes/interviewRoutes.js";
 
 dotenv.config();
-connectDB();
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = Number(process.env.PORT) || 5000;
 
-app.use(cors());
-app.use(express.json({ limit: '10mb' }));
+app.use(cors({ origin: "*", credentials: true }));
+app.use(express.json({ limit: "10mb" }));
+
+// Serve uploaded resumes — absolute path
+const uploadsPath = path.join(__dirname, "uploads");
+app.use("/uploads", express.static(uploadsPath));
+console.log(` 📂 Serving uploads from: ${uploadsPath}`);
 
 app.use("/api/auth",          authRoutes);
 app.use("/api/jobs",          jobRoutes);
@@ -24,46 +34,24 @@ app.use("/api/candidates",    candidateRoutes);
 app.use("/api/applications",  applicationRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/saved-jobs",    savedJobRoutes);
+app.use("/api/interviews",    interviewRoutes);
 
 app.get("/api/health", (_req, res) => res.json({ message: "Backend Running!", timestamp: new Date() }));
 app.get("/", (_req, res) => res.json({ message: "ATS Backend API v2.0" }));
+app.use((err, _req, res, _next) => res.status(500).json({ error: err.message }));
 
-app.use((err, _req, res, _next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: err.message });
-});
-
-import http from "http";
-
-let currentServer = null;
-
-const startServer = (port, retries = 5) => {
-  if (currentServer) {
-    currentServer.close();
-    currentServer = null;
-  }
-
+const startServer = async () => {
+  await connectDB();
   const server = http.createServer(app);
-
-  const onListening = () => {
-    console.log(`\n ATS Backend Server running on http://localhost:${port}`);
-    console.log(` API Documentation: http://localhost:${port}`);
-    console.log(`\n CORS enabled for frontend communication\n`);
-  };
-
-  server.on("error", (err) => {
-    if (err.code === "EADDRINUSE") {
-      console.error(`\n Port ${port} is already in use.`);
-      console.error(` Run this to free it: npx kill-port ${port}\n`);
-      process.exit(1);
-    } else {
-      console.error(err);
-      process.exit(1);
-    }
+  initSocket(server);
+  server.listen(PORT, () => {
+    console.log(` 🚀 ATS Backend running on http://localhost:${PORT}`);
+    console.log(` ⚡ Socket.IO enabled\n`);
   });
-
-  server.listen(port, onListening);
-  currentServer = server;
+  server.on("error", (err) => {
+    if (err.code === "EADDRINUSE") { console.error(`Port ${PORT} in use`); process.exit(1); }
+    else { console.error(err); process.exit(1); }
+  });
 };
 
-startServer(PORT);
+startServer();

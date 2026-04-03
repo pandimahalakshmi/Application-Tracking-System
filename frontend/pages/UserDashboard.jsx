@@ -3,7 +3,7 @@ import { Box, Grid, Card, Typography, Button, Chip, LinearProgress, CircularProg
 import { Briefcase, Clock, CheckCircle, Star, MapPin } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { applicationService, savedJobService } from "../services/api";
+import { applicationService, savedJobService, authService } from "../services/api";
 import NotificationBell from "../components/NotificationBell";
 
 const C = {
@@ -20,23 +20,48 @@ const statusColor = {
   Rejected:             '#F87171',
 };
 
+// Calculate profile completion percentage based on filled fields
+const calcCompletion = (profile) => {
+  if (!profile) return 0;
+  const checks = [
+    !!profile.name,
+    !!profile.email,
+    !!profile.phoneNumber,
+    !!profile.gender,
+    !!profile.dateOfBirth,
+    !!(profile.address?.city),
+    !!(profile.professional?.currentJobTitle),
+    !!(profile.professional?.currentCompany),
+    !!(profile.professional?.totalExperience),
+    !!(profile.skills?.programmingLanguages?.length),
+    !!(profile.education?.length),
+    !!(profile.resume?.portfolioLink || profile.resume?.githubProfile || profile.resume?.linkedinProfile),
+  ];
+  const filled = checks.filter(Boolean).length;
+  return Math.round((filled / checks.length) * 100);
+};
+
 export default function UserDashboard() {
   const navigate = useNavigate();
   const user     = JSON.parse(localStorage.getItem('user') || '{}');
   const userId   = user?.id || user?._id;
   const userName = user?.name || 'User';
 
-  const [apps, setApps]         = useState([]);
-  const [saved, setSaved]       = useState([]);
-  const [loading, setLoading]   = useState(true);
+  const [apps, setApps]               = useState([]);
+  const [saved, setSaved]             = useState([]);
+  const [loading, setLoading]         = useState(true);
+  const [profileData, setProfileData] = useState(null);
 
   useEffect(() => {
     if (!userId) { setLoading(false); return; }
     Promise.all([
       applicationService.getMyApps(userId).then(d => d.success && setApps(d.applications)),
       savedJobService.getAll(userId).then(d => d.success && setSaved(d.jobs)),
+      authService.getProfile(userId).then(d => d.success && setProfileData(d.user)),
     ]).finally(() => setLoading(false));
   }, [userId]);
+
+  const completion = calcCompletion(profileData);
 
   const inProgress = apps.filter(a => a.status === 'Interview Scheduled').length;
   const offers     = apps.filter(a => a.status === 'Selected').length;
@@ -181,10 +206,10 @@ export default function UserDashboard() {
                   <Typography variant="h6" sx={{ fontWeight:700, color: C.text }}>Complete Your Profile</Typography>
                   <Typography sx={{ color: C.muted, fontSize:13, mt:0.5 }}>A complete profile gets 3x more recruiter views</Typography>
                   <Box sx={{ mt:2, display:'flex', alignItems:'center', gap:2 }}>
-                    <LinearProgress variant="determinate" value={40}
+                    <LinearProgress variant="determinate" value={completion}
                       sx={{ width:200, height:8, borderRadius:4, background:`${C.border}`,
                         '& .MuiLinearProgress-bar':{ background:`linear-gradient(90deg, ${C.primary}, ${C.secondary})`, borderRadius:4 } }}/>
-                    <Typography sx={{ color: C.primary, fontWeight:700, fontSize:14 }}>40%</Typography>
+                    <Typography sx={{ color: C.primary, fontWeight:700, fontSize:14 }}>{completion}%</Typography>
                   </Box>
                 </Box>
                 <Button onClick={() => navigate('/user-profile')}

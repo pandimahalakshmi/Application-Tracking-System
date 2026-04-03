@@ -12,6 +12,8 @@ import ScheduleInterviewPage from "./pages/ScheduleInterviewPage";
 import MyApplications from "./pages/MyApplications";
 import AdminApplications from "./pages/AdminApplications";
 import SavedJobs from "./pages/SavedJobs";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
   return (
@@ -30,6 +32,8 @@ function App() {
         <Route path="/my-applications"     element={<MyApplications />} />
         <Route path="/admin/applications"  element={<AdminApplications />} />
         <Route path="/saved-jobs"          element={<SavedJobs />} />
+        <Route path="/forgot-password"     element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="*"                    element={<h2 style={{color:'#fff',textAlign:'center',marginTop:'20vh'}}>Page Not Found</h2>} />
       </Routes>
     </BrowserRouter>

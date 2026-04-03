@@ -2,6 +2,8 @@ import Application from '../models/Application.js';
 import Job from '../models/Job.js';
 import User from '../models/User.js';
 import Notification from '../models/Notification.js';
+import { sendStatusEmail } from '../utils/sendEmail.js';
+import { getIO } from '../socket.js';
 
 // POST /api/applications — user applies for a job
 export const applyForJob = async (req, res) => {
@@ -93,13 +95,30 @@ export const updateApplicationStatus = async (req, res) => {
 
     if (!app) return res.status(404).json({ error: 'Application not found' });
 
-    // Notify the user
+    // 1. In-app notification
     await Notification.create({
       recipientId:   app.userId._id,
       recipientRole: 'user',
-      message:       `Your application for "${app.jobTitle}" has been ${status.toLowerCase()}`,
+      message:       `Your application for "${app.jobTitle}" at ${app.company} has been ${status.toLowerCase()}`,
       type:          'status_update',
       relatedId:     app._id.toString(),
+    });
+
+    // 2. Email notification
+    await sendStatusEmail({
+      toEmail:  app.userId.email,
+      toName:   app.userId.name,
+      jobTitle: app.jobTitle,
+      company:  app.company,
+      status,
+    });
+
+    // 3. Real-time Socket.IO push
+    const io = getIO();
+    if (io) io.to(app.userId._id.toString()).emit('statusUpdate', {
+      jobTitle: app.jobTitle,
+      company:  app.company,
+      status,
     });
 
     res.json({ success: true, message: 'Status updated', application: app });
@@ -118,6 +137,29 @@ export const getStats = async (req, res) => {
       Job.countDocuments({ status: 'active' }),
     ]);
     res.json({ success: true, stats: { totalJobs, totalUsers, totalApplications, activeJobs } });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// PUT /api/applications/:id/notes — admin saves notes
+export const updateNotes = async (req, res) => {
+  try {
+    const app = await Application.findByIdAndUpdate(
+      req.params.id, { adminNotes: req.body.notes }, { new: true }
+    );
+    if (!app) return res.status(404).json({ error: 'Application not found' });
+    res.json({ success: true, application: app });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// DELETE /api/applications/:id — admin deletes application
+export const deleteApplication = async (req, res) => {
+  try {
+    await Application.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'Application deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
