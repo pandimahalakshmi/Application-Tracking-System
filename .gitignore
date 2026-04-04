@@ -7,24 +7,28 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Frontend
 node_modules
 dist
 dist-ssr
 *.local
 
-# Environment variables - never commit secrets
-.env
-.env.local
-.env.production
+# Backend — exclude sensitive and generated files
+backend/node_modules
+backend/package-lock.json
 backend/.env
 
 # Uploaded files
 backend/uploads/resumes/*
 !backend/uploads/resumes/.gitkeep
 
-# Editor directories and files
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Editor
 .vscode/*
-!.vscode/extensions.json
 .idea
 .DS_Store
 *.suo
