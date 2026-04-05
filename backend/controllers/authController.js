@@ -73,7 +73,7 @@ export const updateProfile = async (req, res) => {
     if (updates.skills)       Object.keys(updates.skills).forEach(k       => { setObj[`skills.${k}`]       = updates.skills[k]; });
     if (updates.resume)       Object.keys(updates.resume).forEach(k       => { setObj[`resume.${k}`]       = updates.resume[k]; });
     if (updates.education !== undefined) setObj['education'] = updates.education;
-    const user = await User.findByIdAndUpdate(req.params.id, { $set: setObj }, { new: true, runValidators: false });
+    const user = await User.findByIdAndUpdate(req.params.id, { $set: setObj }, { returnDocument: 'after', runValidators: false });
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json({ success: true, message: 'Profile updated successfully', user: safeUser(user) });
   } catch (err) {

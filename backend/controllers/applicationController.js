@@ -90,7 +90,7 @@ export const updateApplicationStatus = async (req, res) => {
     const app = await Application.findByIdAndUpdate(
       req.params.id,
       { status },
-      { new: true }
+      { returnDocument: 'after' }
     ).populate('userId', 'name email');
 
     if (!app) return res.status(404).json({ error: 'Application not found' });
@@ -146,7 +146,7 @@ export const getStats = async (req, res) => {
 export const updateNotes = async (req, res) => {
   try {
     const app = await Application.findByIdAndUpdate(
-      req.params.id, { adminNotes: req.body.notes }, { new: true }
+      req.params.id, { adminNotes: req.body.notes }, { returnDocument: 'after' }
     );
     if (!app) return res.status(404).json({ error: 'Application not found' });
     res.json({ success: true, application: app });
