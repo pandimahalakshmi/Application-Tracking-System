@@ -5,6 +5,7 @@ import {
   Chip, Paper, Tabs, Tab, List, ListItem, ListItemText,
   ListItemIcon, Divider, IconButton, Dialog, DialogTitle,
   DialogContent, DialogActions, CircularProgress, Alert, Snackbar,
+  Select, MenuItem, FormControl, InputLabel,
 } from '@mui/material';
 import {
   User, Briefcase, GraduationCap, Code, FileText,
@@ -252,12 +253,32 @@ export default function UserProfile() {
             ['Current Job Title','currentJobTitle'],['Current Company','currentCompany'],
             ['Total Experience','totalExperience'],['Expected Salary','expectedSalary'],
             ['Current Salary','currentSalary'],['Preferred Location','preferredLocation'],
-            ['Notice Period','noticePeriod'],
           ].map(([label, field]) => (
             <TextField key={field} label={label} value={profile.professional?.[field] || ''}
               disabled={!editMode} size="small" onChange={e => set('professional', field, e.target.value)}
               sx={{ ...fSx, width:'75%' }} />
           ))}
+
+          {/* Notice Period dropdown */}
+          <FormControl size="small" disabled={!editMode} sx={{
+            width:'75%', mb:2,
+            '& .MuiOutlinedInput-root':{ borderRadius:2, background: D.bg, color: D.text, '& fieldset':{ borderColor: D.border }, '&:hover fieldset':{ borderColor: D.primary }, '&.Mui-focused fieldset':{ borderColor: D.primary, borderWidth:2 }, '&.Mui-disabled':{ background: D.surface2 }, '&.Mui-disabled fieldset':{ borderColor: D.border } },
+            '& .MuiInputLabel-root':{ color: D.muted },
+            '& .MuiInputLabel-root.Mui-focused':{ color: D.primary },
+            '& .MuiSelect-icon':{ color: D.muted },
+          }}>
+            <InputLabel>Notice Period</InputLabel>
+            <Select value={profile.professional?.noticePeriod || ''}
+              label="Notice Period"
+              onChange={e => set('professional', 'noticePeriod', e.target.value)}
+              MenuProps={{ PaperProps:{ sx:{ background: D.surface, border:`1px solid ${D.border}`, '& .MuiMenuItem-root':{ color: D.text, '&:hover':{ background:`${D.primary}22` } } } } }}>
+              <MenuItem value="">Select Notice Period</MenuItem>
+              <MenuItem value="Immediate">Immediate</MenuItem>
+              <MenuItem value="10 Days">10 Days</MenuItem>
+              <MenuItem value="1 Month">1 Month</MenuItem>
+              <MenuItem value="3 Months">3 Months</MenuItem>
+            </Select>
+          </FormControl>
         </Box>
       </Box>
     </Card>

@@ -5,7 +5,7 @@ import { Users, Briefcase, CheckCircle, TrendingUp, PlusCircle, Calendar } from 
 import { useState, useEffect } from "react";
 import { jobService, applicationService } from "../services/api";
 import NotificationBell from "../components/NotificationBell";
-import AnalyticsCharts from "../components/AnalyticsCharts";
+import AnalyticsCharts, { ApplicationStatusPie } from "../components/AnalyticsCharts";
 
 const C = {
   bg:      '#0F172A',
@@ -67,7 +67,7 @@ export default function AdminDashboard() {
 
   const cards = [
     { title:'Total Jobs',         value: stats.totalJobs,         change:'+3',   icon: Briefcase,  gradient:`linear-gradient(135deg, ${C.primary}, ${C.secondary})` },
-    { title:'Active Jobs',        value: stats.activeJobs,        change:'live', icon: TrendingUp, gradient:`linear-gradient(135deg, ${C.accent}, #0EA5E9)` },
+    { title:'Jobs Applied',       value: stats.activeJobs,        change:'jobs', icon: TrendingUp, gradient:`linear-gradient(135deg, ${C.accent}, #0EA5E9)` },
     { title:'Total Applications', value: stats.totalApplications, change:'+18%', icon: CheckCircle,gradient:`linear-gradient(135deg, ${C.success}, #059669)` },
     { title:'Total Users',        value: stats.totalUsers,        change:'+12%', icon: Users,      gradient:`linear-gradient(135deg, ${C.warning}, #D97706)` },
   ];
@@ -97,18 +97,18 @@ export default function AdminDashboard() {
           {cards.map((c, i) => {
             const Icon = c.icon;
             return (
-              <Grid item xs={12} sm={6} md={3} key={i}>
+              <Grid item xs={12} sm={6} lg={3} key={i}>
                 <Card sx={{ p:3, background: C.surface, border:`1px solid ${C.border}`, borderRadius:3,
-                  transition:'all 0.3s', cursor:'pointer',
+                  minHeight: 120, transition:'all 0.3s', cursor:'pointer',
                   '&:hover':{ transform:'translateY(-4px)', boxShadow:`0 12px 32px rgba(0,0,0,0.4)`, borderColor: C.primary } }}>
-                  <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
-                    <Box>
-                      <Typography sx={{ color: C.muted, fontSize:13, mb:1 }}>{c.title}</Typography>
-                      <Typography variant="h4" sx={{ fontWeight:700, color: C.text }}>{c.value}</Typography>
-                      <Chip label={c.change} size="small" sx={{ mt:1, background:`${C.success}22`, color: C.success, fontWeight:600, fontSize:11 }} />
+                  <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:2 }}>
+                    <Box sx={{ flex:1, minWidth:0 }}>
+                      <Typography sx={{ color: C.muted, fontSize:13, mb:1, whiteSpace:'nowrap' }}>{c.title}</Typography>
+                      <Typography variant="h4" sx={{ fontWeight:700, color: C.text, lineHeight:1 }}>{c.value}</Typography>
+                      <Chip label={c.change} size="small" sx={{ mt:1.5, background:`${C.success}22`, color: C.success, fontWeight:600, fontSize:11 }} />
                     </Box>
-                    <Box sx={{ p:1.5, borderRadius:2, background: c.gradient }}>
-                      <Icon size={22} color="#fff" />
+                    <Box sx={{ p:1.5, borderRadius:2, background: c.gradient, flexShrink:0 }}>
+                      <Icon size={24} color="#fff" />
                     </Box>
                   </Box>
                 </Card>
@@ -117,29 +117,62 @@ export default function AdminDashboard() {
           })}
         </Grid>
 
-        <Grid container spacing={3}>
-          {/* Quick Actions only */}
-          <Grid item xs={12} md={4}>
-            <Card sx={{ p:3, background: C.surface, border:`1px solid ${C.border}`, borderRadius:3 }}>
-              <Typography variant="h6" sx={{ fontWeight:700, color: C.text, mb:3 }}>Quick Actions</Typography>
+        {/* Quick Actions + Application Status — side by side */}
+        <Box sx={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:3, mb:3 }}>
+          {/* Quick Actions */}
+          <Card sx={{ p:3, background: C.surface, border:`1px solid ${C.border}`, borderRadius:3 }}>
+            <Typography variant="h6" sx={{ fontWeight:700, color: C.text, mb:3 }}>Quick Actions</Typography>
+            <Box sx={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:2 }}>
               {[
-                { label:'View Candidates',    icon: Users,       route:'/candidates',         gradient:`linear-gradient(135deg, ${C.primary}, ${C.secondary})` },
-                { label:'All Applications',   icon: CheckCircle, route:'/admin/applications', gradient:`linear-gradient(135deg, ${C.success}, #059669)` },
-                { label:'Post New Job',        icon: PlusCircle,  route:'/jobform',            gradient:`linear-gradient(135deg, ${C.accent}, #0EA5E9)` },
-                { label:'Schedule Interview',  icon: Calendar,    route:'/schedule-interview', gradient:`linear-gradient(135deg, ${C.warning}, #D97706)` },
-              ].map(({ label, icon: Icon, route, gradient }) => (
-                <Button key={label} fullWidth onClick={() => navigate(route)}
-                  startIcon={<Icon size={16}/>}
-                  sx={{ mb:1.5, p:1.5, justifyContent:'flex-start', background: gradient, color:'#fff',
-                    borderRadius:2, textTransform:'none', fontWeight:600,
-                    transition:'all 0.2s', '&:hover':{ opacity:0.9, transform:'translateX(4px)' } }}>
-                  {label}
-                </Button>
+                { label:'View Candidates',   icon: Users,       route:'/candidates',         gradient:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`,  desc:'Browse all candidates' },
+                { label:'All Applications',  icon: CheckCircle, route:'/admin/applications', gradient:`linear-gradient(135deg, ${C.success}, #059669)`,          desc:'Review submissions' },
+                { label:'Post New Job',       icon: PlusCircle,  route:'/jobform',            gradient:`linear-gradient(135deg, ${C.accent}, #0EA5E9)`,           desc:'Create a job listing' },
+                { label:'Schedule Interview', icon: Calendar,    route:'/schedule-interview', gradient:`linear-gradient(135deg, ${C.warning}, #D97706)`,          desc:'Set up interviews' },
+              ].map(({ label, icon: Icon, route, gradient, desc }) => (
+                <Box key={label} onClick={() => navigate(route)}
+                  sx={{
+                    p:2, borderRadius:3, cursor:'pointer',
+                    background: C.bg, border:`1px solid ${C.border}`,
+                    display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+                    gap:1, textAlign:'center', minHeight:130,
+                    transition:'all 0.25s',
+                    '&:hover':{
+                      border:`1px solid transparent`,
+                      background: gradient,
+                      transform:'translateY(-4px)',
+                      boxShadow:`0 16px 40px rgba(0,0,0,0.4)`,
+                      '& .qa-icon-box':{ background:'rgba(255,255,255,0.2)' },
+                      '& .qa-label':{ color:'#fff' },
+                      '& .qa-desc':{ color:'rgba(255,255,255,0.75)' },
+                    },
+                  }}>
+                  <Box className="qa-icon-box" sx={{
+                    width:44, height:44, borderRadius:2, background: gradient,
+                    display:'flex', alignItems:'center', justifyContent:'center',
+                    transition:'all 0.25s', boxShadow:`0 4px 16px rgba(0,0,0,0.25)`,
+                  }}>
+                    <Icon size={20} color="#fff"/>
+                  </Box>
+                  <Typography className="qa-label" sx={{ fontWeight:700, color: C.text, fontSize:13, lineHeight:1.3, transition:'color 0.25s' }}>
+                    {label}
+                  </Typography>
+                  <Typography className="qa-desc" sx={{ color: C.muted, fontSize:11, lineHeight:1.3, transition:'color 0.25s' }}>
+                    {desc}
+                  </Typography>
+                </Box>
               ))}
-            </Card>
-          </Grid>
-        </Grid>
-        {/* Analytics Charts */}
+            </Box>
+          </Card>
+
+          {/* Application Status Pie — right */}
+          <Card sx={{ p:3, background: C.surface, border:`1px solid ${C.border}`, borderRadius:3, display:'flex', flexDirection:'column' }}>
+            <Typography variant="h6" sx={{ fontWeight:700, color: C.text, mb:0.5 }}>Application Status</Typography>
+            <Typography sx={{ color: C.muted, fontSize:12, mb:2 }}>Click a status to filter candidates</Typography>
+            <Box sx={{ flex:1, display:'flex', alignItems:'center' }}>
+              <ApplicationStatusPie applications={allApps}/>
+            </Box>
+          </Card>
+        </Box>
         <AnalyticsCharts stats={stats} jobs={jobs} applications={allApps} />
 
       </Box>

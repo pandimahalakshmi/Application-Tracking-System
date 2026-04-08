@@ -6,6 +6,7 @@ import {
 } from "@mui/material";
 import { MapPin, Briefcase, X, Upload, Send, Star, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { jobService, applicationService, savedJobService } from "../services/api";
 import { C, fieldSx, cardSx } from "../theme";
 import JobFilters from "../components/JobFilters";
@@ -16,15 +17,16 @@ const fSx = {
   '& input:-webkit-autofill': { WebkitBoxShadow: '0 0 0 100px #1E293B inset', WebkitTextFillColor: '#F1F5F9' },
 };
 const emptyForm = { fullName:'', email:'', phone:'', coverLetter:'', portfolioLink:'', resume:null };
-const emptyFilters = { search:'', type:'', location:'', salary:'' };
 
 export default function Jobs() {
   const role = localStorage.getItem("role");
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const userId = user?.id || user?._id;
+  const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [filters, setFilters]       = useState(emptyFilters);
+  const [filters, setFilters]       = useState({ search:'', type:'', location:'', salary:'', dateFrom:'', dateTo:'' });
+  const [appliedFilters, setAppliedFilters] = useState({ search:'', type:'', location:'', salary:'', dateFrom:'', dateTo:'' });
   const [jobs, setJobs]             = useState([]);
   const [loading, setLoading]       = useState(true);
   const [savedIds, setSavedIds]     = useState(new Set());
@@ -49,7 +51,6 @@ export default function Jobs() {
   };
 
   const handleChange = (k, v) => setForm(p => ({ ...p, [k]: v }));
-  const handleFilterChange = (k, v) => setFilters(p => ({ ...p, [k]: v }));
 
   // Socket.IO real-time status updates
   useSocket(userId, (data) => {
@@ -111,11 +112,21 @@ export default function Jobs() {
   };
 
   const filtered = jobs.filter(j => {
-    const s = (filters.search || searchTerm).toLowerCase();
+    const s = (appliedFilters.search || searchTerm).toLowerCase();
     const matchSearch   = !s || j.title?.toLowerCase().includes(s) || j.company?.toLowerCase().includes(s);
-    const matchType     = !filters.type     || j.type === filters.type;
-    const matchLocation = !filters.location || j.location?.toLowerCase().includes(filters.location.toLowerCase());
-    return matchSearch && matchType && matchLocation;
+    const matchType     = !appliedFilters.type     || j.type === appliedFilters.type;
+    const matchLocation = !appliedFilters.location || j.location?.toLowerCase().includes(appliedFilters.location.toLowerCase());
+    const matchSalary   = !appliedFilters.salary   || (() => {
+      const sal = parseFloat((j.salary || '').replace(/[^0-9.]/g, '')) || 0;
+      if (appliedFilters.salary === '0-5')   return sal <= 5;
+      if (appliedFilters.salary === '5-10')  return sal > 5  && sal <= 10;
+      if (appliedFilters.salary === '10-20') return sal > 10 && sal <= 20;
+      if (appliedFilters.salary === '20+')   return sal > 20;
+      return true;
+    })();
+    const matchDateFrom = !appliedFilters.dateFrom || new Date(j.createdAt || j.postedDate) >= new Date(appliedFilters.dateFrom);
+    const matchDateTo   = !appliedFilters.dateTo   || new Date(j.createdAt || j.postedDate) <= new Date(appliedFilters.dateTo);
+    return matchSearch && matchType && matchLocation && matchSalary && matchDateFrom && matchDateTo;
   });
 
   const typeColor = (t) => t === 'Full-time'
@@ -148,47 +159,55 @@ export default function Jobs() {
           + Post New Job
         </Button>
       </Box>
-      <Grid container spacing={3}>
+      <Box sx={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:3 }}>
         {jobs.length === 0 && (
-          <Grid item xs={12}>
+          <Box sx={{ gridColumn:'1 / -1' }}>
             <Card sx={{ ...cardSx, p:6, textAlign:'center' }}>
               <Briefcase size={48} color={C.border} style={{ marginBottom:16 }}/>
               <Typography sx={{ color: C.muted }}>No jobs posted yet. Click "Post New Job" to get started.</Typography>
             </Card>
-          </Grid>
+          </Box>
         )}
         {jobs.map(job => {
           const jid = job._id || job.id;
           return (
-            <Grid item xs={12} sm={6} md={4} key={jid}>
-              <Card sx={{ ...cardSx, p:3, height:"100%", display:"flex", flexDirection:"column",
-                '&:hover':{ borderColor: C.primary, transform:"translateY(-3px)", boxShadow:`0 12px 32px rgba(0,0,0,0.4)` } }}>
-                <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", mb:2 }}>
-                  <Box sx={{ flex:1 }}>
-                    <Typography sx={{ fontWeight:700, color: C.text, fontSize:16 }}>{job.title}</Typography>
-                    <Typography sx={{ color: C.muted, fontSize:13 }}>{job.company}</Typography>
-                  </Box>
-                  <Tooltip title="Delete job">
-                    <IconButton size="small" onClick={e => handleDelete(e, jid)}
-                      sx={{ color: C.danger, '&:hover':{ background:`${C.danger}22` } }}>
-                      <Trash2 size={16}/>
-                    </IconButton>
-                  </Tooltip>
+            <Card key={jid} sx={{ ...cardSx, p:3, width:'100%', display:"flex", flexDirection:"column",
+              '&:hover':{ borderColor: C.primary, transform:"translateY(-3px)", boxShadow:`0 12px 32px rgba(0,0,0,0.4)` } }}>
+              <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", mb:1.5 }}>
+                <Box sx={{ flex:1, minWidth:0 }}>
+                  <Typography sx={{ fontWeight:700, color: C.text, fontSize:15, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{job.title}</Typography>
+                  <Typography sx={{ color: C.muted, fontSize:12, mt:0.3 }}>{job.company}</Typography>
                 </Box>
-                <Chip label={job.type} size="small" sx={{ background: typeColor(job.type).bg, color: typeColor(job.type).color, fontWeight:600, mb:1.5, alignSelf:'flex-start' }} />
-                <Typography sx={{ color: C.muted, fontSize:13, mb:2, flexGrow:1 }}>{job.description}</Typography>
-                <Box sx={{ display:"flex", gap:2, mb:2 }}>
-                  <Box sx={{ display:"flex", alignItems:"center", gap:0.5, color: C.muted, fontSize:12 }}><MapPin size={13} color={C.accent}/>{job.location}</Box>
-                  <Box sx={{ display:"flex", alignItems:"center", gap:0.5, color: C.muted, fontSize:12 }}>{job.salary}</Box>
-                </Box>
-                <Box sx={{ display:"flex", gap:1, flexWrap:"wrap" }}>
-                  {(job.skills||[]).map((s,i) => <Chip key={i} label={s} size="small" sx={{ background:`${C.primary}22`, color: C.primary, fontSize:11 }}/>)}
-                </Box>
-              </Card>
-            </Grid>
+                <Tooltip title="Delete job">
+                  <IconButton size="small" onClick={e => handleDelete(e, jid)}
+                    sx={{ color: C.danger, ml:1, flexShrink:0, '&:hover':{ background:`${C.danger}22` } }}>
+                    <Trash2 size={16}/>
+                  </IconButton>
+                </Tooltip>
+              </Box>
+              <Chip label={job.type} size="small" sx={{ background: typeColor(job.type).bg, color: typeColor(job.type).color, fontWeight:600, mb:1.5, alignSelf:'flex-start' }} />
+              <Typography sx={{ color: C.muted, fontSize:12, mb:1.5, flexGrow:1, overflow:'hidden',
+                display:'-webkit-box', WebkitLineClamp:3, WebkitBoxOrient:'vertical' }}>{job.description}</Typography>
+              <Box sx={{ display:"flex", gap:2, mb:1.5 }}>
+                <Box sx={{ display:"flex", alignItems:"center", gap:0.5, color: C.muted, fontSize:12 }}><MapPin size={13} color={C.accent}/>{job.location}</Box>
+                <Box sx={{ color: C.muted, fontSize:12 }}>{job.salary}</Box>
+              </Box>
+              <Box sx={{ display:"flex", gap:0.5, flexWrap:"wrap", mb:1.5, maxHeight:48, overflow:'hidden' }}>
+                {(job.skills||[]).map((s,i) => <Chip key={i} label={s} size="small" sx={{ background:`${C.primary}22`, color: C.primary, fontSize:11 }}/>)}
+              </Box>
+              <Box sx={{ display:'flex', alignItems:'center', justifyContent:'space-between', mt:'auto' }}>
+                <Typography sx={{ color: C.muted, fontSize:11 }}>{job.applications || 0} applicants</Typography>
+                <Button size="small" onClick={() => navigate(`/jobform?id=${jid}`)}
+                  sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:'#fff',
+                    borderRadius:1.5, textTransform:'none', fontWeight:600, px:2, fontSize:11,
+                    boxShadow:`0 4px 12px ${C.primary}44`, '&:hover':{ opacity:0.9 } }}>
+                  Edit Job
+                </Button>
+              </Box>
+            </Card>
           );
         })}
-      </Grid>
+      </Box>
     </>
   );
 
@@ -201,7 +220,7 @@ export default function Jobs() {
           <Typography sx={{ color: C.muted, mt:0.5 }}>{filtered.length} positions found</Typography>
         </Box>
       </Box>
-      <JobFilters filters={filters} onChange={handleFilterChange} onClear={() => setFilters(emptyFilters)} />
+      <JobFilters onApply={f => setAppliedFilters(f)} onClear={() => setAppliedFilters({ search:'', type:'', location:'', salary:'', dateFrom:'', dateTo:'' })} />
 
       {filtered.length === 0 && !loading && (
         <Card sx={{ ...cardSx, p:6, textAlign:'center' }}>
@@ -210,13 +229,13 @@ export default function Jobs() {
         </Card>
       )}
 
-      <Grid container spacing={3} sx={{ alignItems:'stretch' }}>
+      <Box sx={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:3 }}>
         {filtered.map(job => {
           const jid = job._id || job.id;
           const isSaved = savedIds.has(jid);
           return (
-            <Grid item xs={12} sm={6} md={4} key={jid}>
-              <Card sx={{ ...cardSx, p:3, height:"100%", display:"flex", flexDirection:"column", position:'relative',
+            <Box key={jid} sx={{ display:'flex' }}>
+              <Card sx={{ ...cardSx, p:3, width:"100%", display:"flex", flexDirection:"column", position:'relative',
                 '&:hover':{ borderColor: C.primary, transform:"translateY(-4px)", boxShadow:`0 12px 32px rgba(0,0,0,0.4)` } }}>
 
                 {/* Star save button */}
@@ -230,15 +249,16 @@ export default function Jobs() {
                   </IconButton>
                 </Tooltip>
 
-                <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", mb:1.5, pr:4 }}>
-                  <Box>
-                    <Typography sx={{ fontWeight:700, color: C.text, fontSize:15 }}>{job.title}</Typography>
+                <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", mb:1, pr:4 }}>
+                  <Box sx={{ flex:1, minWidth:0 }}>
+                    <Typography sx={{ fontWeight:700, color: C.text, fontSize:15, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{job.title}</Typography>
                     <Typography sx={{ color: C.muted, fontSize:12, mt:0.3 }}>{job.company}</Typography>
                   </Box>
-                  <Chip label={job.type} size="small" sx={{ background: typeColor(job.type).bg, color: typeColor(job.type).color, fontWeight:600, flexShrink:0 }} />
+                  <Chip label={job.type} size="small" sx={{ background: typeColor(job.type).bg, color: typeColor(job.type).color, fontWeight:600, flexShrink:0, ml:1 }} />
                 </Box>
 
-                <Typography sx={{ color: C.muted, fontSize:12, mb:1.5, flexGrow:1 }}>{job.description}</Typography>
+                <Typography sx={{ color: C.muted, fontSize:12, mb:1.5, flexGrow:1, overflow:'hidden',
+                  display:'-webkit-box', WebkitLineClamp:3, WebkitBoxOrient:'vertical' }}>{job.description}</Typography>
 
                 <Box sx={{ display:"flex", gap:2, mb:1.5 }}>
                   <Box sx={{ display:"flex", alignItems:"center", gap:0.5, color: C.muted, fontSize:12 }}>
@@ -247,13 +267,13 @@ export default function Jobs() {
                   <Box sx={{ color: C.muted, fontSize:12 }}>{job.salary}</Box>
                 </Box>
 
-                <Box sx={{ display:"flex", gap:0.5, flexWrap:"wrap", mb:1.5 }}>
+                <Box sx={{ display:"flex", gap:0.5, flexWrap:"wrap", mb:1.5, maxHeight:48, overflow:'hidden' }}>
                   {(job.skills||job.tags||[]).map((t,i) => (
                     <Chip key={i} label={t} size="small" sx={{ background:`${C.primary}22`, color: C.primary, fontSize:11 }}/>
                   ))}
                 </Box>
 
-                <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"center", mt:'auto' }}>
                   <Typography sx={{ color: C.muted, fontSize:11 }}>{job.applications} applicants</Typography>
                   <Button size="small" onClick={() => openModal(job)}
                     sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:"#fff",
@@ -263,10 +283,10 @@ export default function Jobs() {
                   </Button>
                 </Box>
               </Card>
-            </Grid>
+            </Box>
           );
         })}
-      </Grid>
+      </Box>
 
       {/* Application Modal */}
       <Dialog open={open} onClose={() => { setOpen(false); setSubmitted(false); }} maxWidth="sm" fullWidth

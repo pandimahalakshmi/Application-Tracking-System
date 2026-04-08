@@ -9,7 +9,8 @@ const interviewSchema = new mongoose.Schema({
   interviewer:    { type: String, default: '' },
   date:           { type: String, required: true },
   time:           { type: String, required: true },
-  type:           { type: String, enum: ['Phone','Video','In-person'], default: 'Video' },
+  type:           { type: String, enum: ['HR Interview','Technical Interview','Online Assessment','Panel Interview','Managerial Interview','Final Interview'], default: 'HR Interview' },
+  mode:           { type: String, enum: ['Google Meet','Video Interview','Audio Interview','Phone Call','Face to Face Interview'], default: 'Google Meet' },
   notes:          { type: String, default: '' },
   status:         { type: String, enum: ['Scheduled','Completed','Cancelled'], default: 'Scheduled' },
 }, { timestamps: true });

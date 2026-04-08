@@ -43,6 +43,7 @@ export const applicationService = {
 
 export const notificationService = {
   getAll:      (userId) => req("GET", `/notifications/${userId}`),
+  markOneRead: (id)     => req("PUT", `/notifications/read/${id}`),
   markAllRead: (userId) => req("PUT", `/notifications/${userId}/read-all`),
 };
 

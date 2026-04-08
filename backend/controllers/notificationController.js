@@ -5,9 +5,19 @@ export const getNotifications = async (req, res) => {
   try {
     const notifs = await Notification.find({ recipientId: req.params.userId })
       .sort({ createdAt: -1 })
-      .limit(20);
+      .limit(50);
     const unread = await Notification.countDocuments({ recipientId: req.params.userId, read: false });
     res.json({ success: true, notifications: notifs, unread });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// PUT /api/notifications/read/:id  — mark single notification as read
+export const markOneRead = async (req, res) => {
+  try {
+    await Notification.findByIdAndUpdate(req.params.id, { read: true });
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

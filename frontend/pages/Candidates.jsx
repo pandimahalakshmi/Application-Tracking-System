@@ -1,12 +1,13 @@
 import Sidebar from "../components/Sidebar";
 import {
   Box, Card, TextField, Typography, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Chip, Avatar, IconButton,
+  TableHead, TableRow, Chip, Avatar, IconButton,
   Dialog, DialogTitle, DialogContent, DialogActions, Select, MenuItem,
   FormControl, InputLabel, InputAdornment, CircularProgress, Button,
   Drawer, Divider, Tooltip, LinearProgress,
 } from "@mui/material";
 import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Search, Eye, Edit, Trash2, Download, FileText, X,
   Save, Briefcase, Mail, Phone, Calendar, MessageSquare,
@@ -36,6 +37,11 @@ const BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').repla
 
 export default function Candidates() {
   const role = localStorage.getItem("role");
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Pre-apply status filter if navigated from pie chart
+  const statusFromUrl = searchParams.get('status') || '';
   const [apps, setApps]                   = useState([]);
   const [searchTerm, setSearchTerm]       = useState("");
   const [statusFilter, setStatusFilter]   = useState("All");
@@ -51,6 +57,26 @@ export default function Candidates() {
   const [savingNotes, setSavingNotes]     = useState(false);
   const [resumeOpen, setResumeOpen]       = useState(false);
   const [resumeUrl, setResumeUrl]         = useState("");
+  const [coverOpen, setCoverOpen]         = useState(false);
+  const [coverApp, setCoverApp]           = useState(null);
+
+  // Filter local state (not applied yet)
+  const [localSearch, setLocalSearch]     = useState("");
+  const [localStatus, setLocalStatus]     = useState(statusFromUrl || "All");
+  const [localJob, setLocalJob]           = useState("");
+  const [localDateFrom, setLocalDateFrom] = useState("");
+  const [localDateTo, setLocalDateTo]     = useState("");
+
+  // Applied filter state
+  const [appliedSearch, setAppliedSearch]     = useState("");
+  const [appliedStatus, setAppliedStatus]     = useState(statusFromUrl || "All");
+  const [appliedJob, setAppliedJob]           = useState("");
+  const [appliedDateFrom, setAppliedDateFrom] = useState("");
+  const [appliedDateTo, setAppliedDateTo]     = useState("");
+
+  // Pagination
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     applicationService.getAll()
@@ -76,9 +102,16 @@ export default function Candidates() {
   const handleStatusUpdate = async () => {
     setUpdating(true);
     const r = await applicationService.updateStatus(selected._id, newStatus);
-    if (r.success) setApps(prev => prev.map(a => a._id === selected._id ? {...a, status: newStatus} : a));
-    setUpdating(false);
-    setOpenStatus(false);
+    if (r.success) {
+      setApps(prev => prev.map(a => a._id === selected._id ? {...a, status: newStatus} : a));
+      setUpdating(false);
+      setOpenStatus(false);
+      if (newStatus === 'Interview Scheduled') {
+        navigate('/schedule-interview');
+      }
+    } else {
+      setUpdating(false);
+    }
   };
 
   const handleViewResume = (app) => {
@@ -123,12 +156,36 @@ export default function Candidates() {
 
   const uniqueJobs = [...new Set(apps.map(a => a.jobTitle).filter(Boolean))];
   const filtered = apps.filter(a => {
-    const s = searchTerm.toLowerCase();
-    const ms = !s || a.userName?.toLowerCase().includes(s) || a.userEmail?.toLowerCase().includes(s) || a.jobTitle?.toLowerCase().includes(s);
-    const mst = statusFilter === "All" || a.status === statusFilter;
-    const mj  = !jobFilter || a.jobTitle === jobFilter;
-    return ms && mst && mj;
+    const s = appliedSearch.toLowerCase();
+    const ms  = !s || a.userName?.toLowerCase().includes(s) || a.userEmail?.toLowerCase().includes(s) || a.jobTitle?.toLowerCase().includes(s);
+    const mst = appliedStatus === "All" || a.status === appliedStatus;
+    const mj  = !appliedJob  || a.jobTitle === appliedJob;
+    const mdf = !appliedDateFrom || new Date(a.createdAt) >= new Date(appliedDateFrom);
+    const mdt = !appliedDateTo   || new Date(a.createdAt) <= new Date(appliedDateTo);
+    return ms && mst && mj && mdf && mdt;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const handleApplyFilters = () => {
+    setAppliedSearch(localSearch);
+    setAppliedStatus(localStatus);
+    setAppliedJob(localJob);
+    setAppliedDateFrom(localDateFrom);
+    setAppliedDateTo(localDateTo);
+    setPage(1);
+  };
+
+  const handleClearFilters = () => {
+    setLocalSearch(''); setLocalStatus('All'); setLocalJob('');
+    setLocalDateFrom(''); setLocalDateTo('');
+    setAppliedSearch(''); setAppliedStatus('All'); setAppliedJob('');
+    setAppliedDateFrom(''); setAppliedDateTo('');
+    setPage(1);
+  };
+
+  const hasLocalFilters = localSearch || localStatus !== 'All' || localJob || localDateFrom || localDateTo;
 
   return (
     <Box sx={{ display:"flex", background: C.bg, minHeight:"100vh" }}>
@@ -141,33 +198,52 @@ export default function Candidates() {
         </Box>
 
         {/* Filters */}
-        <Card sx={{ ...cardSx, p:2, mb:3, display:"flex", gap:2, flexWrap:"wrap" }}>
-          <TextField placeholder="Search name, email, job..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
-            size="small" sx={{ ...fieldSx, flex:1, minWidth:220 }}
-            InputProps={{ startAdornment: <InputAdornment position="start"><Search size={15} color={C.muted}/></InputAdornment> }} />
-          <FormControl size="small" sx={{ minWidth:160 }}>
-            <InputLabel sx={{ color: C.muted }}>Job Title</InputLabel>
-            <Select value={jobFilter} onChange={e => setJobFilter(e.target.value)}
-              sx={{ color: C.text, background: C.bg, '& fieldset':{ borderColor: C.border } }} MenuProps={menuPropsSx}>
-              <MenuItem value="">All Jobs</MenuItem>
-              {uniqueJobs.map(j => <MenuItem key={j} value={j}>{j}</MenuItem>)}
-            </Select>
-          </FormControl>
-          <FormControl size="small" sx={{ minWidth:180 }}>
-            <InputLabel sx={{ color: C.muted }}>Status</InputLabel>
-            <Select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-              sx={{ color: C.text, background: C.bg, '& fieldset':{ borderColor: C.border } }} MenuProps={menuPropsSx}>
-              <MenuItem value="All">All Status</MenuItem>
-              {statuses.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
-            </Select>
-          </FormControl>
-          {(searchTerm || statusFilter !== "All" || jobFilter) && (
-            <Button size="small" onClick={() => { setSearchTerm(''); setStatusFilter('All'); setJobFilter(''); }}
-              sx={{ color: C.muted, textTransform:'none', border:`1px solid ${C.border}`, borderRadius:2 }}>
-              Clear
+        <Box sx={{ mb:3, p:2.5, background: C.surface, border:`1px solid ${C.border}`, borderRadius:3 }}>
+          <Box sx={{ display:'flex', gap:2, flexWrap:'wrap', alignItems:'flex-end' }}>
+            <TextField placeholder="Search name, email, job..." value={localSearch}
+              onChange={e => setLocalSearch(e.target.value)}
+              size="small" sx={{ ...fieldSx, minWidth:220 }}
+              InputProps={{ startAdornment: <InputAdornment position="start"><Search size={15} color={C.muted}/></InputAdornment> }}/>
+            <FormControl size="small" sx={{ minWidth:160, ...fieldSx }}>
+              <InputLabel sx={{ color: C.muted }}>Job Title</InputLabel>
+              <Select value={localJob} onChange={e => setLocalJob(e.target.value)}
+                sx={{ color: C.text, background: C.bg, '& fieldset':{ borderColor: C.border } }} MenuProps={menuPropsSx}>
+                <MenuItem value="">All Jobs</MenuItem>
+                {uniqueJobs.map(j => <MenuItem key={j} value={j}>{j}</MenuItem>)}
+              </Select>
+            </FormControl>
+            <FormControl size="small" sx={{ minWidth:170, ...fieldSx }}>
+              <InputLabel sx={{ color: C.muted }}>Status</InputLabel>
+              <Select value={localStatus} onChange={e => setLocalStatus(e.target.value)}
+                sx={{ color: C.text, background: C.bg, '& fieldset':{ borderColor: C.border } }} MenuProps={menuPropsSx}>
+                <MenuItem value="All">All Status</MenuItem>
+                {statuses.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+              </Select>
+            </FormControl>
+            <TextField size="small" label="Applied From" type="date" value={localDateFrom}
+              onChange={e => setLocalDateFrom(e.target.value)}
+              InputLabelProps={{ shrink:true }}
+              sx={{ ...fieldSx, minWidth:155 }}/>
+            <TextField size="small" label="Applied To" type="date" value={localDateTo}
+              onChange={e => setLocalDateTo(e.target.value)}
+              InputLabelProps={{ shrink:true }}
+              sx={{ ...fieldSx, minWidth:155 }}/>
+            <Button onClick={handleApplyFilters}
+              startIcon={<Search size={15}/>}
+              sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:'#fff',
+                borderRadius:2, textTransform:'none', fontWeight:600, px:3, height:40,
+                boxShadow:`0 4px 12px ${C.primary}44`, '&:hover':{ opacity:0.9 } }}>
+              Apply Filters
             </Button>
-          )}
-        </Card>
+            {hasLocalFilters && (
+              <Button size="small" onClick={handleClearFilters}
+                sx={{ color: C.muted, textTransform:'none', border:`1px solid ${C.border}`, borderRadius:2, height:40, px:2,
+                  '&:hover':{ borderColor: C.primary, color: C.text } }}>
+                Clear
+              </Button>
+            )}
+          </Box>
+        </Box>
 
         {/* Table */}
         <Card sx={cardSx}>
@@ -176,11 +252,10 @@ export default function Candidates() {
           ) : filtered.length === 0 ? (
             <Box sx={{ textAlign:"center", py:8 }}>
               <Briefcase size={48} color={C.border} style={{ marginBottom:12 }}/>
-              <Typography sx={{ color: C.muted }}>No applicants yet</Typography>
-              <Typography sx={{ color: C.muted, fontSize:12, mt:0.5 }}>Candidates appear here once users apply for jobs</Typography>
+              <Typography sx={{ color: C.muted }}>No applicants found</Typography>
             </Box>
           ) : (
-            <TableContainer>
+            <>
               <Table>
                 <TableHead>
                   <TableRow sx={{ '& th':{ background:'#263348', color: C.muted, fontWeight:600, fontSize:12, borderBottom:`1px solid ${C.border}` } }}>
@@ -193,7 +268,7 @@ export default function Candidates() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filtered.map(app => {
+                  {paginated.map(app => {
                     const sc = statusColors[app.status] || statusColors.Pending;
                     const match = getSkillMatch(app);
                     return (
@@ -243,7 +318,41 @@ export default function Candidates() {
                   })}
                 </TableBody>
               </Table>
-            </TableContainer>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', px:3, py:2,
+                  borderTop:`1px solid ${C.border}` }}>
+                  <Typography sx={{ color: C.muted, fontSize:13 }}>
+                    Showing {(page-1)*PAGE_SIZE+1}–{Math.min(page*PAGE_SIZE, filtered.length)} of {filtered.length}
+                  </Typography>
+                  <Box sx={{ display:'flex', gap:1, alignItems:'center' }}>
+                    <Button size="small" disabled={page === 1} onClick={() => setPage(p => p-1)}
+                      sx={{ minWidth:36, height:36, borderRadius:2, color: C.muted, border:`1px solid ${C.border}`,
+                        '&:not(:disabled):hover':{ borderColor: C.primary, color: C.primary },
+                        '&:disabled':{ opacity:0.3 } }}>
+                      ‹
+                    </Button>
+                    {Array.from({ length: totalPages }, (_, i) => i+1).map(n => (
+                      <Button key={n} size="small" onClick={() => setPage(n)}
+                        sx={{ minWidth:36, height:36, borderRadius:2, fontWeight: n===page ? 700 : 400,
+                          background: n===page ? `linear-gradient(135deg, ${C.primary}, ${C.secondary})` : 'transparent',
+                          color: n===page ? '#fff' : C.muted,
+                          border: n===page ? 'none' : `1px solid ${C.border}`,
+                          '&:hover':{ borderColor: C.primary, color: n===page ? '#fff' : C.primary } }}>
+                        {n}
+                      </Button>
+                    ))}
+                    <Button size="small" disabled={page === totalPages} onClick={() => setPage(p => p+1)}
+                      sx={{ minWidth:36, height:36, borderRadius:2, color: C.muted, border:`1px solid ${C.border}`,
+                        '&:not(:disabled):hover':{ borderColor: C.primary, color: C.primary },
+                        '&:disabled':{ opacity:0.3 } }}>
+                      ›
+                    </Button>
+                  </Box>
+                </Box>
+              )}
+            </>
           )}
         </Card>
 
@@ -300,9 +409,14 @@ export default function Candidates() {
             ))}
             <Divider sx={{ borderColor: C.border, my:2 }}/>
             {drawerApp.coverLetter && <>
-              <Typography sx={{ fontWeight:600, color: C.text, fontSize:13, mb:1 }}>Cover Letter</Typography>
-              <Box sx={{ p:2, background: C.bg, borderRadius:2, mb:2, maxHeight:120, overflowY:'auto' }}>
-                <Typography sx={{ color: C.muted, fontSize:12, lineHeight:1.7 }}>{drawerApp.coverLetter}</Typography>
+              <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:2 }}>
+                <Typography sx={{ fontWeight:600, color: C.text, fontSize:13 }}>Cover Letter</Typography>
+                <Button size="small" onClick={() => { setCoverApp(drawerApp); setCoverOpen(true); }}
+                  sx={{ color: C.accent, textTransform:'none', fontSize:12, fontWeight:600,
+                    border:`1px solid ${C.accent}`, borderRadius:2, px:1.5,
+                    '&:hover':{ background:`${C.accent}22` } }}>
+                  View Cover Letter →
+                </Button>
               </Box>
             </>}
             <Typography sx={{ fontWeight:600, color: C.text, fontSize:13, mb:1 }}>Resume</Typography>
@@ -367,6 +481,41 @@ export default function Candidates() {
                 '& .MuiInputBase-input::placeholder':{ color: C.muted } }} />
           </>}
         </Drawer>
+
+        {/* Cover Letter Full View */}
+        <Dialog open={coverOpen} onClose={() => setCoverOpen(false)} maxWidth="sm" fullWidth
+          TransitionProps={{ timeout: 300 }}
+          PaperProps={{ sx:{ background: C.surface, border:`1px solid ${C.border}`, borderRadius:3,
+            boxShadow:'0 24px 64px rgba(0,0,0,0.7)' } }}>
+          <DialogTitle sx={{ p:3, pb:2, display:'flex', justifyContent:'space-between', alignItems:'flex-start',
+            borderBottom:`1px solid ${C.border}` }}>
+            <Box>
+              <Typography sx={{ fontWeight:700, color: C.text, fontSize:16 }}>Cover Letter</Typography>
+              <Typography sx={{ color: C.muted, fontSize:12, mt:0.3 }}>
+                {coverApp?.userName} · {coverApp?.jobTitle}
+              </Typography>
+            </Box>
+            <IconButton size="small" onClick={() => setCoverOpen(false)}
+              sx={{ color: C.muted, '&:hover':{ color: C.text, background:`${C.border}` } }}>
+              <X size={18}/>
+            </IconButton>
+          </DialogTitle>
+          <DialogContent sx={{ p:3 }}>
+            <Box sx={{ p:2.5, background: C.bg, borderRadius:2, border:`1px solid ${C.border}` }}>
+              <Typography sx={{ color: C.text, fontSize:14, lineHeight:1.9, whiteSpace:'pre-wrap' }}>
+                {coverApp?.coverLetter}
+              </Typography>
+            </Box>
+          </DialogContent>
+          <DialogActions sx={{ px:3, pb:3, pt:0 }}>
+            <Button onClick={() => setCoverOpen(false)}
+              sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:'#fff',
+                borderRadius:2, textTransform:'none', fontWeight:600, px:3,
+                boxShadow:`0 4px 12px ${C.primary}44`, '&:hover':{ opacity:0.9 } }}>
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         {/* Resume Preview Modal */}
         <Dialog open={resumeOpen} onClose={() => setResumeOpen(false)} maxWidth="md" fullWidth

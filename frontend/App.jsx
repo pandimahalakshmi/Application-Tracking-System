@@ -30,7 +30,9 @@ function App() {
         <Route path="/candidates/:id"      element={<CandidateDetailPage />} />
         <Route path="/schedule-interview"  element={<ScheduleInterviewPage />} />
         <Route path="/my-applications"     element={<MyApplications />} />
+        <Route path="/my-applications/:applicationId" element={<MyApplications />} />
         <Route path="/admin/applications"  element={<AdminApplications />} />
+        <Route path="/admin/applications/:applicationId" element={<AdminApplications />} />
         <Route path="/saved-jobs"          element={<SavedJobs />} />
         <Route path="/forgot-password"     element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />

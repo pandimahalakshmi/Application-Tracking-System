@@ -42,6 +42,8 @@ export const applyForJob = async (req, res) => {
       message:       `New application received for "${job.title}" from ${user.name}`,
       type:          'application',
       relatedId:     application._id.toString(),
+      jobId:         job._id,
+      applicationId: application._id,
     }));
     if (adminNotifs.length) await Notification.insertMany(adminNotifs);
 
@@ -130,13 +132,13 @@ export const updateApplicationStatus = async (req, res) => {
 // GET /api/applications/stats — admin dashboard stats
 export const getStats = async (req, res) => {
   try {
-    const [totalJobs, totalUsers, totalApplications, activeJobs] = await Promise.all([
+    const [totalJobs, totalUsers, totalApplications, appliedJobIds] = await Promise.all([
       Job.countDocuments(),
       User.countDocuments({ role: 'user' }),
       Application.countDocuments(),
-      Job.countDocuments({ status: 'active' }),
+      Application.distinct('jobId'), // unique jobIds that have at least 1 application
     ]);
-    res.json({ success: true, stats: { totalJobs, totalUsers, totalApplications, activeJobs } });
+    res.json({ success: true, stats: { totalJobs, totalUsers, totalApplications, activeJobs: appliedJobIds.length } });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

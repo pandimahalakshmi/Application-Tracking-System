@@ -20,7 +20,6 @@ const adminMenu = [
   { label: 'Jobs',               route: '/jobs',                icon: Briefcase },
   { label: 'Create Job',         route: '/jobform',             icon: PlusCircle },
   { label: 'Candidates',         route: '/candidates',          icon: Users },
-  { label: 'Applications',       route: '/admin/applications',  icon: ClipboardList },
   { label: 'Schedule Interview', route: '/schedule-interview',  icon: Calendar },
 ];
 
