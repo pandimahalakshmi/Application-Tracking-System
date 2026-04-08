@@ -96,7 +96,7 @@ export default function MyApplications() {
   return (
     <Box sx={{ display:'flex', background: C.bg, minHeight:'100vh' }}>
       <Sidebar />
-      <Box sx={{ marginLeft:'240px', width:'100%', p:'32px' }}>
+      <Box sx={{ marginLeft:{ xs:0, lg:'240px' }, width:{ xs:'100%', lg:'calc(100% - 240px)' }, p:{ xs:'16px', sm:'24px', lg:'32px' }, pt:{ xs:'64px', lg:'32px' } }}>
 
         {/* Header */}
         <Box sx={{ mb:4 }}>
@@ -336,3 +336,4 @@ export default function MyApplications() {
     </Box>
   );
 }
+

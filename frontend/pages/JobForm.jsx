@@ -110,7 +110,7 @@ export default function JobForm() {
   return (
     <Box sx={{ display:'flex', background: C.bg, minHeight:'100vh' }}>
       <Sidebar />
-      <Box sx={{ marginLeft:'240px', width:'100%', p:'32px', maxWidth:'calc(100% - 240px)' }}>
+      <Box sx={{ marginLeft:{ xs:0, lg:'240px' }, width:'100%', p:{ xs:'16px', sm:'24px', lg:'32px' }, pt:{ xs:'64px', lg:'32px' }, maxWidth:'calc(100% - 240px)' }}>
 
         {/* Header */}
         <Box sx={{ mb:4 }}>

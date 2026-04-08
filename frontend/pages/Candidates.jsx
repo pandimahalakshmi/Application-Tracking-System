@@ -190,7 +190,7 @@ export default function Candidates() {
   return (
     <Box sx={{ display:"flex", background: C.bg, minHeight:"100vh" }}>
       <Sidebar />
-      <Box sx={{ marginLeft:"240px", width:"100%", p:"32px" }}>
+      <Box sx={{ marginLeft:{ xs:0, lg:"240px" }, width:"100%", p:{ xs:"16px", sm:"24px", lg:"32px" }, pt:{ xs:"64px", lg:"32px" } }}>
 
         <Box sx={{ mb:4 }}>
           <Typography variant="h4" sx={{ fontWeight:700, color: C.text }}>Candidates</Typography>
@@ -256,6 +256,7 @@ export default function Candidates() {
             </Box>
           ) : (
             <>
+              <Box sx={{ overflowX:'auto', WebkitOverflowScrolling:'touch' }}>
               <Table>
                 <TableHead>
                   <TableRow sx={{ '& th':{ background:'#263348', color: C.muted, fontWeight:600, fontSize:12, borderBottom:`1px solid ${C.border}` } }}>
@@ -318,6 +319,7 @@ export default function Candidates() {
                   })}
                 </TableBody>
               </Table>
+              </Box>
 
               {/* Pagination */}
               {totalPages > 1 && (
@@ -550,3 +552,4 @@ export default function Candidates() {
     </Box>
   );
 }
+

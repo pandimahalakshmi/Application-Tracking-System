@@ -136,7 +136,7 @@ export default function Jobs() {
   const pageWrap = (children) => (
     <Box sx={{ display:"flex", background: C.bg, minHeight:"100vh" }}>
       <Sidebar />
-      <Box sx={{ marginLeft:"240px", width:"100%", p:"32px" }}>{children}</Box>
+      <Box sx={{ marginLeft:{ xs:0, lg:"240px" }, width:"100%", p:{ xs:"16px", sm:"24px", lg:"32px" }, pt:{ xs:"64px", lg:"32px" } }}>{children}</Box>
     </Box>
   );
 
@@ -159,7 +159,7 @@ export default function Jobs() {
           + Post New Job
         </Button>
       </Box>
-      <Box sx={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:3 }}>
+      <Box sx={{ display:'grid', gridTemplateColumns:{ xs:'1fr', sm:'repeat(2,1fr)', lg:'repeat(3,1fr)' }, gap:{ xs:2, sm:3 } }}>
         {jobs.length === 0 && (
           <Box sx={{ gridColumn:'1 / -1' }}>
             <Card sx={{ ...cardSx, p:6, textAlign:'center' }}>
@@ -229,7 +229,7 @@ export default function Jobs() {
         </Card>
       )}
 
-      <Box sx={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:3 }}>
+      <Box sx={{ display:'grid', gridTemplateColumns:{ xs:'1fr', sm:'repeat(2,1fr)', lg:'repeat(3,1fr)' }, gap:{ xs:2, sm:3 } }}>
         {filtered.map(job => {
           const jid = job._id || job.id;
           const isSaved = savedIds.has(jid);

@@ -82,40 +82,43 @@ export default function UserDashboard() {
   return (
     <Box sx={{ display:'flex', background: C.bg, minHeight:'100vh' }}>
       <Sidebar />
-      <Box sx={{ marginLeft:'240px', width:'100%', p:'32px' }}>
+      <Box sx={{ marginLeft:{ xs:0, lg:'240px' }, width:'100%', p:{ xs:'12px', sm:'24px', lg:'32px' }, pt:{ xs:'60px', lg:'32px' } }}>
 
         {/* Header */}
-        <Box sx={{ mb:4, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight:700, color: C.text }}>
+        <Box sx={{ mb:3, display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:1 }}>
+          <Box sx={{ flex:1, minWidth:0 }}>
+            <Typography sx={{ fontWeight:700, color: C.text, fontSize:{ xs:'1.1rem', sm:'1.5rem', lg:'2rem' }, lineHeight:1.3 }}>
               Welcome back, {userName.split(' ')[0]} 👋
             </Typography>
-            <Typography sx={{ color: C.muted, mt:0.5 }}>Here's your job search overview</Typography>
+            <Typography sx={{ color: C.muted, mt:0.5, fontSize:{ xs:'0.75rem', sm:'0.875rem' } }}>Here's your job search overview</Typography>
           </Box>
-          <Box sx={{ display:'flex', alignItems:'center', gap:2 }}>
+          <Box sx={{ display:'flex', alignItems:'center', gap:1, flexShrink:0 }}>
             <NotificationBell userId={userId} />
-            <Button onClick={() => navigate('/jobs')} startIcon={<Briefcase size={16}/>}
+            <Button onClick={() => navigate('/jobs')} startIcon={<Briefcase size={14}/>}
               sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:'#fff',
-                borderRadius:2, textTransform:'none', fontWeight:600, px:3, boxShadow:`0 4px 16px ${C.primary}44` }}>
-              Browse Jobs
+                borderRadius:2, textTransform:'none', fontWeight:600,
+                px:{ xs:1.5, sm:3 }, fontSize:{ xs:'0.72rem', sm:'0.875rem' },
+                boxShadow:`0 4px 16px ${C.primary}44`, whiteSpace:'nowrap' }}>
+              <Box component="span" sx={{ display:{ xs:'none', sm:'inline' } }}>Browse Jobs</Box>
+              <Box component="span" sx={{ display:{ xs:'inline', sm:'none' } }}>Jobs</Box>
             </Button>
           </Box>
         </Box>
 
         {/* Stat Cards */}
-        <Grid container spacing={3} sx={{ mb:4 }}>
+        <Grid container spacing={{ xs:1.5, sm:2, lg:3 }} sx={{ mb:3 }}>
           {stats.map(({ label, value, icon: Icon, gradient, route }, i) => (
-            <Grid item xs={12} sm={6} lg={3} key={i}>
-              <Card onClick={() => navigate(route)} sx={{ p:3, background: C.surface, border:`1px solid ${C.border}`, borderRadius:3,
-                cursor:'pointer', transition:'all 0.3s', minHeight: 110,
+            <Grid item xs={6} sm={6} lg={3} key={i}>
+              <Card onClick={() => navigate(route)} sx={{ p:{ xs:1.5, sm:2.5, lg:3 }, background: C.surface, border:`1px solid ${C.border}`, borderRadius:3,
+                cursor:'pointer', transition:'all 0.3s', minHeight:{ xs:80, sm:110 },
                 '&:hover':{ transform:'translateY(-4px)', boxShadow:`0 12px 32px rgba(0,0,0,0.4)`, borderColor: C.primary } }}>
-                <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap: 2 }}>
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography sx={{ color: C.muted, fontSize:13, mb:1, whiteSpace:'nowrap' }}>{label}</Typography>
-                    <Typography variant="h4" sx={{ fontWeight:700, color: C.text, lineHeight:1 }}>{value}</Typography>
+                <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:1 }}>
+                  <Box sx={{ flex:1, minWidth:0 }}>
+                    <Typography sx={{ color: C.muted, fontSize:{ xs:10, sm:13 }, mb:0.5, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{label}</Typography>
+                    <Typography sx={{ fontWeight:700, color: C.text, lineHeight:1, fontSize:{ xs:'1.4rem', sm:'1.8rem', lg:'2rem' } }}>{value}</Typography>
                   </Box>
-                  <Box sx={{ p:1.5, borderRadius:2, background: gradient, flexShrink: 0 }}>
-                    <Icon size={24} color="#fff"/>
+                  <Box sx={{ p:{ xs:1, sm:1.5 }, borderRadius:2, background: gradient, flexShrink:0 }}>
+                    <Icon size={20} color="#fff"/>
                   </Box>
                 </Box>
               </Card>
@@ -211,23 +214,26 @@ export default function UserDashboard() {
 
           {/* Profile Completion */}
           <Grid item xs={12}>
-            <Card sx={{ p:4, border:`1px solid ${C.border}`, borderRadius:3, height:140, maxHeight:140,
+            <Card sx={{ p:{ xs:2.5, sm:3, lg:4 }, border:`1px solid ${C.border}`, borderRadius:3,
               display:'flex', alignItems:'center',
               background:`linear-gradient(135deg, ${C.primary}22, ${C.secondary}11)` }}>
-              <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', width:'100%', flexWrap:'wrap', gap:2 }}>
-                <Box>
-                  <Typography variant="h6" sx={{ fontWeight:700, color: C.text }}>Complete Your Profile</Typography>
-                  <Typography sx={{ color: C.muted, fontSize:13, mt:0.5 }}>A complete profile gets 3x more recruiter views</Typography>
+              <Box sx={{ display:'flex', flexDirection:{ xs:'column', sm:'row' }, justifyContent:'space-between',
+                alignItems:{ xs:'flex-start', sm:'center' }, width:'100%', gap:2 }}>
+                <Box sx={{ flex:1, minWidth:0 }}>
+                  <Typography sx={{ fontWeight:700, color: C.text, fontSize:{ xs:'1rem', sm:'1.25rem' } }}>Complete Your Profile</Typography>
+                  <Typography sx={{ color: C.muted, fontSize:{ xs:12, sm:13 }, mt:0.5 }}>A complete profile gets 3x more recruiter views</Typography>
                   <Box sx={{ mt:1.5, display:'flex', alignItems:'center', gap:2 }}>
                     <LinearProgress variant="determinate" value={completion}
-                      sx={{ width:200, height:8, borderRadius:4, background:`${C.border}`,
+                      sx={{ flex:1, maxWidth:{ xs:'100%', sm:200 }, height:8, borderRadius:4, background:`${C.border}`,
                         '& .MuiLinearProgress-bar':{ background:`linear-gradient(90deg, ${C.primary}, ${C.secondary})`, borderRadius:4 } }}/>
-                    <Typography sx={{ color: C.primary, fontWeight:700, fontSize:14 }}>{completion}%</Typography>
+                    <Typography sx={{ color: C.primary, fontWeight:700, fontSize:14, flexShrink:0 }}>{completion}%</Typography>
                   </Box>
                 </Box>
-                <Button onClick={() => navigate('/user-profile')}
+                <Button onClick={() => navigate('/user-profile')} fullWidth={false}
                   sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:'#fff',
-                    borderRadius:2, textTransform:'none', fontWeight:600, px:3, boxShadow:`0 4px 16px ${C.primary}44` }}>
+                    borderRadius:2, textTransform:'none', fontWeight:600, px:3,
+                    width:{ xs:'100%', sm:'auto' },
+                    boxShadow:`0 4px 16px ${C.primary}44` }}>
                   Complete Profile
                 </Button>
               </Box>

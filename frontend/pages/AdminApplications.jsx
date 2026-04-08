@@ -75,7 +75,7 @@ export default function AdminApplications() {
   return (
     <Box sx={{ display:'flex', background: C.bg, minHeight:'100vh' }}>
       <Sidebar />
-      <Box sx={{ marginLeft:'240px', width:'100%', p:'32px' }}>
+      <Box sx={{ marginLeft:{ xs:0, lg:'240px' }, width:{ xs:'100%', lg:'calc(100% - 240px)' }, p:{ xs:'16px', sm:'24px', lg:'32px' }, pt:{ xs:'64px', lg:'32px' } }}>
         <Box sx={{ mb:4 }}>
           <Typography variant="h4" sx={{ fontWeight:700, color: C.text }}>All Applications</Typography>
           <Typography sx={{ color: C.muted, mt:0.5 }}>{filtered.length} applications</Typography>
@@ -292,3 +292,4 @@ export default function AdminApplications() {
     </Box>
   );
 }
+

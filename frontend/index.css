@@ -1,2 +1,64 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0F172A; }
+
+/* ── Responsive page wrapper ── */
+/* All pages use marginLeft:240px on desktop, 0 on mobile/tablet */
+@media (max-width: 1024px) {
+  /* Push content down to clear hamburger button */
+  .page-content {
+    margin-left: 0 !important;
+    padding-top: 64px !important;
+  }
+}
+
+/* ── Smooth page transitions ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-enter {
+  animation: fadeInUp 0.25s ease forwards;
+}
+
+/* ── Scrollbar styling ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+/* ── Mobile table scroll ── */
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* ── Responsive grid helpers ── */
+@media (max-width: 640px) {
+  .hide-mobile { display: none !important; }
+  .grid-1-mobile { grid-template-columns: 1fr !important; }
+  .grid-2-mobile { grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (min-width: 641px) and (max-width: 1024px) {
+  .hide-tablet { display: none !important; }
+  .grid-2-tablet { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+/* ── Card hover animations ── */
+.card-hover {
+  transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+}
+.card-hover:hover {
+  transform: translateY(-4px) !important;
+}
+
+/* ── Button press effect ── */
+button:active { transform: scale(0.97); }
+
+/* ── Notification badge pulse ── */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.15); }
+}
+.notif-badge { animation: pulse 2s ease-in-out infinite; }
+
+/* ── Mobile-friendly tap targets ── */
+@media (max-width: 640px) {
+  button, [role="button"] { min-height: 40px; }
+}

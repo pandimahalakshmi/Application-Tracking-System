@@ -81,7 +81,7 @@ export default function SavedJobs() {
   return (
     <Box sx={{ display:'flex', background: C.bg, minHeight:'100vh' }}>
       <Sidebar />
-      <Box sx={{ marginLeft:'240px', width:'100%', p:'32px' }}>
+      <Box sx={{ marginLeft:{ xs:0, lg:'240px' }, width:{ xs:'100%', lg:'calc(100% - 240px)' }, p:{ xs:'16px', sm:'24px', lg:'32px' }, pt:{ xs:'64px', lg:'32px' } }}>
         <Box sx={{ mb:4 }}>
           <Typography variant="h4" sx={{ fontWeight:700, color: C.text }}>Saved Jobs</Typography>
           <Typography sx={{ color: C.muted, mt:0.5 }}>{jobs.length} job{jobs.length !== 1 ? 's' : ''} saved</Typography>
@@ -102,7 +102,7 @@ export default function SavedJobs() {
             </Button>
           </Card>
         ) : (
-          <Box sx={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:3 }}>
+          <Box sx={{ display:'grid', gridTemplateColumns:{ xs:'1fr', sm:'repeat(2,1fr)', lg:'repeat(3,1fr)' }, gap:{ xs:2, sm:3 } }}>
             {jobs.map(job => {
               const jid = job._id || job.id;
               return (
@@ -222,3 +222,4 @@ export default function SavedJobs() {
     </Box>
   );
 }
+

@@ -537,7 +537,7 @@ export default function UserProfile() {
   return (
     <Box sx={{ display:'flex', background: D.bg, minHeight:'100vh' }}>
       <Sidebar />
-      <Box sx={{ marginLeft:'240px', padding:'32px', width:'100%' }}>
+      <Box sx={{ marginLeft:{ xs:0, lg:'240px' }, width:{ xs:'100%', lg:'calc(100% - 240px)' }, p:{ xs:'16px', sm:'24px', lg:'32px' }, pt:{ xs:'64px', lg:'32px' } }}>
 
         {/* Header banner */}
         <Box sx={{ mb:4, p:3, borderRadius:3, background:`linear-gradient(135deg, ${D.primary}, ${D.secondary})`,
@@ -616,3 +616,4 @@ export default function UserProfile() {
     </Box>
   );
 }
+
