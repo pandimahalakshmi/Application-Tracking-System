@@ -1,41 +1,41 @@
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Box, Card, TextField, Button, Typography, InputAdornment, IconButton } from "@mui/material";
-import { Briefcase, Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { useNavigat from "react";
 import { authService } from "../services/api";
+import { Eye, EyeOff, Mail, Lock, User, Phone, Briefcase } from "lucide-react";
 
-const C = { bg:'#0F172A', surface:'#1E293B', border:'#334155', primary:'#6366F1', secondary:'#8B5CF6', text:'#F1F5F9', muted:'#94A3B8' };
-
-const fieldSx = {
-  mb: 2,
-  '& .MuiOutlinedInput-root': {
-    borderRadius: 2, background: '#1E293B', color: '#F1F5F9',
-    '& fieldset': { borderColor: '#334155' },
-    '&:hover fieldset': { borderColor: '#6366F1' },
-    '&.Mui-focused fieldset': { borderColor: '#6366F1', borderWidth: 2 },
-  },
-  '& .MuiInputLabel-root': { color: '#94A3B8' },
-  '& .MuiInputLabel-root.Mui-focused': { color: '#6366F1' },
-  '& input:-webkit-autofill': {
-    WebkitBoxShadow: '0 0 0 100px #1E293B inset',
-    WebkitTextFillColor: '#F1F5F9',
-    caretColor: '#F1F5F9',
-  },
+const C = {
+  bg:      '#0F172A',
+  surface: '#1E293B',
+  border:  '#334155',
+  primary: '#6366F1',
+  secondary:'#8B5CF6',
+  text:    '#F1F5F9',
+  muted:   '#94A3B8',
+  danger:  '#F87171',
 };
 
-export default function Login() {
-  const navigate = useNavigate();
-  const [email, setEmail]       = useState('');
-  const [password, setPassword] = useState('');
-  const [showPw, setShowPw]     = useState(false);
-  const [error, setError]       = useState('');
-  const [loading, setLoading]   = useState(false);
+const Input = ({ icon: Icon, type = 'text', placeholder, value, onChange, right }) => (
+  <div style={{ position:'relative', marginBottom:12 }}>
+    <div style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', color: C.muted, display:'flex' }}>
+      <Icon size={16}/>
+    </div>
+    <input
+      type={type} placeholder={placeholder} value={value} onChange={onChange}
+      style={{
+        width:'100%', padding:'11px 40px 11px 38px', borderRadius:8,
+        background: C.bg, border:`1px solid ${C.border}`,
+        color: C.text, fontSize:14, outline:'none', boxSizing:'border-box',
+        transition:'border-color 0.2s',
+      }}
+      onFocus={e => e.target.style.borderColor = C.primary}
+      onBlur={e => e.target.style.borderColor = C.border}
+    />
+    {right && <div style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)' }}>{right}</div>}
+  </div>
+);
 
-  const login = async () => {
-    if (!email || !password) { setError('Please fill in all fields'); return; }
-    setLoading(true); setError('');
-    try {
-      const result = await authService.login(email, password);
+const SocialBtn = ({ label, color, children }) => (
+  <button titesult = await authService.login(email, password);
       if (result.success) {
         localStorage.setItem('user', JSON.stringify(result.user));
         localStorage.setItem('role', result.user.role);
