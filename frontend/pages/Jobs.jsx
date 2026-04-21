@@ -8,6 +8,7 @@ import { MapPin, Briefcase, X, Upload, Send, Star, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jobService, applicationService, savedJobService } from "../services/api";
+import { API_BASE_URL } from "../config/api";
 import { C, fieldSx, cardSx } from "../theme";
 import JobFilters from "../components/JobFilters";
 import useSocket from "../hooks/useSocket";
@@ -89,7 +90,7 @@ export default function Jobs() {
         formData.append('resume', form.resume);
         const token = localStorage.getItem('token');
         const uploadRes = await fetch(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/upload-resume`,
+          `${API_BASE_URL}/auth/upload-resume`,
           { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData }
         );
         const uploadData = await uploadRes.json();

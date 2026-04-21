@@ -7,6 +7,7 @@ import {
 } from '@mui/material';
 import { Star, MapPin, X, Upload, Send } from 'lucide-react';
 import { savedJobService, applicationService } from '../services/api';
+import { API_BASE_URL } from '../config/api';
 import { C, cardSx, fieldSx } from '../theme';
 
 const fSx = {
@@ -56,7 +57,7 @@ export default function SavedJobs() {
         formData.append('resume', form.resume);
         const token = localStorage.getItem('token');
         const uploadRes = await fetch(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/upload-resume`,
+          `${API_BASE_URL}/auth/upload-resume`,
           { method:'POST', headers:{ Authorization:`Bearer ${token}` }, body: formData }
         );
         const uploadData = await uploadRes.json();

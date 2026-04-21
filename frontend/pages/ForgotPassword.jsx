@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { Box, TextField, Button, Typography, Card } from '@mui/material';
 import { Mail, ArrowLeft, Send } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../config/api';
 
 const C = { bg:'#0F172A', surface:'#1E293B', border:'#334155', primary:'#6366F1', secondary:'#8B5CF6', text:'#F1F5F9', muted:'#94A3B8' };
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const BASE = API_BASE_URL;
 
 const fSx = {
   mb:2,

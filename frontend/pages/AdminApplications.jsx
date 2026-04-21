@@ -9,12 +9,13 @@ import {
 } from '@mui/material';
 import { Search, Users, X, Download, FileText, Phone, Mail, ExternalLink } from 'lucide-react';
 import { applicationService } from '../services/api';
+import { API_ORIGIN } from '../config/api';
 
 const C = { bg:'#0F172A', surface:'#1E293B', surface2:'#263348', border:'#334155', primary:'#6366F1', secondary:'#8B5CF6', accent:'#06B6D4', success:'#10B981', warning:'#F59E0B', danger:'#F87171', text:'#F1F5F9', muted:'#94A3B8' };
 const statuses = ['Pending','Shortlisted','Interview Scheduled','Selected','Rejected'];
 const statusColor = { Pending: C.muted, Shortlisted: C.warning, 'Interview Scheduled': C.accent, Selected: C.success, Rejected: C.danger };
 
-const BASE = import.meta.env.VITE_API_URL?.replace('/api','') || 'http://localhost:5000';
+const BASE = API_ORIGIN;
 
 export default function AdminApplications() {
   const { applicationId } = useParams();

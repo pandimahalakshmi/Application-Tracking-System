@@ -7,9 +7,10 @@ import {
   Avatar, Divider,
 } from '@mui/material';
 import { Calendar, Clock, User, CheckCircle, Video, Phone, Monitor, Users, Mic } from 'lucide-react';
+import { API_BASE_URL } from '../config/api';
 import { C, menuPropsSx } from '../theme';
 
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const BASE = API_BASE_URL;
 
 const fSx = {
   '& .MuiOutlinedInput-root': {

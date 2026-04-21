@@ -13,6 +13,7 @@ import {
   Save, Briefcase, Mail, Phone, Calendar, MessageSquare,
 } from "lucide-react";
 import { applicationService } from "../services/api";
+import { API_ORIGIN } from "../config/api";
 import { C, fieldSx, cardSx, menuPropsSx } from "../theme";
 
 const statuses = ['Pending','Shortlisted','Interview Scheduled','Selected','Rejected'];
@@ -33,7 +34,7 @@ const getSkillMatch = (app) => {
   return { score, matched };
 };
 
-const BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace('/api','');
+const BASE = API_ORIGIN;
 
 export default function Candidates() {
   const role = localStorage.getItem("role");

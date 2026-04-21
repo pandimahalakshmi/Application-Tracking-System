@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 import { Briefcase, Calendar, MapPin, Search, X, SlidersHorizontal, FileText, ExternalLink } from 'lucide-react';
 import { applicationService } from '../services/api';
+import { API_ORIGIN } from '../config/api';
 
 const C = { bg:'#0F172A', surface:'#1E293B', border:'#334155', primary:'#6366F1', secondary:'#8B5CF6', accent:'#06B6D4', success:'#10B981', warning:'#F59E0B', danger:'#F87171', text:'#F1F5F9', muted:'#94A3B8' };
 
@@ -28,7 +29,7 @@ const fSx = {
 
 const menuProps = { PaperProps:{ sx:{ background: C.surface, border:`1px solid ${C.border}`, '& .MuiMenuItem-root':{ color: C.text, '&:hover':{ background:`${C.primary}22` } } } } };
 const emptyFilters = { search:'', status:'', type:'', dateFrom:'', dateTo:'' };
-const BASE = import.meta.env.VITE_API_URL?.replace('/api','') || 'http://localhost:5000';
+const BASE = API_ORIGIN;
 
 export default function MyApplications() {
   const { applicationId } = useParams();
