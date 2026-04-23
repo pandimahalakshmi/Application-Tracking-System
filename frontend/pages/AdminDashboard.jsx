@@ -78,91 +78,129 @@ export default function AdminDashboard() {
       <Box sx={{
         marginLeft:{ xs:0, lg:'240px' },
         width:{ xs:'100%', lg:'calc(100% - 240px)' },
-        p:{ xs:'16px', sm:'24px', lg:'32px' },
+        minWidth: 0,
+        p:{ xs:'12px', sm:'24px', lg:'32px' },
         pt:{ xs:'64px', lg:'32px' },
+        overflowX: 'hidden',
       }}>
 
         {/* Header */}
-        <Box sx={{ mb:3, display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:2 }}>
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight:700, color: C.text, fontSize:{ xs:'1.4rem', sm:'1.75rem', lg:'2.125rem' } }}>Admin Dashboard</Typography>
-            <Typography sx={{ color: C.muted, mt:0.5, fontSize:{ xs:'0.8rem', sm:'0.875rem' } }}>Welcome back, Administrator</Typography>
-          </Box>
-          <Box sx={{ display:'flex', alignItems:'center', gap:2 }}>
-            <NotificationBell userId={adminUser?.id || adminUser?._id} />
+        <Box sx={{ mb:3 }}>
+          {/* Mobile: centered layout */}
+          <Box sx={{ display:{ xs:'flex', sm:'none' }, flexDirection:'column', alignItems:'center', textAlign:'center', gap:1.5, position:'relative' }}>
+            {/* Notification bell — absolute top-left */}
+            <Box sx={{ position:'absolute', top:0, left:0 }}>
+              <NotificationBell userId={adminUser?.id || adminUser?._id} />
+            </Box>
+            {/* Title centered */}
+            <Box>
+              <Typography sx={{ fontWeight:700, color: C.text, fontSize:'1.3rem' }}>Admin Dashboard</Typography>
+              <Typography sx={{ color: C.muted, mt:0.25, fontSize:'0.75rem' }}>Welcome back, Administrator</Typography>
+            </Box>
+            {/* Button centered */}
             <Button onClick={() => navigate('/jobform')} startIcon={<PlusCircle size={16}/>}
-              sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:'#fff', borderRadius:2, textTransform:'none', fontWeight:600, px:{ xs:2, sm:3 }, fontSize:{ xs:'0.75rem', sm:'0.875rem' }, boxShadow:`0 4px 16px ${C.primary}44` }}>
-              Post New Job
+              sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:'#fff', borderRadius:2, textTransform:'none', fontWeight:600, px:3, fontSize:'0.75rem', minHeight:40, boxShadow:`0 4px 16px ${C.primary}44` }}>
+              New Job
             </Button>
+          </Box>
+
+          {/* Tablet/Desktop: horizontal layout */}
+          <Box sx={{ display:{ xs:'none', sm:'flex' }, justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:2 }}>
+            <Box>
+              <Typography sx={{ fontWeight:700, color: C.text, fontSize:{ sm:'1.75rem', lg:'2.125rem' } }}>Admin Dashboard</Typography>
+              <Typography sx={{ color: C.muted, mt:0.5, fontSize:'0.875rem' }}>Welcome back, Administrator</Typography>
+            </Box>
+            <Box sx={{ display:'flex', alignItems:'center', gap:2 }}>
+              <NotificationBell userId={adminUser?.id || adminUser?._id} />
+              <Button onClick={() => navigate('/jobform')} startIcon={<PlusCircle size={16}/>}
+                sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:'#fff', borderRadius:2, textTransform:'none', fontWeight:600, px:3, fontSize:'0.875rem', minHeight:40, boxShadow:`0 4px 16px ${C.primary}44` }}>
+                Post New Job
+              </Button>
+            </Box>
           </Box>
         </Box>
 
         {/* Stat Cards */}
-        <Grid container spacing={{ xs:2, sm:3 }} sx={{ mb:3 }}>
+        <Box sx={{ display:'grid', gridTemplateColumns:{ xs:'repeat(2,1fr)', sm:'repeat(2,1fr)', lg:'repeat(4,1fr)' }, gap:{ xs:1.5, sm:2, lg:3 }, mb:3 }}>
           {cards.map((c, i) => {
             const Icon = c.icon;
             return (
-              <Grid item xs={6} sm={6} lg={3} key={i}>
-                <Card sx={{ p:{ xs:2, sm:3 }, background: C.surface, border:`1px solid ${C.border}`, borderRadius:3,
-                  minHeight:{ xs:90, sm:120 }, transition:'all 0.3s', cursor:'pointer',
-                  '&:hover':{ transform:'translateY(-4px)', boxShadow:`0 12px 32px rgba(0,0,0,0.4)`, borderColor: C.primary } }}>
-                  <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:1 }}>
-                    <Box sx={{ flex:1, minWidth:0 }}>
-                      <Typography sx={{ color: C.muted, fontSize:{ xs:11, sm:13 }, mb:0.5 }}>{c.title}</Typography>
-                      <Typography sx={{ fontWeight:700, color: C.text, lineHeight:1, fontSize:{ xs:'1.4rem', sm:'2rem' } }}>{c.value}</Typography>
-                      <Chip label={c.change} size="small" sx={{ mt:1, background:`${C.success}22`, color: C.success, fontWeight:600, fontSize:10 }} />
-                    </Box>
-                    <Box sx={{ p:{ xs:1, sm:1.5 }, borderRadius:2, background: c.gradient, flexShrink:0 }}>
-                      <Icon size={20} color="#fff" />
-                    </Box>
+              <Card key={i} sx={{
+                background: C.surface, border:`1px solid ${C.border}`,
+                borderRadius:3, cursor:'pointer', transition:'all 0.3s',
+                '&:hover':{ transform:'translateY(-4px)', boxShadow:`0 12px 32px rgba(0,0,0,0.4)`, borderColor: C.primary },
+              }}>
+                {/* Mobile + Tablet: vertical centered like quick actions */}
+                <Box sx={{
+                  display:{ xs:'flex', lg:'none' },
+                  flexDirection:'column', alignItems:'center', justifyContent:'center',
+                  textAlign:'center', gap:1, p:'16px 10px', minHeight:110,
+                }}>
+                  <Box sx={{ width:44, height:44, borderRadius:2, background: c.gradient, display:'flex', alignItems:'center', justifyContent:'center', boxShadow:`0 4px 12px rgba(0,0,0,0.25)` }}>
+                    <Icon size={20} color="#fff" />
                   </Box>
-                </Card>
-              </Grid>
+                  <Typography sx={{ color: C.text, fontWeight:700, fontSize:'0.72rem', lineHeight:1.3 }}>{c.title}</Typography>
+                  <Typography sx={{ fontWeight:800, color: C.text, fontSize:'1.5rem', lineHeight:1 }}>{c.value}</Typography>
+                  <Chip label={c.change} size="small" sx={{ background:`${C.success}22`, color: C.success, fontWeight:700, fontSize:'0.55rem', height:18 }} />
+                </Box>
+                {/* Desktop: horizontal */}
+                <Box sx={{ display:{ xs:'none', lg:'flex' }, justifyContent:'space-between', alignItems:'flex-start', gap:1, p:3 }}>
+                  <Box sx={{ flex:1, minWidth:0 }}>
+                    <Typography sx={{ color: C.muted, fontSize:'0.8rem', mb:0.25 }}>{c.title}</Typography>
+                    <Typography sx={{ fontWeight:700, color: C.text, lineHeight:1, fontSize:'1.75rem' }}>{c.value}</Typography>
+                    <Chip label={c.change} size="small" sx={{ mt:0.75, background:`${C.success}22`, color: C.success, fontWeight:600, fontSize:'0.65rem', height:22 }} />
+                  </Box>
+                  <Box sx={{ p:'10px', borderRadius:2, background: c.gradient, flexShrink:0 }}>
+                    <Icon size={20} color="#fff" />
+                  </Box>
+                </Box>
+              </Card>
             );
           })}
-        </Grid>
+        </Box>
 
         {/* Quick Actions + Pie */}
-        <Box sx={{ display:'grid', gridTemplateColumns:{ xs:'1fr', md:'2fr 1fr' }, gap:{ xs:2, sm:3 }, mb:3 }}>
-          <Card sx={{ p:{ xs:2, sm:3 }, background: C.surface, border:`1px solid ${C.border}`, borderRadius:3 }}>
-            <Typography variant="h6" sx={{ fontWeight:700, color: C.text, mb:2, fontSize:{ xs:'1rem', sm:'1.25rem' } }}>Quick Actions</Typography>
-            <Box sx={{ display:'grid', gridTemplateColumns:{ xs:'repeat(2,1fr)', sm:'repeat(4,1fr)' }, gap:{ xs:1.5, sm:2 } }}>
+        <Box sx={{ display:'grid', gridTemplateColumns:{ xs:'1fr', md:'2fr 1fr' }, gap:{ xs:1.5, sm:3 }, mb:3 }}>
+          <Card sx={{ p:{ xs:'14px', sm:3 }, background: C.surface, border:`1px solid ${C.border}`, borderRadius:{ xs:2, sm:3 } }}>
+            <Typography sx={{ fontWeight:700, color: C.text, mb:{ xs:1.5, sm:2 }, fontSize:{ xs:'0.875rem', sm:'1.1rem' } }}>Quick Actions</Typography>
+            <Box sx={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:{ xs:1.5, sm:2 } }}>
               {[
-                { label:'View Candidates',   icon: Users,       route:'/candidates',         gradient:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`,  desc:'Browse all candidates' },
-                { label:'All Applications',  icon: CheckCircle, route:'/admin/applications', gradient:`linear-gradient(135deg, ${C.success}, #059669)`,          desc:'Review submissions' },
-                { label:'Post New Job',       icon: PlusCircle,  route:'/jobform',            gradient:`linear-gradient(135deg, ${C.accent}, #0EA5E9)`,           desc:'Create a job listing' },
-                { label:'Schedule Interview', icon: Calendar,    route:'/schedule-interview', gradient:`linear-gradient(135deg, ${C.warning}, #D97706)`,          desc:'Set up interviews' },
-              ].map(({ label, icon: Icon, route, gradient, desc }) => (
+                { label:'Candidates',   icon: Users,       route:'/candidates',         gradient:`linear-gradient(135deg, ${C.primary}, ${C.secondary})` },
+                { label:'Applications', icon: CheckCircle, route:'/admin/applications', gradient:`linear-gradient(135deg, ${C.success}, #059669)` },
+                { label:'Post Job',     icon: PlusCircle,  route:'/jobform',            gradient:`linear-gradient(135deg, ${C.accent}, #0EA5E9)` },
+                { label:'Interviews',   icon: Calendar,    route:'/schedule-interview', gradient:`linear-gradient(135deg, ${C.warning}, #D97706)` },
+              ].map(({ label, icon: Icon, route, gradient }) => (
                 <Box key={label} onClick={() => navigate(route)}
                   sx={{
-                    p:{ xs:1.5, sm:2 }, borderRadius:3, cursor:'pointer',
+                    borderRadius:3, cursor:'pointer',
                     background: C.bg, border:`1px solid ${C.border}`,
                     display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
-                    gap:1, textAlign:'center', minHeight:{ xs:100, sm:130 },
+                    gap:1, textAlign:'center',
+                    minHeight:110,
+                    p:'16px 10px',
                     transition:'all 0.25s',
-                    '&:hover':{ border:`1px solid transparent`, background: gradient, transform:'translateY(-4px)',
-                      boxShadow:`0 16px 40px rgba(0,0,0,0.4)`,
-                      '& .qa-icon-box':{ background:'rgba(255,255,255,0.2)' },
-                      '& .qa-label':{ color:'#fff' }, '& .qa-desc':{ color:'rgba(255,255,255,0.75)' } },
+                    '&:hover':{ background: gradient, border:'1px solid transparent', transform:'translateY(-3px)',
+                      boxShadow:`0 12px 32px rgba(0,0,0,0.4)`,
+                      '& .qa-lbl':{ color:'#fff' } },
                   }}>
-                  <Box className="qa-icon-box" sx={{ width:{ xs:36, sm:44 }, height:{ xs:36, sm:44 }, borderRadius:2, background: gradient,
-                    display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.25s', boxShadow:`0 4px 16px rgba(0,0,0,0.25)` }}>
-                    <Icon size={18} color="#fff"/>
+                  <Box sx={{
+                    width:44, height:44, borderRadius:2,
+                    background: gradient, display:'flex', alignItems:'center', justifyContent:'center',
+                    boxShadow:`0 4px 12px rgba(0,0,0,0.25)`,
+                  }}>
+                    <Icon size={20} color="#fff"/>
                   </Box>
-                  <Typography className="qa-label" sx={{ fontWeight:700, color: C.text, fontSize:{ xs:11, sm:13 }, lineHeight:1.3, transition:'color 0.25s' }}>
+                  <Typography className="qa-lbl" sx={{ fontWeight:700, color: C.text, fontSize:{ xs:'0.72rem', sm:'0.8rem' }, lineHeight:1.3, transition:'color 0.25s' }}>
                     {label}
-                  </Typography>
-                  <Typography className="qa-desc" sx={{ color: C.muted, fontSize:{ xs:10, sm:11 }, lineHeight:1.3, transition:'color 0.25s', display:{ xs:'none', sm:'block' } }}>
-                    {desc}
                   </Typography>
                 </Box>
               ))}
             </Box>
           </Card>
 
-          <Card sx={{ p:{ xs:2, sm:3 }, background: C.surface, border:`1px solid ${C.border}`, borderRadius:3, display:'flex', flexDirection:'column' }}>
-            <Typography variant="h6" sx={{ fontWeight:700, color: C.text, mb:0.5, fontSize:{ xs:'1rem', sm:'1.25rem' } }}>Application Status</Typography>
-            <Typography sx={{ color: C.muted, fontSize:12, mb:2 }}>Click a status to filter candidates</Typography>
+          <Card sx={{ p:{ xs:'14px', sm:3 }, background: C.surface, border:`1px solid ${C.border}`, borderRadius:{ xs:2, sm:3 }, display:'flex', flexDirection:'column' }}>
+            <Typography sx={{ fontWeight:700, color: C.text, mb:0.5, fontSize:{ xs:'0.875rem', sm:'1.1rem' } }}>Application Status</Typography>
+            <Typography sx={{ color: C.muted, fontSize:{ xs:'0.7rem', sm:'0.75rem' }, mb:1.5 }}>Tap a status to filter</Typography>
             <Box sx={{ flex:1, display:'flex', alignItems:'center' }}>
               <ApplicationStatusPie applications={allApps}/>
             </Box>

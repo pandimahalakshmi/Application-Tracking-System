@@ -1,64 +1,106 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0F172A; }
-
-/* ── Responsive page wrapper ── */
-/* All pages use marginLeft:240px on desktop, 0 on mobile/tablet */
-@media (max-width: 1024px) {
-  /* Push content down to clear hamburger button */
-  .page-content {
-    margin-left: 0 !important;
-    padding-top: 64px !important;
-  }
+html { -webkit-text-size-adjust: 100%; font-size: 16px; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #0F172A;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Smooth page transitions ── */
+/* ─── Responsive base font scale ─── */
+@media (max-width: 599px)  { html { font-size: 14px; } }   /* mobile  */
+@media (min-width: 600px) and (max-width: 1023px) { html { font-size: 15px; } } /* tablet */
+@media (min-width: 1024px) { html { font-size: 16px; } }   /* desktop */
+
+/* ─── Page wrapper ─── */
+#root { overflow-x: hidden; max-width: 100vw; }
+
+@media (max-width: 1024px) {
+  .page-content { margin-left: 0 !important; padding-top: 64px !important; }
+}
+
+/* ─── Smooth transitions ─── */
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.page-enter {
-  animation: fadeInUp 0.25s ease forwards;
-}
+.page-enter { animation: fadeInUp 0.22s ease forwards; }
 
-/* ── Scrollbar styling ── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #475569; }
+* { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
 
-/* ── Mobile table scroll ── */
+/* ─── Mobile table scroll ─── */
 .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-/* ── Responsive grid helpers ── */
-@media (max-width: 640px) {
+/* ─── Responsive helpers ─── */
+@media (max-width: 599px) {
   .hide-mobile { display: none !important; }
-  .grid-1-mobile { grid-template-columns: 1fr !important; }
-  .grid-2-mobile { grid-template-columns: repeat(2, 1fr) !important; }
+  .stack-mobile { flex-direction: column !important; }
+  .full-mobile  { width: 100% !important; }
 }
-@media (min-width: 641px) and (max-width: 1024px) {
+@media (min-width: 600px) and (max-width: 1023px) {
   .hide-tablet { display: none !important; }
-  .grid-2-tablet { grid-template-columns: repeat(2, 1fr) !important; }
 }
 
-/* ── Card hover animations ── */
-.card-hover {
-  transition: transform 0.25s ease, box-shadow 0.25s ease !important;
-}
-.card-hover:hover {
-  transform: translateY(-4px) !important;
+/* ─── Touch targets ─── */
+@media (max-width: 1023px) {
+  button, [role="button"] { min-height: 44px; }
+  a { min-height: 36px; display: inline-flex; align-items: center; }
 }
 
-/* ── Button press effect ── */
-button:active { transform: scale(0.97); }
+/* ─── Card hover ─── */
+.card-hover { transition: transform 0.22s ease, box-shadow 0.22s ease !important; }
+.card-hover:hover { transform: translateY(-3px) !important; }
 
-/* ── Notification badge pulse ── */
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50%       { transform: scale(1.15); }
-}
+/* ─── Button press ─── */
+button:active { transform: scale(0.96); }
+
+/* ─── Notification pulse ─── */
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.14)} }
 .notif-badge { animation: pulse 2s ease-in-out infinite; }
 
-/* ── Mobile-friendly tap targets ── */
-@media (max-width: 640px) {
-  button, [role="button"] { min-height: 40px; }
+/* ─── Responsive MUI TextField input size ─── */
+@media (max-width: 599px) {
+  .MuiInputBase-input { font-size: 14px !important; padding: 10px 12px !important; }
+  .MuiInputLabel-root { font-size: 13px !important; }
+  .MuiOutlinedInput-root { border-radius: 8px !important; }
+  .MuiChip-root { font-size: 10px !important; height: 22px !important; }
+  .MuiButton-root { font-size: 13px !important; }
+}
+@media (min-width: 600px) and (max-width: 1023px) {
+  .MuiInputBase-input { font-size: 15px !important; }
+  .MuiInputLabel-root { font-size: 14px !important; }
+}
+
+/* ─── Mobile job/app card text scale ─── */
+@media (max-width: 599px) {
+  /* Job cards */
+  .job-card-title    { font-size: 0.8rem !important; font-weight: 700 !important; }
+  .job-card-company  { font-size: 0.68rem !important; }
+  .job-card-desc     { font-size: 0.68rem !important; }
+  .job-card-meta     { font-size: 0.65rem !important; }
+  .job-card-btn      { font-size: 0.7rem !important; padding: 5px 12px !important; min-height: 30px !important; }
+
+  /* Application cards */
+  .app-card-title    { font-size: 0.78rem !important; font-weight: 700 !important; }
+  .app-card-company  { font-size: 0.65rem !important; }
+  .app-card-meta     { font-size: 0.62rem !important; }
+
+  /* Filter inputs compact */
+  .filter-bar .MuiInputBase-input { font-size: 0.75rem !important; padding: 8px 10px !important; }
+  .filter-bar .MuiInputLabel-root { font-size: 0.72rem !important; }
+  .filter-bar .MuiSelect-select   { font-size: 0.75rem !important; padding: 8px 10px !important; }
+
+  /* Profile page */
+  .profile-section-title { font-size: 0.85rem !important; }
+  .profile-field-label   { font-size: 0.65rem !important; }
+  .profile-field-value   { font-size: 0.78rem !important; }
+
+  /* Page section headings */
+  .section-card-title { font-size: 0.82rem !important; font-weight: 700 !important; }
 }

@@ -188,32 +188,33 @@ export default function UserProfile() {
   // ── Renders ───────────────────────────────────────────────────────────────
   const renderPersonal = () => (
     <Card sx={cardSx}>
-      <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:3 }}>
-        <Typography variant="h6" sx={{ fontWeight:700, color: D.text }}>Personal Information</Typography>
+      <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:{ xs:2, sm:3 } }}>
+        <Typography sx={{ fontWeight:700, color: D.text, fontSize:{ xs:'0.9rem', sm:'1.1rem' } }}>Personal Information</Typography>
         <ActionBar editMode={editMode} saving={saving} onEdit={startEdit} onCancel={cancelEdit} onSave={saveProfile} />
       </Box>
+      {/* Mobile: avatar centered top, fields below */}
+      <Box sx={{ display:{ xs:'flex', sm:'none' }, flexDirection:'column', alignItems:'center', mb:2, gap:1 }}>
+        <Avatar sx={{ width:64, height:64, background:`linear-gradient(135deg, ${D.primary}, ${D.secondary})`, fontSize:24, fontWeight:700 }}>
+          {profile.profilePhoto ? <img src={profile.profilePhoto} alt="profile" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:'50%' }}/> : profile.name ? profile.name.charAt(0).toUpperCase() : <User size={28} color="#fff"/>}
+        </Avatar>
+        <Button size="small" component="label" startIcon={<Upload size={12}/>}
+          sx={{ borderRadius:2, textTransform:'none', border:`1px solid ${D.primary}`, color: D.primary, fontSize:'0.68rem', minHeight:28 }}>
+          Change Photo
+          <input type="file" hidden accept="image/*" onChange={e => { const file = e.target.files[0]; if (file) { const r = new FileReader(); r.onload = ev => set(null,'profilePhoto',ev.target.result); r.readAsDataURL(file); }}}/>
+        </Button>
+      </Box>
       <Box sx={{ display:'flex', gap:4 }}>
-        {/* Avatar */}
-        <Box sx={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
-          minWidth:160, pr:4, borderRight:`1px solid ${D.border}` }}>
-          <Avatar sx={{ width:100, height:100, mb:2, background:`linear-gradient(135deg, ${D.primary}, ${D.secondary})`,
-            fontSize:36, fontWeight:700, boxShadow:`0 8px 24px ${D.primary}44` }}>
-            {profile.profilePhoto
-              ? <img src={profile.profilePhoto} alt="profile" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:'50%' }}/>
-              : profile.name ? profile.name.charAt(0).toUpperCase() : <User size={40} color="#fff"/>}
+        {/* Desktop avatar panel */}
+        <Box sx={{ display:{ xs:'none', sm:'flex' }, flexDirection:'column', alignItems:'center', justifyContent:'center', minWidth:160, pr:4, borderRight:`1px solid ${D.border}` }}>
+          <Avatar sx={{ width:100, height:100, mb:2, background:`linear-gradient(135deg, ${D.primary}, ${D.secondary})`, fontSize:36, fontWeight:700, boxShadow:`0 8px 24px ${D.primary}44` }}>
+            {profile.profilePhoto ? <img src={profile.profilePhoto} alt="profile" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:'50%' }}/> : profile.name ? profile.name.charAt(0).toUpperCase() : <User size={40} color="#fff"/>}
           </Avatar>
           <Button size="small" component="label" startIcon={<Upload size={14}/>}
-            sx={{ borderRadius:2, textTransform:'none', borderColor: D.primary, color: D.primary,
-              border:`1px solid ${D.primary}`, fontSize:12,
-              '&:hover':{ background: D.primary, color:'#fff' } }}>
+            sx={{ borderRadius:2, textTransform:'none', border:`1px solid ${D.primary}`, color: D.primary, fontSize:12, '&:hover':{ background: D.primary, color:'#fff' } }}>
             Change Photo
-            <input type="file" hidden accept="image/*" onChange={e => {
-              const file = e.target.files[0];
-              if (file) { const r = new FileReader(); r.onload = ev => set(null,'profilePhoto',ev.target.result); r.readAsDataURL(file); }
-            }}/>
+            <input type="file" hidden accept="image/*" onChange={e => { const file = e.target.files[0]; if (file) { const r = new FileReader(); r.onload = ev => set(null,'profilePhoto',ev.target.result); r.readAsDataURL(file); }}}/>
           </Button>
         </Box>
-        {/* Fields */}
         <Box sx={{ flex:1 }}>
           <Field label="Full Name"     value={profile.name}             onChange={v => set(null,'name',v)}             disabled={!editMode} />
           <Field label="Email"         value={profile.email}            onChange={v => set(null,'email',v)}            disabled={!editMode} />
@@ -230,56 +231,44 @@ export default function UserProfile() {
 
   const renderProfessional = () => (
     <Card sx={cardSx}>
-      <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:3 }}>
-        <Typography variant="h6" sx={{ fontWeight:700, color: D.text }}>Professional Details</Typography>
+      <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:{ xs:2, sm:3 } }}>
+        <Typography sx={{ fontWeight:700, color: D.text, fontSize:{ xs:'0.9rem', sm:'1.1rem' } }}>Professional Details</Typography>
         <ActionBar editMode={editMode} saving={saving} onEdit={startEdit} onCancel={cancelEdit} onSave={saveProfile} />
       </Box>
-      <Box sx={{ display:'flex', gap:4 }}>
-        <Box sx={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
-          minWidth:160, pr:4, borderRight:`1px solid ${D.border}` }}>
-          <Avatar sx={{ width:90, height:90, mb:2, background:`linear-gradient(135deg, ${D.accent}, #0EA5E9)`,
-            boxShadow:`0 8px 24px ${D.accent}44` }}>
+      {/* Desktop: side panel + fields */}
+      <Box sx={{ display:{ xs:'none', sm:'flex' }, gap:4 }}>
+        <Box sx={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minWidth:160, pr:4, borderRight:`1px solid ${D.border}` }}>
+          <Avatar sx={{ width:90, height:90, mb:2, background:`linear-gradient(135deg, ${D.accent}, #0EA5E9)`, boxShadow:`0 8px 24px ${D.accent}44` }}>
             <Briefcase size={36} color="#fff"/>
           </Avatar>
-          <Typography sx={{ fontWeight:700, textAlign:'center', color: D.text, fontSize:13 }}>
-            {profile.professional?.currentJobTitle || ''}
-          </Typography>
-          <Typography sx={{ color: D.muted, textAlign:'center', fontSize:12 }}>
-            {profile.professional?.currentCompany || ''}
-          </Typography>
+          <Typography sx={{ fontWeight:700, textAlign:'center', color: D.text, fontSize:13 }}>{profile.professional?.currentJobTitle || ''}</Typography>
+          <Typography sx={{ color: D.muted, textAlign:'center', fontSize:12 }}>{profile.professional?.currentCompany || ''}</Typography>
         </Box>
         <Box sx={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center' }}>
-          {[
-            ['Current Job Title','currentJobTitle'],['Current Company','currentCompany'],
-            ['Total Experience','totalExperience'],['Expected Salary','expectedSalary'],
-            ['Current Salary','currentSalary'],['Preferred Location','preferredLocation'],
-          ].map(([label, field]) => (
-            <TextField key={field} label={label} value={profile.professional?.[field] || ''}
-              disabled={!editMode} size="small" onChange={e => set('professional', field, e.target.value)}
-              sx={{ ...fSx, width:'75%' }} />
+          {[['Current Job Title','currentJobTitle'],['Current Company','currentCompany'],['Total Experience','totalExperience'],['Expected Salary','expectedSalary'],['Current Salary','currentSalary'],['Preferred Location','preferredLocation']].map(([label, field]) => (
+            <TextField key={field} label={label} value={profile.professional?.[field] || ''} disabled={!editMode} size="small" onChange={e => set('professional', field, e.target.value)} sx={{ ...fSx, width:'75%' }} />
           ))}
-
-          {/* Notice Period dropdown */}
-          <FormControl size="small" disabled={!editMode} sx={{
-            width:'75%', mb:2,
-            '& .MuiOutlinedInput-root':{ borderRadius:2, background: D.bg, color: D.text, '& fieldset':{ borderColor: D.border }, '&:hover fieldset':{ borderColor: D.primary }, '&.Mui-focused fieldset':{ borderColor: D.primary, borderWidth:2 }, '&.Mui-disabled':{ background: D.surface2 }, '&.Mui-disabled fieldset':{ borderColor: D.border } },
-            '& .MuiInputLabel-root':{ color: D.muted },
-            '& .MuiInputLabel-root.Mui-focused':{ color: D.primary },
-            '& .MuiSelect-icon':{ color: D.muted },
-          }}>
+          <FormControl size="small" disabled={!editMode} sx={{ width:'75%', mb:2, '& .MuiOutlinedInput-root':{ borderRadius:2, background: D.bg, color: D.text, '& fieldset':{ borderColor: D.border }, '&:hover fieldset':{ borderColor: D.primary }, '&.Mui-focused fieldset':{ borderColor: D.primary, borderWidth:2 }, '&.Mui-disabled':{ background: D.surface2 }, '&.Mui-disabled fieldset':{ borderColor: D.border } }, '& .MuiInputLabel-root':{ color: D.muted }, '& .MuiInputLabel-root.Mui-focused':{ color: D.primary }, '& .MuiSelect-icon':{ color: D.muted } }}>
             <InputLabel>Notice Period</InputLabel>
-            <Select value={profile.professional?.noticePeriod || ''}
-              label="Notice Period"
-              onChange={e => set('professional', 'noticePeriod', e.target.value)}
-              MenuProps={{ PaperProps:{ sx:{ background: D.surface, border:`1px solid ${D.border}`, '& .MuiMenuItem-root':{ color: D.text, '&:hover':{ background:`${D.primary}22` } } } } }}>
+            <Select value={profile.professional?.noticePeriod || ''} label="Notice Period" onChange={e => set('professional', 'noticePeriod', e.target.value)} MenuProps={{ PaperProps:{ sx:{ background: D.surface, border:`1px solid ${D.border}`, '& .MuiMenuItem-root':{ color: D.text, '&:hover':{ background:`${D.primary}22` } } } } }}>
               <MenuItem value="">Select Notice Period</MenuItem>
-              <MenuItem value="Immediate">Immediate</MenuItem>
-              <MenuItem value="10 Days">10 Days</MenuItem>
-              <MenuItem value="1 Month">1 Month</MenuItem>
-              <MenuItem value="3 Months">3 Months</MenuItem>
+              {['Immediate','10 Days','1 Month','3 Months'].map(v => <MenuItem key={v} value={v}>{v}</MenuItem>)}
             </Select>
           </FormControl>
         </Box>
+      </Box>
+      {/* Mobile: full-width fields */}
+      <Box sx={{ display:{ xs:'block', sm:'none' } }}>
+        {[['Current Job Title','currentJobTitle'],['Current Company','currentCompany'],['Total Experience','totalExperience'],['Expected Salary','expectedSalary'],['Current Salary','currentSalary'],['Preferred Location','preferredLocation']].map(([label, field]) => (
+          <TextField key={field} fullWidth label={label} value={profile.professional?.[field] || ''} disabled={!editMode} size="small" onChange={e => set('professional', field, e.target.value)} sx={{ ...fSx, mb:1.25 }} />
+        ))}
+        <FormControl fullWidth size="small" disabled={!editMode} sx={{ mb:1.25, '& .MuiOutlinedInput-root':{ borderRadius:2, background: D.bg, color: D.text, '& fieldset':{ borderColor: D.border } }, '& .MuiInputLabel-root':{ color: D.muted }, '& .MuiSelect-icon':{ color: D.muted } }}>
+          <InputLabel>Notice Period</InputLabel>
+          <Select value={profile.professional?.noticePeriod || ''} label="Notice Period" onChange={e => set('professional', 'noticePeriod', e.target.value)} MenuProps={{ PaperProps:{ sx:{ background: D.surface, border:`1px solid ${D.border}`, '& .MuiMenuItem-root':{ color: D.text } } } }}>
+            <MenuItem value="">Select</MenuItem>
+            {['Immediate','10 Days','1 Month','3 Months'].map(v => <MenuItem key={v} value={v}>{v}</MenuItem>)}
+          </Select>
+        </FormControl>
       </Box>
     </Card>
   );
@@ -334,59 +323,56 @@ export default function UserProfile() {
 
   const renderSkills = () => (
     <Card sx={cardSx}>
-      <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:3 }}>
-        <Typography variant="h6" sx={{ fontWeight:700, color: D.text }}>Skills</Typography>
+      <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:{ xs:2, sm:3 } }}>
+        <Typography sx={{ fontWeight:700, color: D.text, fontSize:{ xs:'0.9rem', sm:'1.1rem' } }}>Skills</Typography>
         <ActionBar editMode={editMode} saving={saving} onEdit={startEdit} onCancel={cancelEdit} onSave={saveProfile} />
       </Box>
-      <Box sx={{ display:'flex', gap:4 }}>
-        <Box sx={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
-          minWidth:160, pr:4, borderRight:`1px solid ${D.border}` }}>
-          <Avatar sx={{ width:90, height:90, mb:2, background:`linear-gradient(135deg, ${D.warning}, #D97706)`,
-            boxShadow:`0 8px 24px ${D.warning}44` }}>
+      {/* Skills fields — full width on mobile, no side panel */}
+      <Box sx={{ display:{ xs:'none', sm:'flex' }, gap:4 }}>
+        <Box sx={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minWidth:160, pr:4, borderRight:`1px solid ${D.border}` }}>
+          <Avatar sx={{ width:90, height:90, mb:2, background:`linear-gradient(135deg, ${D.warning}, #D97706)`, boxShadow:`0 8px 24px ${D.warning}44` }}>
             <Code size={36} color="#fff"/>
           </Avatar>
           <Typography sx={{ fontWeight:700, color: D.text, fontSize:13, textAlign:'center' }}>Technical Skills</Typography>
-          <Typography sx={{ color: D.muted, fontSize:12 }}>
-            {(profile.skills?.programmingLanguages?.length || 0) + (profile.skills?.frameworks?.length || 0)} skills
-          </Typography>
+          <Typography sx={{ color: D.muted, fontSize:12 }}>{(profile.skills?.programmingLanguages?.length || 0) + (profile.skills?.frameworks?.length || 0)} skills</Typography>
         </Box>
         <Box sx={{ flex:1 }}>
-          {[
-            ['Programming Languages','programmingLanguages'],
-            ['Frameworks','frameworks'],
-            ['Databases','databases'],
-            ['Tools','tools'],
-          ].map(([label, field]) => {
-            // Use raw text while editing, joined array when viewing
-            const rawVal = editMode
-              ? (skillText[field] !== undefined ? skillText[field] : (profile.skills?.[field] || []).join(', '))
-              : (profile.skills?.[field] || []).join(', ');
+          {[['Programming Languages','programmingLanguages'],['Frameworks','frameworks'],['Databases','databases'],['Tools','tools']].map(([label, field]) => {
+            const rawVal = editMode ? (skillText[field] !== undefined ? skillText[field] : (profile.skills?.[field] || []).join(', ')) : (profile.skills?.[field] || []).join(', ');
             return (
               <Box key={field} sx={{ mb:2 }}>
-                <TextField fullWidth label={`${label} (comma-separated)`}
-                  value={rawVal}
-                  disabled={!editMode}
-                  size="small"
+                <TextField fullWidth label={`${label} (comma-separated)`} value={rawVal} disabled={!editMode} size="small"
                   onChange={e => handleSkillTextChange(field, e.target.value)}
-                  onBlur={e => {
-                    // Only split into array on blur (when user leaves the field)
-                    setSkill(field, e.target.value);
-                    setSkillText(p => ({ ...p, [field]: undefined }));
-                  }}
-                  placeholder="e.g. React, Node.js, Python"
-                  sx={fSx} />
+                  onBlur={e => { setSkill(field, e.target.value); setSkillText(p => ({ ...p, [field]: undefined })); }}
+                  placeholder="e.g. React, Node.js" sx={fSx} />
                 {(profile.skills?.[field] || []).length > 0 && (
                   <Box sx={{ display:'flex', flexWrap:'wrap', gap:0.5, mt:0.5 }}>
-                    {profile.skills[field].map(s => (
-                      <Chip key={s} label={s} size="small"
-                        sx={{ background:`${D.warning}22`, color: D.warning, fontWeight:600, fontSize:11 }} />
-                    ))}
+                    {profile.skills[field].map(s => <Chip key={s} label={s} size="small" sx={{ background:`${D.warning}22`, color: D.warning, fontWeight:600, fontSize:11 }} />)}
                   </Box>
                 )}
               </Box>
             );
           })}
         </Box>
+      </Box>
+      {/* Mobile: full width */}
+      <Box sx={{ display:{ xs:'block', sm:'none' } }}>
+        {[['Programming Languages','programmingLanguages'],['Frameworks','frameworks'],['Databases','databases'],['Tools','tools']].map(([label, field]) => {
+          const rawVal = editMode ? (skillText[field] !== undefined ? skillText[field] : (profile.skills?.[field] || []).join(', ')) : (profile.skills?.[field] || []).join(', ');
+          return (
+            <Box key={field} sx={{ mb:1.5 }}>
+              <TextField fullWidth label={label} value={rawVal} disabled={!editMode} size="small"
+                onChange={e => handleSkillTextChange(field, e.target.value)}
+                onBlur={e => { setSkill(field, e.target.value); setSkillText(p => ({ ...p, [field]: undefined })); }}
+                placeholder="e.g. React, Node.js" sx={fSx} />
+              {(profile.skills?.[field] || []).length > 0 && (
+                <Box sx={{ display:'flex', flexWrap:'wrap', gap:0.5, mt:0.5 }}>
+                  {profile.skills[field].map(s => <Chip key={s} label={s} size="small" sx={{ background:`${D.warning}22`, color: D.warning, fontWeight:600, fontSize:'0.6rem', height:18 }} />)}
+                </Box>
+              )}
+            </Box>
+          );
+        })}
       </Box>
     </Card>
   );
@@ -455,49 +441,79 @@ export default function UserProfile() {
     };
     return (
       <Card sx={cardSx}>
-        <Typography variant="h6" sx={{ fontWeight:700, mb:3, color: D.text }}>Applied Jobs</Typography>
+        <Typography sx={{ fontWeight:700, mb:{ xs:1.5, sm:3 }, color: D.text, fontSize:{ xs:'0.9rem', sm:'1.1rem' } }}>Applied Jobs</Typography>
         {myApps.length === 0 ? (
-          <Box sx={{ textAlign:'center', py:4 }}>
-            <Briefcase size={40} color={D.border} style={{ marginBottom:12 }}/>
-            <Typography sx={{ color: D.muted }}>No applications yet.</Typography>
-            <Typography sx={{ color: D.muted, fontSize:12, mt:0.5 }}>Browse jobs and click Apply Now to get started.</Typography>
+          <Box sx={{ textAlign:'center', py:{ xs:3, sm:4 } }}>
+            <Briefcase size={32} color={D.border} style={{ marginBottom:8 }}/>
+            <Typography sx={{ color: D.muted, fontSize:{ xs:'0.78rem', sm:'0.875rem' } }}>No applications yet.</Typography>
+            <Typography sx={{ color: D.muted, fontSize:{ xs:'0.68rem', sm:'0.75rem' }, mt:0.5 }}>Browse jobs and click Apply Now to get started.</Typography>
           </Box>
         ) : (
-          <List>
-            {myApps.map((app, i) => {
-              const job = app.jobId;
-              const sc  = statusColor[app.status] || D.primary;
-              return (
-                <React.Fragment key={app._id || i}>
-                  <ListItem sx={{ px:0, py:1.5 }}>
-                    <ListItemIcon>
-                      <Avatar sx={{ width:36, height:36, background:`linear-gradient(135deg, ${D.accent}, #0EA5E9)` }}>
-                        <Briefcase size={18} color="#fff"/>
-                      </Avatar>
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={
-                        <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                          <Typography sx={{ fontWeight:700, color: D.text, fontSize:14 }}>
-                            {job?.title || app.jobTitle}
-                          </Typography>
-                          <Chip label={app.status} size="small"
-                            sx={{ background:`${sc}22`, color: sc, fontWeight:600, fontSize:11 }} />
-                        </Box>
-                      }
-                      secondary={
-                        <Typography sx={{ color: D.muted, fontSize:12 }}>
-                          {job?.company || app.company}
-                          {' · Applied: '}{new Date(app.createdAt).toLocaleDateString('en-US', { day:'numeric', month:'short', year:'numeric' })}
+          <>
+            {/* Mobile: compact card rows */}
+            <Box sx={{ display:{ xs:'flex', sm:'none' }, flexDirection:'column', gap:1 }}>
+              {myApps.map((app, i) => {
+                const job = app.jobId;
+                const sc  = statusColor[app.status] || D.primary;
+                return (
+                  <Box key={app._id || i} sx={{
+                    display:'flex', alignItems:'center', gap:1,
+                    p:'10px 12px', borderRadius:1.5,
+                    background: D.bg, border:`1px solid ${D.border}`,
+                    '&:hover':{ borderColor: sc },
+                  }}>
+                    <Avatar sx={{ width:30, height:30, flexShrink:0, background:`linear-gradient(135deg, ${D.accent}, #0EA5E9)` }}>
+                      <Briefcase size={13} color="#fff"/>
+                    </Avatar>
+                    <Box sx={{ flex:1, minWidth:0 }}>
+                      <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:0.5, mb:0.2 }}>
+                        <Typography sx={{ fontWeight:700, color: D.text, fontSize:'0.75rem', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                          {job?.title || app.jobTitle}
                         </Typography>
-                      }
-                    />
-                  </ListItem>
-                  {i < myApps.length - 1 && <Divider sx={{ borderColor: D.border }}/>}
-                </React.Fragment>
-              );
-            })}
-          </List>
+                        <Chip label={app.status} size="small" sx={{ background:`${sc}22`, color: sc, fontWeight:600, fontSize:'0.55rem', height:18, flexShrink:0 }} />
+                      </Box>
+                      <Typography sx={{ color: D.muted, fontSize:'0.65rem' }}>
+                        {job?.company || app.company} · {new Date(app.createdAt).toLocaleDateString('en-US', { day:'numeric', month:'short', year:'numeric' })}
+                      </Typography>
+                    </Box>
+                  </Box>
+                );
+              })}
+            </Box>
+
+            {/* Desktop: original List layout */}
+            <List sx={{ display:{ xs:'none', sm:'block' } }}>
+              {myApps.map((app, i) => {
+                const job = app.jobId;
+                const sc  = statusColor[app.status] || D.primary;
+                return (
+                  <React.Fragment key={app._id || i}>
+                    <ListItem sx={{ px:0, py:1.5 }}>
+                      <ListItemIcon>
+                        <Avatar sx={{ width:36, height:36, background:`linear-gradient(135deg, ${D.accent}, #0EA5E9)` }}>
+                          <Briefcase size={18} color="#fff"/>
+                        </Avatar>
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={
+                          <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                            <Typography sx={{ fontWeight:700, color: D.text, fontSize:14 }}>{job?.title || app.jobTitle}</Typography>
+                            <Chip label={app.status} size="small" sx={{ background:`${sc}22`, color: sc, fontWeight:600, fontSize:11 }} />
+                          </Box>
+                        }
+                        secondary={
+                          <Typography sx={{ color: D.muted, fontSize:12 }}>
+                            {job?.company || app.company}{' · Applied: '}{new Date(app.createdAt).toLocaleDateString('en-US', { day:'numeric', month:'short', year:'numeric' })}
+                          </Typography>
+                        }
+                      />
+                    </ListItem>
+                    {i < myApps.length - 1 && <Divider sx={{ borderColor: D.border }}/>}
+                  </React.Fragment>
+                );
+              })}
+            </List>
+          </>
         )}
       </Card>
     );
@@ -505,8 +521,27 @@ export default function UserProfile() {
 
   const renderSettings = () => (
     <Card sx={cardSx}>
-      <Typography variant="h6" sx={{ fontWeight:700, mb:3, color: D.text }}>Account Settings</Typography>
-      <Grid container spacing={2}>
+      <Typography sx={{ fontWeight:700, mb:{ xs:1.5, sm:3 }, color: D.text, fontSize:{ xs:'0.9rem', sm:'1.1rem' } }}>Account Settings</Typography>
+
+      {/* Mobile: compact cards */}
+      <Box sx={{ display:{ xs:'flex', sm:'none' }, flexDirection:'column', gap:1.25 }}>
+        {[
+          { title:'Change Password',       desc:'Update your login password', btn:'Update Password',      onClick: () => setPwDialog(true) },
+          { title:'Notification Settings', desc:'Manage email & app alerts',  btn:'Manage Notifications', onClick: () => alert('Coming soon') },
+        ].map(({ title, desc, btn, onClick }) => (
+          <Box key={title} sx={{ p:'14px', borderRadius:2, background: D.bg, border:`1px solid ${D.border}`, '&:hover':{ borderColor: D.primary } }}>
+            <Typography sx={{ fontWeight:700, color: D.text, fontSize:'0.78rem', mb:0.25 }}>{title}</Typography>
+            <Typography sx={{ color: D.muted, fontSize:'0.65rem', mb:1.25 }}>{desc}</Typography>
+            <Button fullWidth onClick={onClick}
+              sx={{ borderRadius:2, textTransform:'none', border:`1px solid ${D.primary}`, color: D.primary, fontSize:'0.72rem', minHeight:34, py:0.75, '&:hover':{ background: D.primary, color:'#fff' } }}>
+              {btn}
+            </Button>
+          </Box>
+        ))}
+      </Box>
+
+      {/* Desktop: original Grid + Paper layout */}
+      <Grid container spacing={2} sx={{ display:{ xs:'none', sm:'flex' } }}>
         {[
           { title:'Change Password',       btn:'Update Password',       onClick: () => setPwDialog(true) },
           { title:'Notification Settings', btn:'Manage Notifications',  onClick: () => alert('Coming soon') },
@@ -515,8 +550,7 @@ export default function UserProfile() {
             <Paper sx={{ ...paperSx, transition:'all 0.2s', '&:hover':{ borderColor: D.primary } }}>
               <Typography sx={{ fontWeight:700, mb:1.5, color: D.text, fontSize:14 }}>{title}</Typography>
               <Button fullWidth variant="outlined" onClick={onClick}
-                sx={{ borderRadius:2, textTransform:'none', borderColor: D.primary, color: D.primary,
-                  '&:hover':{ background: D.primary, color:'#fff' } }}>
+                sx={{ borderRadius:2, textTransform:'none', borderColor: D.primary, color: D.primary, '&:hover':{ background: D.primary, color:'#fff' } }}>
                 {btn}
               </Button>
             </Paper>
@@ -537,33 +571,32 @@ export default function UserProfile() {
   return (
     <Box sx={{ display:'flex', background: D.bg, minHeight:'100vh' }}>
       <Sidebar />
-      <Box sx={{ marginLeft:{ xs:0, lg:'240px' }, width:{ xs:'100%', lg:'calc(100% - 240px)' }, p:{ xs:'16px', sm:'24px', lg:'32px' }, pt:{ xs:'64px', lg:'32px' } }}>
+      <Box sx={{ marginLeft:{ xs:0, lg:'240px' }, width:{ xs:'100%', lg:'calc(100% - 240px)' }, minWidth:0, p:{ xs:'12px', sm:'24px', lg:'32px' }, pt:{ xs:'64px', lg:'32px' }, overflowX:'hidden' }}>
 
-        {/* Header banner */}
-        <Box sx={{ mb:4, p:3, borderRadius:3, background:`linear-gradient(135deg, ${D.primary}, ${D.secondary})`,
-          boxShadow:`0 8px 32px ${D.primary}44` }}>
-          <Box sx={{ display:'flex', flexDirection:'column', alignItems:'center', gap:1.5 }}>
-            <Avatar sx={{ width:80, height:80, background:'rgba(255,255,255,0.2)', fontSize:32, fontWeight:700,
-              border:'3px solid rgba(255,255,255,0.4)', boxShadow:'0 4px 16px rgba(0,0,0,0.2)' }}>
+        {/* Header banner — compact on mobile */}
+        <Box sx={{ mb:{ xs:2, sm:3 }, p:{ xs:'14px 16px', sm:3 }, borderRadius:{ xs:2, sm:3 }, background:`linear-gradient(135deg, ${D.primary}, ${D.secondary})`, boxShadow:`0 8px 32px ${D.primary}44` }}>
+          <Box sx={{ display:'flex', alignItems:'center', gap:{ xs:1.5, sm:2 } }}>
+            <Avatar sx={{ width:{ xs:48, sm:72 }, height:{ xs:48, sm:72 }, background:'rgba(255,255,255,0.2)', fontSize:{ xs:20, sm:28 }, fontWeight:700, border:'2px solid rgba(255,255,255,0.4)', flexShrink:0 }}>
               {profile.profilePhoto
                 ? <img src={profile.profilePhoto} alt="profile" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:'50%' }}/>
-                : profile.name ? profile.name.charAt(0).toUpperCase() : <User size={36} color="#fff"/>}
+                : profile.name ? profile.name.charAt(0).toUpperCase() : <User size={24} color="#fff"/>}
             </Avatar>
-            <Box sx={{ textAlign:'center' }}>
-              <Typography variant="h5" sx={{ fontWeight:700, color:'#fff' }}>{profile.name || 'Your Profile'}</Typography>
-              <Typography sx={{ opacity:0.85, color:'#fff', fontSize:14 }}>
+            <Box>
+              <Typography sx={{ fontWeight:700, color:'#fff', fontSize:{ xs:'0.95rem', sm:'1.25rem' } }}>{profile.name || 'Your Profile'}</Typography>
+              <Typography sx={{ opacity:0.85, color:'#fff', fontSize:{ xs:'0.72rem', sm:'0.875rem' } }}>
                 {profile.professional?.currentJobTitle || 'Complete your profile to get started'}
               </Typography>
             </Box>
           </Box>
         </Box>
 
-        {/* Tabs */}
-        <Card sx={{ mb:3, background: D.surface, border:`1px solid ${D.border}`, borderRadius:3 }}>
+        {/* Tabs — compact on mobile */}
+        <Card sx={{ mb:{ xs:1.5, sm:3 }, background: D.surface, border:`1px solid ${D.border}`, borderRadius:{ xs:2, sm:3 } }}>
           <Tabs value={activeTab} onChange={(_, v) => { setActiveTab(v); setEditMode(false); }}
             variant="scrollable" scrollButtons="auto"
             sx={{
-              '& .MuiTab-root': { textTransform:'none', fontWeight:600, minHeight:56, color: D.muted,
+              minHeight:{ xs:44, sm:56 },
+              '& .MuiTab-root': { textTransform:'none', fontWeight:600, minHeight:{ xs:44, sm:56 }, color: D.muted, fontSize:{ xs:'0.68rem', sm:'0.875rem' }, px:{ xs:1, sm:2 },
                 '&.Mui-selected':{ color: D.primary } },
               '& .MuiTabs-indicator':{ background:`linear-gradient(90deg, ${D.primary}, ${D.secondary})`, height:3, borderRadius:2 },
             }}>

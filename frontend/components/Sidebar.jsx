@@ -7,109 +7,130 @@ import {
 import NotificationBell from "./NotificationBell";
 
 const C = {
-  bg:'#0F172A', surface:'#1E293B', border:'#334155',
-  primary:'#6366F1', text:'#F1F5F9', muted:'#94A3B8',
+  bg: '#0F172A', surface: '#1E293B', border: '#334155',
+  primary: '#6366F1', text: '#F1F5F9', muted: '#94A3B8',
 };
 
 const adminMenu = [
-  { label:'Dashboard',          route:'/dashboard',           icon:LayoutDashboard },
-  { label:'Jobs',               route:'/jobs',                icon:Briefcase },
-  { label:'Create Job',         route:'/jobform',             icon:PlusCircle },
-  { label:'Candidates',         route:'/candidates',          icon:Users },
-  { label:'Schedule Interview', route:'/schedule-interview',  icon:Calendar },
+  { label: 'Dashboard',          route: '/dashboard',           icon: LayoutDashboard },
+  { label: 'Jobs',               route: '/jobs',                icon: Briefcase },
+  { label: 'Create Job',         route: '/jobform',             icon: PlusCircle },
+  { label: 'Candidates',         route: '/candidates',          icon: Users },
+  { label: 'Schedule Interview', route: '/schedule-interview',  icon: Calendar },
 ];
 
 const userMenu = [
-  { label:'Dashboard',       route:'/userdashboard',   icon:LayoutDashboard },
-  { label:'View Jobs',       route:'/jobs',            icon:Briefcase },
-  { label:'Saved Jobs',      route:'/saved-jobs',      icon:Star },
-  { label:'My Applications', route:'/my-applications', icon:ClipboardList },
-  { label:'My Profile',      route:'/user-profile',    icon:User },
+  { label: 'Dashboard',       route: '/userdashboard',   icon: LayoutDashboard },
+  { label: 'View Jobs',       route: '/jobs',            icon: Briefcase },
+  { label: 'Saved Jobs',      route: '/saved-jobs',      icon: Star },
+  { label: 'My Applications', route: '/my-applications', icon: ClipboardList },
+  { label: 'My Profile',      route: '/user-profile',    icon: User },
 ];
 
 export default function Sidebar() {
-  const navigate    = useNavigate();
-  const location    = useLocation();
-  const role        = localStorage.getItem('role');
-  const storedUser  = JSON.parse(localStorage.getItem('user') || '{}');
-  const userName    = storedUser?.name || 'User';
+  const navigate   = useNavigate();
+  const location   = useLocation();
+  const role       = localStorage.getItem('role');
+  const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const userName   = storedUser?.name || 'User';
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const menu = role === 'admin' ? adminMenu : userMenu;
-
   const logout = () => { localStorage.clear(); navigate('/'); };
 
   const Item = ({ label, route, icon: Icon }) => {
     const active = location.pathname === route;
     return (
-      <div onClick={() => { navigate(route); setMobileOpen(false); }}
+      <div
+        onClick={() => { navigate(route); setMobileOpen(false); }}
         style={{
-          display:'flex', alignItems:'center', gap:12,
-          padding:'11px 14px', borderRadius:10, marginBottom:4,
-          cursor:'pointer', transition:'all 0.2s',
+          display: 'flex', alignItems: 'center', gap: 12,
+          padding: '12px 14px', borderRadius: 10, marginBottom: 4,
+          cursor: 'pointer', transition: 'all 0.2s',
           background: active ? `linear-gradient(90deg,${C.primary}22,${C.primary}11)` : 'transparent',
           borderLeft: active ? `3px solid ${C.primary}` : '3px solid transparent',
           color: active ? C.text : C.muted,
+          minHeight: 44,
         }}
-        onMouseEnter={e => { if (!active) { e.currentTarget.style.background=C.surface; e.currentTarget.style.color=C.text; } }}
-        onMouseLeave={e => { if (!active) { e.currentTarget.style.background='transparent'; e.currentTarget.style.color=C.muted; } }}>
-        <Icon size={18}/>
-        <span style={{ fontSize:14, fontWeight: active?600:400 }}>{label}</span>
-        {active && <ChevronRight size={14} style={{ marginLeft:'auto' }}/>}
+        onMouseEnter={e => { if (!active) { e.currentTarget.style.background = C.surface; e.currentTarget.style.color = C.text; } }}
+        onMouseLeave={e => { if (!active) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = C.muted; } }}
+      >
+        <Icon size={18} />
+        <span style={{ fontSize: 14, fontWeight: active ? 600 : 400 }}>{label}</span>
+        {active && <ChevronRight size={14} style={{ marginLeft: 'auto' }} />}
       </div>
     );
   };
 
   const sidebarContent = (
     <div style={{
-      width:240, height:'100%', background:C.bg,
-      display:'flex', flexDirection:'column',
-      borderRight:`1px solid ${C.border}`, padding:'24px 16px',
-      overflowY:'auto',
+      width: 240, height: '100%', background: C.bg,
+      display: 'flex', flexDirection: 'column',
+      borderRight: `1px solid ${C.border}`, padding: '20px 14px',
+      overflowY: 'auto',
     }}>
-      {/* Logo + close on mobile */}
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:32, paddingLeft:4 }}>
-        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-          <div style={{ width:36, height:36, borderRadius:10, background:`linear-gradient(135deg,${C.primary},#8B5CF6)`, display:'flex', alignItems:'center', justifyContent:'center' }}>
-            <Briefcase size={18} color="#fff"/>
+      {/* Logo + close button */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28, paddingLeft: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{
+            width: 34, height: 34, borderRadius: 10,
+            background: `linear-gradient(135deg,${C.primary},#8B5CF6)`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            {/* RecruitHub logo — person + checkmark */}
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="7" r="4" fill="#fff" opacity="0.9"/>
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#fff" strokeWidth="2" strokeLinecap="round" opacity="0.9"/>
+              <circle cx="19" cy="5" r="4" fill="#10B981"/>
+              <path d="M17 5l1.5 1.5L21 4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
-          <span style={{ color:C.text, fontWeight:700, fontSize:18, letterSpacing:0.5 }}>ATS System</span>
+          <span style={{ color: C.text, fontWeight: 700, fontSize: 17, letterSpacing: 0.3 }}>RecruitHub</span>
         </div>
-        {/* Close button — mobile only */}
-        <button onClick={() => setMobileOpen(false)}
-          style={{ display:'none', background:'none', border:'none', cursor:'pointer', color:C.muted, padding:4 }}
-          className="sidebar-close-btn">
-          <X size={20}/>
+        <button
+          onClick={() => setMobileOpen(false)}
+          className="sidebar-close-btn"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.muted, padding: 6, borderRadius: 8, display: 'none' }}
+        >
+          <X size={20} />
         </button>
       </div>
 
-      <div style={{ marginBottom:20, paddingLeft:4 }}>
-        <span style={{ fontSize:11, color:C.muted, textTransform:'uppercase', letterSpacing:1 }}>
-          {role==='admin' ? 'Admin Panel' : 'User Panel'}
+      <div style={{ marginBottom: 16, paddingLeft: 4 }}>
+        <span style={{ fontSize: 11, color: C.muted, textTransform: 'uppercase', letterSpacing: 1 }}>
+          {role === 'admin' ? 'Admin Panel' : 'User Panel'}
         </span>
       </div>
 
-      <div style={{ flex:1 }}>
-        {menu.map(item => <Item key={item.route} {...item}/>)}
+      <div style={{ flex: 1 }}>
+        {menu.map(item => <Item key={item.route} {...item} />)}
       </div>
 
-      <div style={{ borderTop:`1px solid ${C.border}`, paddingTop:16, marginTop:16 }}>
-        <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:8, paddingLeft:4 }}>
-          <div style={{ width:34, height:34, borderRadius:'50%', background:`linear-gradient(135deg,${C.primary},#8B5CF6)`, display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontWeight:700, fontSize:14, flexShrink:0 }}>
+      {/* User info + logout */}
+      <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 14, marginTop: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, paddingLeft: 4 }}>
+          <div style={{
+            width: 34, height: 34, borderRadius: '50%',
+            background: `linear-gradient(135deg,${C.primary},#8B5CF6)`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#fff', fontWeight: 700, fontSize: 14, flexShrink: 0,
+          }}>
             {userName.charAt(0).toUpperCase()}
           </div>
-          <div style={{ flex:1, minWidth:0 }}>
-            <div style={{ color:C.text, fontSize:13, fontWeight:600, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{userName}</div>
-            <div style={{ color:C.muted, fontSize:11, textTransform:'capitalize' }}>{role}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ color: C.text, fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{userName}</div>
+            <div style={{ color: C.muted, fontSize: 11, textTransform: 'capitalize' }}>{role}</div>
           </div>
-          <NotificationBell userId={storedUser?.id || storedUser?._id}/>
+          <NotificationBell userId={storedUser?.id || storedUser?._id} />
         </div>
-        <div onClick={logout}
-          style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 14px', borderRadius:10, cursor:'pointer', color:'#F87171', transition:'all 0.2s' }}
-          onMouseEnter={e => e.currentTarget.style.background='rgba(248,113,113,0.1)'}
-          onMouseLeave={e => e.currentTarget.style.background='transparent'}>
-          <LogOut size={16}/>
-          <span style={{ fontSize:14 }}>Logout</span>
+        <div
+          onClick={logout}
+          style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 10, cursor: 'pointer', color: '#F87171', transition: 'all 0.2s', minHeight: 44 }}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(248,113,113,0.1)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+        >
+          <LogOut size={16} />
+          <span style={{ fontSize: 14 }}>Logout</span>
         </div>
       </div>
     </div>
@@ -120,7 +141,7 @@ export default function Sidebar() {
       <style>{`
         .sidebar-close-btn { display: none !important; }
         @media (max-width: 1024px) {
-          .sidebar-close-btn { display: flex !important; }
+          .sidebar-close-btn { display: flex !important; align-items: center; justify-content: center; }
         }
         .mobile-hamburger {
           display: none;
@@ -131,13 +152,15 @@ export default function Sidebar() {
           background: linear-gradient(135deg, #6366F1, #8B5CF6);
           border: none;
           border-radius: 10px;
-          width: 40px;
-          height: 40px;
+          width: 42px;
+          height: 42px;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+          box-shadow: 0 4px 16px rgba(99,102,241,0.45);
+          transition: transform 0.15s;
         }
+        .mobile-hamburger:active { transform: scale(0.93); }
         @media (max-width: 1024px) {
           .mobile-hamburger { display: flex; }
         }
@@ -145,9 +168,10 @@ export default function Sidebar() {
           display: none;
           position: fixed;
           inset: 0;
-          background: rgba(0,0,0,0.6);
+          background: rgba(0,0,0,0.65);
           z-index: 999;
-          backdrop-filter: blur(2px);
+          backdrop-filter: blur(3px);
+          -webkit-backdrop-filter: blur(3px);
         }
         @media (max-width: 1024px) {
           .sidebar-overlay.open { display: block; }
@@ -162,21 +186,23 @@ export default function Sidebar() {
         @media (max-width: 1024px) {
           .sidebar-desktop {
             transform: translateX(-100%);
-            transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+            transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+            box-shadow: none;
           }
           .sidebar-desktop.open {
             transform: translateX(0);
+            box-shadow: 8px 0 32px rgba(0,0,0,0.5);
           }
         }
       `}</style>
 
       {/* Hamburger button */}
-      <button className="mobile-hamburger" onClick={() => setMobileOpen(true)}>
-        <Menu size={20} color="#fff"/>
+      <button className="mobile-hamburger" onClick={() => setMobileOpen(true)} aria-label="Open menu">
+        <Menu size={20} color="#fff" />
       </button>
 
       {/* Overlay */}
-      <div className={`sidebar-overlay ${mobileOpen ? 'open' : ''}`} onClick={() => setMobileOpen(false)}/>
+      <div className={`sidebar-overlay ${mobileOpen ? 'open' : ''}`} onClick={() => setMobileOpen(false)} />
 
       {/* Sidebar */}
       <div className={`sidebar-desktop ${mobileOpen ? 'open' : ''}`}>

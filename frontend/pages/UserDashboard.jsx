@@ -1,44 +1,31 @@
 import Sidebar from "../components/Sidebar";
-import { Box, Grid, Card, Typography, Button, Chip, LinearProgress, CircularProgress } from "@mui/material";
-import { Briefcase, Clock, CheckCircle, Star, MapPin } from "lucide-react";
+import { Box, Card, Typography, Button, Chip, LinearProgress, CircularProgress, Avatar, TextField, InputAdornment, Collapse } from "@mui/material";
+import { Briefcase, Clock, CheckCircle, Star, MapPin, TrendingUp, Eye, ArrowRight, Search, Settings2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { applicationService, savedJobService, authService } from "../services/api";
 import NotificationBell from "../components/NotificationBell";
 
-const C = {
-  bg:'#0F172A', surface:'#1E293B', border:'#334155',
-  primary:'#6366F1', secondary:'#8B5CF6', accent:'#06B6D4',
-  warning:'#F59E0B', success:'#10B981', text:'#F1F5F9', muted:'#94A3B8',
-};
+const THEMES = [
+  { name:'Indigo', primary:'#6366F1', secondary:'#8B5CF6' },
+  { name:'Blue',   primary:'#3B82F6', secondary:'#06B6D4' },
+  { name:'Green',  primary:'#10B981', secondary:'#059669' },
+  { name:'Rose',   primary:'#F43F5E', secondary:'#EC4899' },
+  { name:'Orange', primary:'#F97316', secondary:'#F59E0B' },
+  { name:'Violet', primary:'#7C3AED', secondary:'#A855F7' },
+];
 
-const statusColor = {
-  Pending:              C.muted,
-  Shortlisted:          C.warning,
-  'Interview Scheduled':C.accent,
-  Selected:             C.success,
-  Rejected:             '#F87171',
-};
-
-// Calculate profile completion percentage based on filled fields
 const calcCompletion = (profile) => {
   if (!profile) return 0;
   const checks = [
-    !!profile.name,
-    !!profile.email,
-    !!profile.phoneNumber,
-    !!profile.gender,
-    !!profile.dateOfBirth,
-    !!(profile.address?.city),
-    !!(profile.professional?.currentJobTitle),
-    !!(profile.professional?.currentCompany),
-    !!(profile.professional?.totalExperience),
-    !!(profile.skills?.programmingLanguages?.length),
+    !!profile.name, !!profile.email, !!profile.phoneNumber, !!profile.gender,
+    !!profile.dateOfBirth, !!(profile.address?.city),
+    !!(profile.professional?.currentJobTitle), !!(profile.professional?.currentCompany),
+    !!(profile.professional?.totalExperience), !!(profile.skills?.programmingLanguages?.length),
     !!(profile.education?.length),
     !!(profile.resume?.portfolioLink || profile.resume?.githubProfile || profile.resume?.linkedinProfile),
   ];
-  const filled = checks.filter(Boolean).length;
-  return Math.round((filled / checks.length) * 100);
+  return Math.round((checks.filter(Boolean).length / checks.length) * 100);
 };
 
 export default function UserDashboard() {
@@ -51,6 +38,33 @@ export default function UserDashboard() {
   const [saved, setSaved]             = useState([]);
   const [loading, setLoading]         = useState(true);
   const [profileData, setProfileData] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [customizeOpen, setCustomizeOpen] = useState(false);
+  const [accentColor, setAccentColor] = useState('#6366F1');
+  const [visibleSections, setVisibleSections] = useState({
+    stats: true, recommended: true, activity: true, savedJobs: true,
+  });
+
+  // C is derived from accentColor — defined inside component
+  const theme = THEMES.find(t => t.primary === accentColor) || THEMES[0];
+  const C = {
+    bg:       '#0F172A',
+    surface:  '#1E293B',
+    primary:  theme.primary,
+    secondary:theme.secondary,
+    accent:   '#06B6D4',
+    success:  '#10B981',
+    warning:  '#F59E0B',
+    danger:   '#EF4444',
+    text:     '#F1F5F9',
+    muted:    '#94A3B8',
+    border:   '#334155',
+  };
+
+  const statusColor = {
+    Pending: C.warning, Shortlisted: C.accent,
+    'Interview Scheduled': C.primary, Selected: C.success, Rejected: C.danger,
+  };
 
   useEffect(() => {
     if (!userId) { setLoading(false); return; }
@@ -62,15 +76,14 @@ export default function UserDashboard() {
   }, [userId]);
 
   const completion = calcCompletion(profileData);
-
   const inProgress = apps.filter(a => a.status === 'Interview Scheduled').length;
   const offers     = apps.filter(a => a.status === 'Selected').length;
 
   const stats = [
-    { label:'Applications', value: apps.length,   icon: Briefcase, gradient:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, route:'/my-applications' },
-    { label:'Saved Jobs',   value: saved.length,  icon: Star,      gradient:`linear-gradient(135deg, ${C.accent}, #0EA5E9)`,         route:'/saved-jobs' },
-    { label:'Interviews',   value: inProgress,    icon: Clock,     gradient:`linear-gradient(135deg, ${C.warning}, #D97706)`,        route:'/my-applications' },
-    { label:'Offers',       value: offers,        icon: CheckCircle,gradient:`linear-gradient(135deg, ${C.success}, #059669)`,       route:'/my-applications' },
+    { label:'Applications Sent',    value: apps.length,  icon: Briefcase,   color: C.primary },
+    { label:'Interviews Scheduled', value: inProgress,   icon: Clock,       color: C.secondary },
+    { label:'Saved Jobs',           value: saved.length, icon: Star,        color: C.accent },
+    { label:'Offers',               value: offers,       icon: CheckCircle, color: C.success },
   ];
 
   if (loading) return (
@@ -82,164 +95,265 @@ export default function UserDashboard() {
   return (
     <Box sx={{ display:'flex', background: C.bg, minHeight:'100vh' }}>
       <Sidebar />
-      <Box sx={{ marginLeft:{ xs:0, lg:'240px' }, width:'100%', p:{ xs:'12px', sm:'24px', lg:'32px' }, pt:{ xs:'60px', lg:'32px' } }}>
+      <Box sx={{
+        marginLeft:{ xs:0, lg:'240px' },
+        width:{ xs:'100%', lg:'calc(100% - 240px)' },
+        minWidth:0, overflowX:'hidden',
+        p:{ xs:'12px', sm:'16px', lg:'24px' },
+        pt:{ xs:'64px', lg:'24px' },
+      }}>
 
-        {/* Header */}
-        <Box sx={{ mb:3, display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:1 }}>
-          <Box sx={{ flex:1, minWidth:0 }}>
-            <Typography sx={{ fontWeight:700, color: C.text, fontSize:{ xs:'1.1rem', sm:'1.5rem', lg:'2rem' }, lineHeight:1.3 }}>
-              Welcome back, {userName.split(' ')[0]} 👋
+        {/* ── Top bar ── */}
+        <Box sx={{ mb:2 }}>
+          <Box sx={{ display:'flex', alignItems:'center', gap:1.5, mb: customizeOpen ? 1.5 : 0 }}>
+            <Typography sx={{ fontWeight:700, color: C.text, fontSize:'1.1rem', flexShrink:0, display:{ xs:'none', sm:'block' } }}>
+              Dashboard
             </Typography>
-            <Typography sx={{ color: C.muted, mt:0.5, fontSize:{ xs:'0.75rem', sm:'0.875rem' } }}>Here's your job search overview</Typography>
-          </Box>
-          <Box sx={{ display:'flex', alignItems:'center', gap:1, flexShrink:0 }}>
-            <NotificationBell userId={userId} />
-            <Button onClick={() => navigate('/jobs')} startIcon={<Briefcase size={14}/>}
-              sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:'#fff',
-                borderRadius:2, textTransform:'none', fontWeight:600,
-                px:{ xs:1.5, sm:3 }, fontSize:{ xs:'0.72rem', sm:'0.875rem' },
-                boxShadow:`0 4px 16px ${C.primary}44`, whiteSpace:'nowrap' }}>
-              <Box component="span" sx={{ display:{ xs:'none', sm:'inline' } }}>Browse Jobs</Box>
-              <Box component="span" sx={{ display:{ xs:'inline', sm:'none' } }}>Jobs</Box>
+            <TextField size="small" placeholder="Search jobs, applications..."
+              value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && searchQuery.trim()) navigate(`/jobs`); }}
+              sx={{ flex:1,
+                '& .MuiOutlinedInput-root':{ borderRadius:2, background: C.surface, color: C.text, fontSize:'0.8rem',
+                  '& fieldset':{ borderColor: C.border }, '&:hover fieldset':{ borderColor: C.primary }, '&.Mui-focused fieldset':{ borderColor: C.primary } },
+                '& .MuiInputBase-input::placeholder':{ color: C.muted, opacity:1 },
+              }}
+              InputProps={{ startAdornment: <InputAdornment position="start"><Search size={14} color={C.muted}/></InputAdornment> }}
+            />
+            <Button onClick={() => setCustomizeOpen(o => !o)} startIcon={<Settings2 size={14}/>}
+              sx={{ background: customizeOpen ? C.primary : C.surface, color: customizeOpen ? '#fff' : C.muted,
+                borderRadius:2, textTransform:'none', fontWeight:600, fontSize:'0.75rem', minHeight:36, px:1.75,
+                border:`1px solid ${C.border}`, whiteSpace:'nowrap', flexShrink:0,
+                '&:hover':{ background: C.primary, color:'#fff', borderColor: C.primary } }}>
+              <Box component="span" sx={{ display:{ xs:'none', sm:'inline' } }}>Customize Dashboard</Box>
+              <Box component="span" sx={{ display:{ xs:'inline', sm:'none' } }}>Customize</Box>
             </Button>
+            <NotificationBell userId={userId} />
           </Box>
+
+          {/* Customize panel */}
+          <Collapse in={customizeOpen}>
+            <Box sx={{ p:'14px 16px', borderRadius:2, background: C.surface, border:`1px solid ${C.border}`, display:'flex', flexDirection:'column', gap:2 }}>
+              {/* Theme color */}
+              <Box>
+                <Typography sx={{ color: C.muted, fontSize:'0.7rem', fontWeight:600, mb:1, textTransform:'uppercase', letterSpacing:0.5 }}>Theme Color</Typography>
+                <Box sx={{ display:'flex', gap:1.5, flexWrap:'wrap' }}>
+                  {THEMES.map(t => (
+                    <Box key={t.name} onClick={() => setAccentColor(t.primary)}
+                      sx={{ display:'flex', flexDirection:'column', alignItems:'center', gap:0.5, cursor:'pointer' }}>
+                      <Box sx={{
+                        width:30, height:30, borderRadius:'50%',
+                        background:`linear-gradient(135deg,${t.primary},${t.secondary})`,
+                        border: accentColor === t.primary ? '3px solid #fff' : '3px solid transparent',
+                        boxShadow: accentColor === t.primary ? `0 0 0 2px ${t.primary}` : 'none',
+                        transition:'all 0.2s', '&:hover':{ transform:'scale(1.15)' },
+                      }}/>
+                      <Typography sx={{ color: accentColor === t.primary ? C.text : C.muted, fontSize:'0.58rem', fontWeight: accentColor === t.primary ? 700 : 400 }}>{t.name}</Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+              {/* Section toggles */}
+              <Box>
+                <Typography sx={{ color: C.muted, fontSize:'0.7rem', fontWeight:600, mb:1, textTransform:'uppercase', letterSpacing:0.5 }}>Visible Sections</Typography>
+                <Box sx={{ display:'flex', flexWrap:'wrap', gap:1 }}>
+                  {[
+                    { key:'stats',       label:'Stat Cards',     icon:'📊' },
+                    { key:'recommended', label:'Recommended',    icon:'⭐' },
+                    { key:'activity',    label:'Recent Activity',icon:'🕐' },
+                    { key:'savedJobs',   label:'Saved Jobs',     icon:'🔖' },
+                  ].map(({ key, label, icon }) => (
+                    <Button key={key} size="small" onClick={() => setVisibleSections(s => ({ ...s, [key]: !s[key] }))}
+                      sx={{ borderRadius:2, textTransform:'none', fontSize:'0.72rem', minHeight:30, px:1.5,
+                        background: visibleSections[key] ? `${C.primary}22` : C.bg,
+                        color: visibleSections[key] ? C.primary : C.muted,
+                        border:`1px solid ${visibleSections[key] ? C.primary : C.border}`,
+                        '&:hover':{ background:`${C.primary}22`, color: C.primary, borderColor: C.primary } }}>
+                      {icon} {label} {visibleSections[key] ? '✓' : ''}
+                    </Button>
+                  ))}
+                </Box>
+              </Box>
+            </Box>
+          </Collapse>
         </Box>
 
-        {/* Stat Cards */}
-        <Grid container spacing={{ xs:1.5, sm:2, lg:3 }} sx={{ mb:3 }}>
-          {stats.map(({ label, value, icon: Icon, gradient, route }, i) => (
-            <Grid item xs={6} sm={6} lg={3} key={i}>
-              <Card onClick={() => navigate(route)} sx={{ p:{ xs:1.5, sm:2.5, lg:3 }, background: C.surface, border:`1px solid ${C.border}`, borderRadius:3,
-                cursor:'pointer', transition:'all 0.3s', minHeight:{ xs:80, sm:110 },
-                '&:hover':{ transform:'translateY(-4px)', boxShadow:`0 12px 32px rgba(0,0,0,0.4)`, borderColor: C.primary } }}>
-                <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:1 }}>
-                  <Box sx={{ flex:1, minWidth:0 }}>
-                    <Typography sx={{ color: C.muted, fontSize:{ xs:10, sm:13 }, mb:0.5, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{label}</Typography>
-                    <Typography sx={{ fontWeight:700, color: C.text, lineHeight:1, fontSize:{ xs:'1.4rem', sm:'1.8rem', lg:'2rem' } }}>{value}</Typography>
-                  </Box>
-                  <Box sx={{ p:{ xs:1, sm:1.5 }, borderRadius:2, background: gradient, flexShrink:0 }}>
-                    <Icon size={20} color="#fff"/>
+        {/* ── Welcome banner + Profile completion ── */}
+        <Box sx={{ display:'grid', gridTemplateColumns:{ xs:'1fr', md:'1fr 320px' }, gap:2, mb:2.5 }}>
+          <Card sx={{ borderRadius:2.5, background:`linear-gradient(135deg,${C.primary},${C.secondary})`, boxShadow:`0 8px 24px ${C.primary}33`, p:{ xs:'20px', sm:'24px' }, position:'relative', overflow:'hidden' }}>
+            <Box sx={{ position:'absolute', top:-20, right:-20, width:120, height:120, borderRadius:'50%', background:'rgba(255,255,255,0.08)' }}/>
+            <Box sx={{ position:'absolute', bottom:-30, right:60, width:80, height:80, borderRadius:'50%', background:'rgba(255,255,255,0.06)' }}/>
+            <Typography sx={{ color:'rgba(255,255,255,0.8)', fontSize:'0.75rem', mb:0.5 }}>Welcome back</Typography>
+            <Typography sx={{ color:'#fff', fontWeight:800, fontSize:{ xs:'1.3rem', sm:'1.5rem' }, mb:0.5 }}>
+              Good morning, {userName.split(' ')[0]} 👋
+            </Typography>
+            <Typography sx={{ color:'rgba(255,255,255,0.75)', fontSize:'0.8rem', mb:2 }}>Ready to find your next opportunity?</Typography>
+            <Button onClick={() => navigate('/jobs')} size="small"
+              sx={{ background:'rgba(255,255,255,0.2)', color:'#fff', borderRadius:2, textTransform:'none', fontWeight:600, fontSize:'0.75rem', px:2, minHeight:32, border:'1px solid rgba(255,255,255,0.3)', '&:hover':{ background:'rgba(255,255,255,0.3)' } }}>
+              View All Jobs →
+            </Button>
+          </Card>
+          <Card sx={{ borderRadius:2.5, p:{ xs:'16px', sm:'20px' }, boxShadow:'0 2px 12px rgba(0,0,0,0.3)', border:`1px solid ${C.border}`, background: C.surface }}>
+            <Typography sx={{ fontWeight:700, color: C.text, fontSize:'0.875rem', mb:2 }}>Profile Completion</Typography>
+            <Box sx={{ display:'flex', alignItems:'center', gap:2.5 }}>
+              {/* Circular progress */}
+              <Box sx={{ position:'relative', flexShrink:0 }}>
+                <CircularProgress
+                  variant="determinate"
+                  value={100}
+                  size={72}
+                  thickness={4}
+                  sx={{ color: C.border, position:'absolute', top:0, left:0 }}
+                />
+                <CircularProgress
+                  variant="determinate"
+                  value={completion}
+                  size={72}
+                  thickness={4}
+                  sx={{ color: C.primary, '& .MuiCircularProgress-circle':{ strokeLinecap:'round' } }}
+                />
+                <Box sx={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  <Typography sx={{ fontWeight:800, color: C.text, fontSize:'0.9rem', lineHeight:1 }}>{completion}%</Typography>
+                </Box>
+              </Box>
+              {/* Text + button */}
+              <Box sx={{ flex:1, minWidth:0 }}>
+                <Typography sx={{ color: C.text, fontWeight:600, fontSize:'0.8rem', mb:0.5 }}>
+                  {completion === 100 ? 'Profile Complete!' : `${100 - completion}% remaining`}
+                </Typography>
+                <Typography sx={{ color: C.muted, fontSize:'0.68rem', mb:1.5 }}>
+                  Complete your profile to get more recruiter views
+                </Typography>
+                <Button fullWidth onClick={() => navigate('/user-profile')} size="small"
+                  sx={{ background:`linear-gradient(135deg,${C.primary},${C.secondary})`, color:'#fff', borderRadius:2, textTransform:'none', fontWeight:600, fontSize:'0.72rem', minHeight:30 }}>
+                  Complete Profile →
+                </Button>
+              </Box>
+            </Box>
+          </Card>
+        </Box>
+
+        {/* ── Stat cards ── */}
+        {visibleSections.stats && (
+          <Box sx={{ display:'grid', gridTemplateColumns:{ xs:'repeat(2,1fr)', lg:'repeat(4,1fr)' }, gap:{ xs:1.5, sm:2 }, mb:2.5 }}>
+            {stats.map(({ label, value, icon: Icon, color }, i) => (
+              <Card key={i} sx={{ borderRadius:2, p:{ xs:'14px 12px', sm:'16px' }, boxShadow:'0 2px 8px rgba(0,0,0,0.2)', border:`1px solid ${C.border}`, background: C.surface, transition:'all 0.2s', cursor:'pointer', '&:hover':{ boxShadow:`0 6px 20px rgba(0,0,0,0.3)`, transform:'translateY(-2px)', borderColor: C.primary } }}>
+                <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', mb:1 }}>
+                  <Typography sx={{ color: C.muted, fontSize:{ xs:'0.65rem', sm:'0.72rem' }, fontWeight:500, lineHeight:1.3 }}>{label}</Typography>
+                  <Box sx={{ width:{ xs:28, sm:32 }, height:{ xs:28, sm:32 }, borderRadius:1.5, background:`${color}18`, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    <Icon size={14} color={color}/>
                   </Box>
                 </Box>
+                <Typography sx={{ fontWeight:800, color: C.text, fontSize:{ xs:'1.5rem', sm:'1.75rem' }, lineHeight:1 }}>{value}</Typography>
               </Card>
-            </Grid>
-          ))}
-        </Grid>
+            ))}
+          </Box>
+        )}
 
-        <Grid container spacing={3} alignItems="stretch">
-          {/* Recent Applications */}
-          <Grid item xs={12} md={6}>
-            <Card sx={{ p:3, background: C.surface, border:`1px solid ${C.border}`, borderRadius:3,
-              height:420, maxHeight:420, display:'flex', flexDirection:'column' }}>
-              <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:3, flexShrink:0 }}>
-                <Typography variant="h6" sx={{ fontWeight:700, color: C.text }}>Recent Applications</Typography>
-                <Button size="small" onClick={() => navigate('/my-applications')}
-                  sx={{ color: C.accent, textTransform:'none', fontWeight:600 }}>View All</Button>
+        {/* ── Recommended + Right column ── */}
+        <Box sx={{ display:'grid', gridTemplateColumns:{ xs:'1fr', lg:'1.6fr 1fr' }, gap:2 }}>
+
+          {visibleSections.recommended && (
+            <Card sx={{ borderRadius:2.5, p:{ xs:'12px', sm:'14px' }, boxShadow:'0 2px 12px rgba(0,0,0,0.3)', background: C.surface, border:`1px solid ${C.border}` }}>
+              <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:0.75 }}>
+                <Box>
+                  <Typography sx={{ fontWeight:700, color: C.text, fontSize:'0.875rem' }}>Recommended for You</Typography>
+                  <Typography sx={{ color: C.muted, fontSize:'0.65rem' }}>AI-powered matches based on your profile</Typography>
+                </Box>
+                <Button size="small" onClick={() => navigate('/jobs')} sx={{ color: C.primary, textTransform:'none', fontWeight:600, fontSize:'0.7rem', minHeight:'unset' }}>View All</Button>
               </Box>
-              <Box sx={{ flex:1, overflowY:'auto', pr:0.5,
-                '&::-webkit-scrollbar':{ width:4 },
-                '&::-webkit-scrollbar-track':{ background:'transparent' },
-                '&::-webkit-scrollbar-thumb':{ background: C.border, borderRadius:2 } }}>
-                {apps.length === 0 ? (
-                  <Box sx={{ textAlign:'center', py:6 }}>
-                    <Briefcase size={36} color={C.border} style={{ marginBottom:8 }}/>
-                    <Typography sx={{ color: C.muted, fontSize:13 }}>No applications yet</Typography>
-                    <Button size="small" onClick={() => navigate('/jobs')} sx={{ mt:1, color: C.primary, textTransform:'none' }}>Browse Jobs</Button>
+              {apps.length === 0 ? (
+                <Box sx={{ textAlign:'center', py:3 }}>
+                  <Briefcase size={28} color={C.border} style={{ marginBottom:6 }}/>
+                  <Typography sx={{ color: C.muted, fontSize:'0.75rem' }}>No recommendations yet</Typography>
+                  <Button size="small" onClick={() => navigate('/jobs')} sx={{ mt:1, color: C.primary, textTransform:'none', fontSize:'0.7rem' }}>Browse Jobs</Button>
+                </Box>
+              ) : apps.slice(0,3).map((app, i) => {
+                const sc  = statusColor[app.status] || C.muted;
+                const job = app.jobId;
+                return (
+                  <Box key={i} sx={{ p:'10px 12px', mb:1, borderRadius:1.5, border:`1px solid ${C.border}`, background: C.bg, transition:'all 0.2s', '&:hover':{ borderColor: C.primary } }}>
+                    <Box sx={{ display:'flex', alignItems:'center', gap:1.25 }}>
+                      <Avatar sx={{ width:32, height:32, borderRadius:1.5, background:`linear-gradient(135deg,${C.primary},${C.secondary})`, fontSize:13, fontWeight:700, flexShrink:0 }}>
+                        {(job?.title || app.jobTitle || '?').charAt(0)}
+                      </Avatar>
+                      <Box sx={{ flex:1, minWidth:0 }}>
+                        <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                          <Typography sx={{ fontWeight:700, color: C.text, fontSize:'0.78rem', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{job?.title || app.jobTitle}</Typography>
+                          <Chip label={app.status} size="small" sx={{ background:`${sc}22`, color: sc, fontWeight:600, fontSize:'0.55rem', height:16, flexShrink:0, ml:0.5 }}/>
+                        </Box>
+                        <Typography sx={{ color: C.muted, fontSize:'0.63rem' }}>{job?.company || app.company}</Typography>
+                        <Box sx={{ display:'flex', gap:1.5, mt:0.2 }}>
+                          {job?.location && <Box sx={{ display:'flex', alignItems:'center', gap:0.4, color: C.muted, fontSize:'0.6rem' }}><MapPin size={9} color={C.muted}/>{job.location}</Box>}
+                          {job?.type && <Box sx={{ display:'flex', alignItems:'center', gap:0.4, color: C.muted, fontSize:'0.6rem' }}><Briefcase size={9} color={C.muted}/>{job.type}</Box>}
+                        </Box>
+                      </Box>
+                    </Box>
+                    <Button fullWidth size="small" onClick={() => navigate('/my-applications')}
+                      sx={{ mt:0.75, background: C.primary, color:'#fff', borderRadius:1.5, textTransform:'none', fontWeight:600, fontSize:'0.68rem', minHeight:26, py:0.3, '&:hover':{ background: C.secondary } }}>
+                      View Application →
+                    </Button>
                   </Box>
+                );
+              })}
+            </Card>
+          )}
+
+          <Box sx={{ display:'flex', flexDirection:'column', gap:1.5 }}>
+            {visibleSections.activity && (
+              <Card sx={{ borderRadius:2.5, p:{ xs:'12px', sm:'14px' }, boxShadow:'0 2px 12px rgba(0,0,0,0.3)', background: C.surface, border:`1px solid ${C.border}` }}>
+                <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:1 }}>
+                  <Typography sx={{ fontWeight:700, color: C.text, fontSize:'0.85rem' }}>Recent Activity</Typography>
+                  <Button size="small" onClick={() => navigate('/my-applications')} sx={{ color: C.primary, textTransform:'none', fontWeight:600, fontSize:'0.65rem', minHeight:'unset' }}>View All</Button>
+                </Box>
+                {apps.length === 0 ? (
+                  <Typography sx={{ color: C.muted, fontSize:'0.7rem', textAlign:'center', py:1.5 }}>No recent activity</Typography>
                 ) : apps.slice(0,4).map((app, i) => {
-                  const sc = statusColor[app.status] || C.muted;
+                  const sc  = statusColor[app.status] || C.muted;
                   const job = app.jobId;
                   return (
-                    <Box key={i} sx={{ p:2, mb:1.5, borderRadius:2, background: C.bg, border:`1px solid ${C.border}`,
-                      transition:'all 0.2s', '&:hover':{ borderColor: sc, background:`${sc}08` } }}>
-                      <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', mb:0.5 }}>
-                        <Box>
-                          <Typography sx={{ fontWeight:600, color: C.text, fontSize:14 }}>{job?.title || app.jobTitle}</Typography>
-                          <Typography sx={{ color: C.muted, fontSize:12 }}>{job?.company || app.company}</Typography>
-                        </Box>
-                        <Chip label={app.status} size="small" sx={{ background:`${sc}22`, color: sc, fontWeight:600, fontSize:11 }}/>
+                    <Box key={i} sx={{ display:'flex', alignItems:'center', gap:1, mb:1 }}>
+                      <Box sx={{ width:28, height:28, borderRadius:'50%', background:`${sc}22`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                        <TrendingUp size={12} color={sc}/>
                       </Box>
-                      <Typography sx={{ color: C.muted, fontSize:11, mt:0.5 }}>
-                        Applied {new Date(app.createdAt).toLocaleDateString()}
+                      <Box sx={{ flex:1, minWidth:0 }}>
+                        <Typography sx={{ fontWeight:600, color: C.text, fontSize:'0.7rem', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                          {app.status === 'Interview Scheduled' ? 'Interview scheduled' : `Applied to ${job?.title || app.jobTitle}`}
+                        </Typography>
+                        <Typography sx={{ color: C.muted, fontSize:'0.6rem' }}>{job?.company || app.company}</Typography>
+                      </Box>
+                      <Typography sx={{ color: C.muted, fontSize:'0.58rem', flexShrink:0 }}>
+                        {new Date(app.createdAt).toLocaleDateString('en-US',{ month:'short', day:'numeric' })}
                       </Typography>
                     </Box>
                   );
                 })}
-              </Box>
-            </Card>
-          </Grid>
+              </Card>
+            )}
 
-          {/* Saved Jobs preview */}
-          <Grid item xs={12} md={6}>
-            <Card sx={{ p:3, background: C.surface, border:`1px solid ${C.border}`, borderRadius:3,
-              height:420, maxHeight:420, display:'flex', flexDirection:'column' }}>
-              <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:3, flexShrink:0 }}>
-                <Typography variant="h6" sx={{ fontWeight:700, color: C.text }}>Saved Jobs</Typography>
-                <Button size="small" onClick={() => navigate('/saved-jobs')}
-                  sx={{ color: C.accent, textTransform:'none', fontWeight:600 }}>View All</Button>
-              </Box>
-              <Box sx={{ flex:1, overflowY:'auto', pr:0.5,
-                '&::-webkit-scrollbar':{ width:4 },
-                '&::-webkit-scrollbar-track':{ background:'transparent' },
-                '&::-webkit-scrollbar-thumb':{ background: C.border, borderRadius:2 } }}>
+            {visibleSections.savedJobs && (
+              <Card sx={{ borderRadius:2.5, p:{ xs:'12px', sm:'14px' }, boxShadow:'0 2px 12px rgba(0,0,0,0.3)', background: C.surface, border:`1px solid ${C.border}` }}>
+                <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:1 }}>
+                  <Typography sx={{ fontWeight:700, color: C.text, fontSize:'0.85rem' }}>Saved Jobs</Typography>
+                  <Button size="small" onClick={() => navigate('/saved-jobs')} sx={{ color: C.primary, textTransform:'none', fontWeight:600, fontSize:'0.65rem', minHeight:'unset' }}>View All</Button>
+                </Box>
                 {saved.length === 0 ? (
-                  <Box sx={{ textAlign:'center', py:6 }}>
-                    <Star size={36} color={C.border} style={{ marginBottom:8 }}/>
-                    <Typography sx={{ color: C.muted, fontSize:13 }}>No saved jobs yet</Typography>
-                    <Typography sx={{ color: C.muted, fontSize:12, mt:0.5 }}>Click ★ on any job to save it here</Typography>
-                  </Box>
+                  <Typography sx={{ color: C.muted, fontSize:'0.7rem', textAlign:'center', py:1.5 }}>No saved jobs yet</Typography>
                 ) : saved.slice(0,3).map((job, i) => (
-                  <Box key={i} sx={{ p:2, mb:1.5, borderRadius:2, background: C.bg, border:`1px solid ${C.border}`,
-                    transition:'all 0.2s', '&:hover':{ borderColor: C.warning, background:`${C.warning}08` } }}>
-                    <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', mb:0.5 }}>
-                      <Box>
-                        <Typography sx={{ fontWeight:600, color: C.text, fontSize:14 }}>{job.title}</Typography>
-                        <Typography sx={{ color: C.muted, fontSize:12 }}>{job.company}</Typography>
-                      </Box>
-                      <Star size={14} fill={C.warning} color={C.warning}/>
+                  <Box key={i} sx={{ display:'flex', alignItems:'center', gap:1, mb:0.875, p:'7px 10px', borderRadius:1.5, background: C.bg, border:`1px solid ${C.border}` }}>
+                    <Box sx={{ width:26, height:26, borderRadius:1, background:`${C.warning}22`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                      <Star size={11} color={C.warning} fill={C.warning}/>
                     </Box>
-                    <Box sx={{ display:'flex', gap:2, mt:0.5 }}>
-                      <Box sx={{ display:'flex', alignItems:'center', gap:0.5, color: C.muted, fontSize:11 }}>
-                        <MapPin size={11} color={C.accent}/>{job.location}
-                      </Box>
-                      <Box sx={{ display:'flex', alignItems:'center', gap:0.5, color: C.muted, fontSize:11 }}>
-                        {job.salary}
-                      </Box>
+                    <Box sx={{ flex:1, minWidth:0 }}>
+                      <Typography sx={{ fontWeight:600, color: C.text, fontSize:'0.7rem', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{job.title}</Typography>
+                      <Typography sx={{ color: C.muted, fontSize:'0.6rem' }}>{job.company}</Typography>
                     </Box>
+                    <Eye size={12} color={C.muted} style={{ cursor:'pointer', flexShrink:0 }} onClick={() => navigate('/saved-jobs')}/>
                   </Box>
                 ))}
-              </Box>
-            </Card>
-          </Grid>
-
-          {/* Profile Completion */}
-          <Grid item xs={12}>
-            <Card sx={{ p:{ xs:2.5, sm:3, lg:4 }, border:`1px solid ${C.border}`, borderRadius:3,
-              display:'flex', alignItems:'center',
-              background:`linear-gradient(135deg, ${C.primary}22, ${C.secondary}11)` }}>
-              <Box sx={{ display:'flex', flexDirection:{ xs:'column', sm:'row' }, justifyContent:'space-between',
-                alignItems:{ xs:'flex-start', sm:'center' }, width:'100%', gap:2 }}>
-                <Box sx={{ flex:1, minWidth:0 }}>
-                  <Typography sx={{ fontWeight:700, color: C.text, fontSize:{ xs:'1rem', sm:'1.25rem' } }}>Complete Your Profile</Typography>
-                  <Typography sx={{ color: C.muted, fontSize:{ xs:12, sm:13 }, mt:0.5 }}>A complete profile gets 3x more recruiter views</Typography>
-                  <Box sx={{ mt:1.5, display:'flex', alignItems:'center', gap:2 }}>
-                    <LinearProgress variant="determinate" value={completion}
-                      sx={{ flex:1, maxWidth:{ xs:'100%', sm:200 }, height:8, borderRadius:4, background:`${C.border}`,
-                        '& .MuiLinearProgress-bar':{ background:`linear-gradient(90deg, ${C.primary}, ${C.secondary})`, borderRadius:4 } }}/>
-                    <Typography sx={{ color: C.primary, fontWeight:700, fontSize:14, flexShrink:0 }}>{completion}%</Typography>
-                  </Box>
-                </Box>
-                <Button onClick={() => navigate('/user-profile')} fullWidth={false}
-                  sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:'#fff',
-                    borderRadius:2, textTransform:'none', fontWeight:600, px:3,
-                    width:{ xs:'100%', sm:'auto' },
-                    boxShadow:`0 4px 16px ${C.primary}44` }}>
-                  Complete Profile
-                </Button>
-              </Box>
-            </Card>
-          </Grid>
-        </Grid>
+              </Card>
+            )}
+          </Box>
+        </Box>
       </Box>
     </Box>
   );

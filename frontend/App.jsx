@@ -18,8 +18,9 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/"                    element={<AuthPage />} />
-        <Route path="/signup"              element={<AuthPage />} />
+        <Route path="/"       element={<AuthPage />} />
+        <Route path="/login"  element={<AuthPage />} />
+        <Route path="/signup" element={<AuthPage mode="signup" />} />
         <Route path="/dashboard"           element={<AdminDashboard />} />
         <Route path="/userdashboard"       element={<UserDashboard />} />
         <Route path="/user-profile"        element={<UserProfile />} />

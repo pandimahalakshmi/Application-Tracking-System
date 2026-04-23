@@ -110,26 +110,26 @@ export default function JobForm() {
   return (
     <Box sx={{ display:'flex', background: C.bg, minHeight:'100vh' }}>
       <Sidebar />
-      <Box sx={{ marginLeft:{ xs:0, lg:'240px' }, width:'100%', p:{ xs:'16px', sm:'24px', lg:'32px' }, pt:{ xs:'64px', lg:'32px' }, maxWidth:'calc(100% - 240px)' }}>
+      <Box sx={{ marginLeft:{ xs:0, lg:'240px' }, width:'100%', minWidth:0, p:{ xs:'16px', sm:'24px', lg:'32px' }, pt:{ xs:'64px', lg:'32px' }, overflowX:'hidden' }}>
 
         {/* Header */}
-        <Box sx={{ mb:4 }}>
-          <Box sx={{ display:'flex', alignItems:'center', gap:1.5, mb:1 }}>
-            <Box sx={{ p:1, borderRadius:2, background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})` }}>
-              <Briefcase size={20} color="#fff"/>
+        <Box sx={{ mb:{ xs:2, sm:3 } }}>
+          <Box sx={{ display:'flex', alignItems:'center', gap:1.25, mb:0.5 }}>
+            <Box sx={{ p:{ xs:'6px', sm:'8px' }, borderRadius:2, background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})` }}>
+              <Briefcase size={16} color="#fff"/>
             </Box>
-            <Typography variant="h4" sx={{ fontWeight:700, color: C.text }}>
+            <Typography sx={{ fontWeight:700, color: C.text, fontSize:{ xs:'1.1rem', sm:'1.5rem', lg:'1.875rem' } }}>
               {editId ? 'Edit Job Posting' : 'Create Job Posting'}
             </Typography>
           </Box>
-          <Typography sx={{ color: C.muted, ml:5.5 }}>
+          <Typography sx={{ color: C.muted, ml:{ xs:4.5, sm:5 }, fontSize:{ xs:'0.72rem', sm:'0.875rem' } }}>
             {editId ? 'Update the job details below' : 'Fill in the details to post a new position'}
           </Typography>
         </Box>
 
-        <Grid container spacing={3}>
+        <Grid container spacing={{ xs:1.5, sm:3 }}>
           <Grid item xs={12}>
-            <Card sx={{ background: C.surface, border:`1px solid ${C.border}`, borderRadius:3, p:4 }}>
+            <Card sx={{ background: C.surface, border:`1px solid ${C.border}`, borderRadius:{ xs:2, sm:3 }, p:{ xs:'14px', sm:3, lg:4 } }}>
 
               {submitted && (
                 <Box sx={{ mb:3, p:2, borderRadius:2, background:`${C.success}22`, border:`1px solid ${C.success}55`, color: C.success, fontWeight:600 }}>
@@ -144,10 +144,10 @@ export default function JobForm() {
 
               <form onSubmit={handleSubmit}>
                 {/* Basic Info */}
-                <Typography sx={{ color: C.muted, fontSize:12, fontWeight:600, textTransform:'uppercase', letterSpacing:1, mb:2 }}>
+                <Typography sx={{ color: C.muted, fontSize:{ xs:'0.65rem', sm:'0.72rem' }, fontWeight:600, textTransform:'uppercase', letterSpacing:1, mb:{ xs:1.5, sm:2 } }}>
                   Basic Information
                 </Typography>
-                <Grid container spacing={2} sx={{ mb:3 }}>
+                <Grid container spacing={{ xs:1.25, sm:2 }} sx={{ mb:{ xs:2, sm:3 } }}>
                   <Grid item xs={12} sm={6}>
                     <TextField fullWidth label="Job Title *" name="title" value={form.title} onChange={handle} sx={fSx}/>
                   </Grid>
@@ -176,18 +176,18 @@ export default function JobForm() {
                 <Divider sx={{ borderColor: C.border, mb:3 }}/>
 
                 {/* Job Details */}
-                <Typography sx={{ color: C.muted, fontSize:12, fontWeight:600, textTransform:'uppercase', letterSpacing:1, mb:2 }}>
+                <Typography sx={{ color: C.muted, fontSize:{ xs:'0.65rem', sm:'0.72rem' }, fontWeight:600, textTransform:'uppercase', letterSpacing:1, mb:{ xs:1.5, sm:2 } }}>
                   Job Details
                 </Typography>
                 <TextField fullWidth label="Job Description *" name="description" value={form.description}
-                  onChange={handle} multiline rows={5} sx={{ ...fSx, mb:2 }}/>
+                  onChange={handle} multiline rows={{ xs:3, sm:5 }} sx={{ ...fSx, mb:{ xs:1.5, sm:2 } }}/>
                 <TextField fullWidth label="Requirements" name="requirements" value={form.requirements}
-                  onChange={handle} multiline rows={4} sx={{ ...fSx, mb:3 }}/>
+                  onChange={handle} multiline rows={{ xs:3, sm:4 }} sx={{ ...fSx, mb:{ xs:2, sm:3 } }}/>
 
                 <Divider sx={{ borderColor: C.border, mb:3 }}/>
 
                 {/* Tags & Skills */}
-                <Typography sx={{ color: C.muted, fontSize:12, fontWeight:600, textTransform:'uppercase', letterSpacing:1, mb:2 }}>
+                <Typography sx={{ color: C.muted, fontSize:{ xs:'0.65rem', sm:'0.72rem' }, fontWeight:600, textTransform:'uppercase', letterSpacing:1, mb:{ xs:1.5, sm:2 } }}>
                   Tags & Skills
                 </Typography>
                 {[
@@ -221,18 +221,18 @@ export default function JobForm() {
                 <Divider sx={{ borderColor: C.border, mb:3 }}/>
 
                 {/* Actions */}
-                <Box sx={{ display:'flex', gap:2, flexWrap:'wrap' }}>
+                <Box sx={{ display:'flex', gap:{ xs:1, sm:2 }, flexWrap:'wrap' }}>
                   <Button type="submit" variant="contained" disabled={loading}
-                    sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`,
-                      px:4, py:1.5, borderRadius:2, textTransform:'none', fontWeight:700,
-                      boxShadow:`0 4px 16px ${C.primary}44`,
-                      '&:hover':{ transform:'translateY(-1px)', boxShadow:`0 8px 24px ${C.primary}66` },
-                      transition:'all 0.2s' }}>
+                    sx={{ flex:{ xs:1, sm:'none' }, background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`,
+                      px:{ xs:2, sm:4 }, py:{ xs:1.25, sm:1.5 }, borderRadius:2, textTransform:'none', fontWeight:700,
+                      fontSize:{ xs:'0.8rem', sm:'0.875rem' }, minHeight:44,
+                      boxShadow:`0 4px 16px ${C.primary}44`, transition:'all 0.2s' }}>
                     {loading ? (editId ? 'Updating…' : 'Posting…') : (editId ? 'Update Job' : 'Post Job')}
                   </Button>
                   <Button variant="outlined" onClick={() => navigate('/jobs')}
-                    sx={{ borderColor: C.border, color: C.muted, px:3, py:1.5, borderRadius:2,
-                      textTransform:'none', '&:hover':{ borderColor: C.muted } }}>
+                    sx={{ borderColor: C.border, color: C.muted, px:{ xs:2, sm:3 }, py:{ xs:1.25, sm:1.5 }, borderRadius:2,
+                      textTransform:'none', fontSize:{ xs:'0.8rem', sm:'0.875rem' }, minHeight:44,
+                      '&:hover':{ borderColor: C.muted } }}>
                     Cancel
                   </Button>
                 </Box>

@@ -21,10 +21,11 @@ const statusConfig = {
 };
 
 const fSx = {
-  '& .MuiOutlinedInput-root':{ borderRadius:2, background: C.bg, color: C.text, '& fieldset':{ borderColor: C.border }, '&:hover fieldset':{ borderColor: C.primary }, '&.Mui-focused fieldset':{ borderColor: C.primary } },
-  '& .MuiInputLabel-root':{ color: C.muted },
+  '& .MuiOutlinedInput-root':{ borderRadius:1.5, background: C.bg, color: C.text, '& fieldset':{ borderColor: C.border }, '&:hover fieldset':{ borderColor: C.primary }, '&.Mui-focused fieldset':{ borderColor: C.primary } },
+  '& .MuiInputLabel-root':{ color: C.muted, fontSize:'0.75rem' },
   '& .MuiInputLabel-root.Mui-focused':{ color: C.primary },
   '& .MuiSelect-icon':{ color: C.muted },
+  '& .MuiInputBase-input':{ fontSize:'0.78rem', padding:'8px 12px' },
 };
 
 const menuProps = { PaperProps:{ sx:{ background: C.surface, border:`1px solid ${C.border}`, '& .MuiMenuItem-root':{ color: C.text, '&:hover':{ background:`${C.primary}22` } } } } };
@@ -97,55 +98,101 @@ export default function MyApplications() {
   return (
     <Box sx={{ display:'flex', background: C.bg, minHeight:'100vh' }}>
       <Sidebar />
-      <Box sx={{ marginLeft:{ xs:0, lg:'240px' }, width:{ xs:'100%', lg:'calc(100% - 240px)' }, p:{ xs:'16px', sm:'24px', lg:'32px' }, pt:{ xs:'64px', lg:'32px' } }}>
+      <Box sx={{ marginLeft:{ xs:0, lg:'240px' }, width:{ xs:'100%', lg:'calc(100% - 240px)' }, minWidth:0, p:{ xs:'12px', sm:'24px', lg:'32px' }, pt:{ xs:'64px', lg:'32px' }, overflowX:'hidden' }}>
 
         {/* Header */}
-        <Box sx={{ mb:4 }}>
-          <Typography variant="h4" sx={{ fontWeight:700, color: C.text }}>My Applications</Typography>
-          <Typography sx={{ color: C.muted, mt:0.5 }}>
-            {filtered.length} of {apps.length} application{apps.length !== 1 ? 's' : ''}
-          </Typography>
+        <Box sx={{ mb:{ xs:2, sm:3 } }}>
+          <Box sx={{ display:{ xs:'flex', sm:'none' }, flexDirection:'column', alignItems:'center', textAlign:'center', gap:0.5 }}>
+            <Typography sx={{ fontWeight:700, color: C.text, fontSize:'1.2rem' }}>My Applications</Typography>
+            <Typography sx={{ color: C.muted, fontSize:'0.75rem' }}>{filtered.length} of {apps.length} application{apps.length !== 1 ? 's' : ''}</Typography>
+          </Box>
+          <Box sx={{ display:{ xs:'none', sm:'block' } }}>
+            <Typography sx={{ fontWeight:700, color: C.text, fontSize:{ sm:'1.5rem', lg:'2rem' } }}>My Applications</Typography>
+            <Typography sx={{ color: C.muted, mt:0.5, fontSize:'0.875rem' }}>{filtered.length} of {apps.length} application{apps.length !== 1 ? 's' : ''}</Typography>
+          </Box>
         </Box>
 
         {/* Filter Bar */}
-        <Box sx={{ mb:3, p:2.5, background: C.surface, border:`1px solid ${C.border}`, borderRadius:3 }}>
-          <Box sx={{ display:'flex', gap:2, flexWrap:'wrap', alignItems:'flex-end' }}>
-            <TextField size="small" placeholder="Search job title or company..." value={local.search}
-              onChange={e => set('search', e.target.value)} sx={{ ...fSx, minWidth:230 }}
-              InputProps={{ startAdornment: <InputAdornment position="start"><Search size={15} color={C.muted}/></InputAdornment> }}/>
-            <FormControl size="small" sx={{ ...fSx, minWidth:160 }}>
-              <InputLabel>Status</InputLabel>
-              <Select value={local.status} onChange={e => set('status', e.target.value)} MenuProps={menuProps}>
-                <MenuItem value="">All Statuses</MenuItem>
-                {Object.keys(statusConfig).map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
-              </Select>
-            </FormControl>
-            <FormControl size="small" sx={{ ...fSx, minWidth:140 }}>
-              <InputLabel>Job Type</InputLabel>
-              <Select value={local.type} onChange={e => set('type', e.target.value)} MenuProps={menuProps}>
-                <MenuItem value="">All Types</MenuItem>
-                {['Full-time','Part-time','Contract','Internship'].map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
-              </Select>
-            </FormControl>
-            <TextField size="small" label="Applied From" type="date" value={local.dateFrom}
-              onChange={e => set('dateFrom', e.target.value)}
-              InputLabelProps={{ shrink:true }} sx={{ ...fSx, minWidth:160 }}/>
-            <TextField size="small" label="Applied To" type="date" value={local.dateTo}
-              onChange={e => set('dateTo', e.target.value)}
-              InputLabelProps={{ shrink:true }} sx={{ ...fSx, minWidth:160 }}/>
-            <Button onClick={handleApply} startIcon={<SlidersHorizontal size={15}/>}
-              sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:'#fff',
-                borderRadius:2, textTransform:'none', fontWeight:600, px:3, height:40,
-                boxShadow:`0 4px 12px ${C.primary}44`, '&:hover':{ opacity:0.9 } }}>
-              Apply Filters
-            </Button>
-            {hasFilters && (
-              <Button size="small" startIcon={<X size={14}/>} onClick={handleClear}
-                sx={{ color: C.muted, textTransform:'none', borderRadius:2, height:40,
-                  border:`1px solid ${C.border}`, '&:hover':{ borderColor: C.primary, color: C.text } }}>
-                Clear
+        <Box sx={{ mb:{ xs:2, sm:2 }, p:{ xs:'10px', sm:'12px 14px' }, background: C.surface, border:`1px solid ${C.border}`, borderRadius:{ xs:2, sm:2 } }}>
+
+          {/* Desktop: compact 2-row layout */}
+          <Box sx={{ display:{ xs:'none', sm:'flex' }, flexDirection:'column', gap:1 }}>
+            <Box sx={{ display:'grid', gridTemplateColumns:'2fr 1fr 1fr', gap:1 }}>
+              <TextField size="small" placeholder="Search job title or company..." value={local.search}
+                onChange={e => set('search', e.target.value)} sx={fSx}
+                InputProps={{ startAdornment: <InputAdornment position="start"><Search size={13} color={C.muted}/></InputAdornment> }}/>
+              <FormControl size="small" sx={fSx}>
+                <InputLabel sx={{ fontSize:'0.72rem' }}>Status</InputLabel>
+                <Select value={local.status} onChange={e => set('status', e.target.value)} MenuProps={menuProps}>
+                  <MenuItem value="">All</MenuItem>
+                  {Object.keys(statusConfig).map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+                </Select>
+              </FormControl>
+              <FormControl size="small" sx={fSx}>
+                <InputLabel sx={{ fontSize:'0.72rem' }}>Job Type</InputLabel>
+                <Select value={local.type} onChange={e => set('type', e.target.value)} MenuProps={menuProps}>
+                  <MenuItem value="">All</MenuItem>
+                  {['Full-time','Part-time','Contract','Internship'].map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
+                </Select>
+              </FormControl>
+            </Box>
+            <Box sx={{ display:'flex', gap:1, alignItems:'center' }}>
+              <TextField size="small" label="From" type="date" value={local.dateFrom}
+                onChange={e => set('dateFrom', e.target.value)} InputLabelProps={{ shrink:true }} sx={{ ...fSx, flex:1 }}/>
+              <TextField size="small" label="To" type="date" value={local.dateTo}
+                onChange={e => set('dateTo', e.target.value)} InputLabelProps={{ shrink:true }} sx={{ ...fSx, flex:1 }}/>
+              <Button onClick={handleApply} startIcon={<SlidersHorizontal size={13}/>}
+                sx={{ background:`linear-gradient(135deg,${C.primary},${C.secondary})`, color:'#fff', borderRadius:1.5, textTransform:'none', fontWeight:600, fontSize:'0.75rem', height:36, px:2, whiteSpace:'nowrap', boxShadow:`0 3px 10px ${C.primary}44` }}>
+                Apply
               </Button>
-            )}
+              {hasFilters && (
+                <Button size="small" startIcon={<X size={12}/>} onClick={handleClear}
+                  sx={{ color: C.muted, textTransform:'none', borderRadius:1.5, height:36, px:1.5, fontSize:'0.72rem', border:`1px solid ${C.border}`, whiteSpace:'nowrap', '&:hover':{ borderColor: C.primary, color: C.text } }}>
+                  Clear
+                </Button>
+              )}
+            </Box>
+          </Box>
+
+          {/* Mobile layout */}
+          <Box sx={{ display:{ xs:'flex', sm:'none' }, flexDirection:'column', gap:1 }}>
+            <TextField fullWidth size="small" placeholder="Search job title or company..." value={local.search}
+              onChange={e => set('search', e.target.value)} sx={fSx}
+              InputProps={{ startAdornment: <InputAdornment position="start"><Search size={13} color={C.muted}/></InputAdornment> }}/>
+            <Box sx={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:1 }}>
+              <FormControl size="small" sx={fSx}>
+                <InputLabel sx={{ fontSize:'0.72rem' }}>Status</InputLabel>
+                <Select value={local.status} onChange={e => set('status', e.target.value)} MenuProps={menuProps}>
+                  <MenuItem value="">All</MenuItem>
+                  {Object.keys(statusConfig).map(s => <MenuItem key={s} value={s} sx={{ fontSize:'0.78rem' }}>{s}</MenuItem>)}
+                </Select>
+              </FormControl>
+              <FormControl size="small" sx={fSx}>
+                <InputLabel sx={{ fontSize:'0.72rem' }}>Job Type</InputLabel>
+                <Select value={local.type} onChange={e => set('type', e.target.value)} MenuProps={menuProps}>
+                  <MenuItem value="">All</MenuItem>
+                  {['Full-time','Part-time','Contract','Internship'].map(t => <MenuItem key={t} value={t} sx={{ fontSize:'0.78rem' }}>{t}</MenuItem>)}
+                </Select>
+              </FormControl>
+            </Box>
+            <Box sx={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:1 }}>
+              <TextField size="small" label="From" type="date" value={local.dateFrom}
+                onChange={e => set('dateFrom', e.target.value)} InputLabelProps={{ shrink:true }} sx={fSx}/>
+              <TextField size="small" label="To" type="date" value={local.dateTo}
+                onChange={e => set('dateTo', e.target.value)} InputLabelProps={{ shrink:true }} sx={fSx}/>
+            </Box>
+            <Box sx={{ display:'flex', gap:1 }}>
+              <Button onClick={handleApply} startIcon={<SlidersHorizontal size={13}/>} fullWidth
+                sx={{ background:`linear-gradient(135deg,${C.primary},${C.secondary})`, color:'#fff', borderRadius:1.5, textTransform:'none', fontWeight:600, fontSize:'0.72rem', height:34 }}>
+                Apply Filters
+              </Button>
+              {hasFilters && (
+                <Button size="small" startIcon={<X size={12}/>} onClick={handleClear}
+                  sx={{ color: C.muted, textTransform:'none', borderRadius:1.5, height:34, px:1.5, fontSize:'0.72rem', border:`1px solid ${C.border}`, flexShrink:0 }}>
+                  Clear
+                </Button>
+              )}
+            </Box>
           </Box>
         </Box>
 
@@ -167,53 +214,53 @@ export default function MyApplications() {
             <Typography sx={{ color: C.muted }}>Try adjusting your filters</Typography>
           </Card>
         ) : (
-          <Grid container spacing={3}>
+          <Grid container spacing={{ xs:1.5, sm:2.5, lg:3 }}>
             {filtered.map(app => {
               const sc  = statusConfig[app.status] || statusConfig.Pending;
               const job = app.jobId;
               const isHighlighted = app._id === applicationId;
               return (
-                <Grid item xs={12} md={6} lg={4} key={app._id}
+                <Grid item xs={12} sm={6} lg={4} key={app._id}
                   ref={el => cardRefs.current[app._id] = el}>
                   <Card onClick={() => { setSelected(app); setDrawerOpen(true); }}
                     sx={{ background: C.surface, border:`1px solid ${isHighlighted ? C.primary : C.border}`,
-                      borderRadius:3, p:3, height:'100%', cursor:'pointer',
+                      borderRadius:{ xs:2, sm:3 }, p:{ xs:'12px', sm:3 }, height:'100%', cursor:'pointer',
                       boxShadow: isHighlighted ? `0 0 0 2px ${C.primary}` : 'none',
                       transition:'all 0.2s',
                       '&:hover':{ borderColor: C.primary, transform:'translateY(-3px)', boxShadow:`0 12px 32px rgba(0,0,0,0.3)` } }}>
 
-                    <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', mb:2 }}>
-                      <Box sx={{ display:'flex', alignItems:'center', gap:1.5 }}>
-                        <Avatar sx={{ width:40, height:40, background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, fontSize:16, fontWeight:700 }}>
+                    <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', mb:{ xs:1.25, sm:2 } }}>
+                      <Box sx={{ display:'flex', alignItems:'center', gap:{ xs:1, sm:1.5 } }}>
+                        <Avatar sx={{ width:{ xs:32, sm:40 }, height:{ xs:32, sm:40 }, background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, fontSize:{ xs:13, sm:16 }, fontWeight:700 }}>
                           {(job?.title || app.jobTitle || '?').charAt(0)}
                         </Avatar>
                         <Box>
-                          <Typography sx={{ fontWeight:700, color: C.text, fontSize:14 }}>{job?.title || app.jobTitle}</Typography>
-                          <Typography sx={{ color: C.muted, fontSize:12 }}>{job?.company || app.company}</Typography>
+                          <Typography sx={{ fontWeight:700, color: C.text, fontSize:{ xs:'0.78rem', sm:'0.875rem' } }}>{job?.title || app.jobTitle}</Typography>
+                          <Typography sx={{ color: C.muted, fontSize:{ xs:'0.65rem', sm:'0.75rem' } }}>{job?.company || app.company}</Typography>
                         </Box>
                       </Box>
-                      <Chip label={app.status} size="small" sx={{ background: sc.bg, color: sc.color, fontWeight:700, fontSize:11 }}/>
+                      <Chip label={app.status} size="small" sx={{ background: sc.bg, color: sc.color, fontWeight:700, fontSize:{ xs:'0.58rem', sm:'0.68rem' }, height:{ xs:18, sm:22 }, flexShrink:0 }}/>
                     </Box>
 
-                    <Box sx={{ display:'flex', flexDirection:'column', gap:1, mb:2 }}>
+                    <Box sx={{ display:'flex', flexDirection:'column', gap:{ xs:0.5, sm:1 }, mb:{ xs:1.25, sm:2 } }}>
                       {job?.location && (
-                        <Box sx={{ display:'flex', alignItems:'center', gap:1, color: C.muted, fontSize:12 }}>
-                          <MapPin size={13} color={C.accent}/>{job.location}
+                        <Box sx={{ display:'flex', alignItems:'center', gap:0.75, color: C.muted, fontSize:{ xs:'0.65rem', sm:'0.75rem' } }}>
+                          <MapPin size={11} color={C.accent}/>{job.location}
                         </Box>
                       )}
                       {job?.type && (
-                        <Box sx={{ display:'flex', alignItems:'center', gap:1, color: C.muted, fontSize:12 }}>
-                          <Briefcase size={13} color={C.accent}/>{job.type}
+                        <Box sx={{ display:'flex', alignItems:'center', gap:0.75, color: C.muted, fontSize:{ xs:'0.65rem', sm:'0.75rem' } }}>
+                          <Briefcase size={11} color={C.accent}/>{job.type}
                         </Box>
                       )}
-                      <Box sx={{ display:'flex', alignItems:'center', gap:1, color: C.muted, fontSize:12 }}>
-                        <Calendar size={13} color={C.accent}/>
+                      <Box sx={{ display:'flex', alignItems:'center', gap:0.75, color: C.muted, fontSize:{ xs:'0.65rem', sm:'0.75rem' } }}>
+                        <Calendar size={11} color={C.accent}/>
                         Applied {new Date(app.createdAt).toLocaleDateString('en-US', { day:'numeric', month:'short', year:'numeric' })}
                       </Box>
                     </Box>
 
-                    <Box sx={{ p:1.5, borderRadius:2, background: sc.bg, border:`1px solid ${sc.color}33`, textAlign:'center' }}>
-                      <Typography sx={{ color: sc.color, fontWeight:600, fontSize:12 }}>Status: {app.status}</Typography>
+                    <Box sx={{ p:{ xs:'8px 10px', sm:1.5 }, borderRadius:{ xs:1.5, sm:2 }, background: sc.bg, border:`1px solid ${sc.color}33`, textAlign:'center' }}>
+                      <Typography sx={{ color: sc.color, fontWeight:600, fontSize:{ xs:'0.68rem', sm:'0.75rem' } }}>Status: {app.status}</Typography>
                     </Box>
                   </Card>
                 </Grid>

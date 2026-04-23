@@ -107,12 +107,12 @@ export default function ScheduleInterviewPage() {
   return (
     <Box sx={{ display:'flex', background: C.bg, minHeight:'100vh' }}>
       <Sidebar />
-      <Box sx={{ marginLeft:{ xs:0, lg:'240px' }, width:{ xs:'100%', lg:'calc(100% - 240px)' }, p:{ xs:'16px', sm:'24px', lg:'32px' }, pt:{ xs:'64px', lg:'32px' } }}>
+      <Box sx={{ marginLeft:{ xs:0, lg:'240px' }, width:{ xs:'100%', lg:'calc(100% - 240px)' }, minWidth:0, p:{ xs:'12px', sm:'20px', lg:'32px' }, pt:{ xs:'64px', lg:'32px' }, overflowX:'hidden' }}>
 
         {/* Header */}
-        <Box sx={{ mb:4 }}>
-          <Typography variant="h4" sx={{ fontWeight:700, color: C.text }}>Schedule Interview</Typography>
-          <Typography sx={{ color: C.muted, mt:0.5 }}>
+        <Box sx={{ mb:{ xs:2, sm:3 } }}>
+          <Typography sx={{ fontWeight:700, color: C.text, fontSize:{ xs:'1.1rem', sm:'1.5rem', lg:'1.875rem' } }}>Schedule Interview</Typography>
+          <Typography sx={{ color: C.muted, mt:0.5, fontSize:{ xs:'0.72rem', sm:'0.875rem' } }}>
             Select a candidate and set interview details — they'll be notified automatically
           </Typography>
         </Box>
@@ -131,8 +131,7 @@ export default function ScheduleInterviewPage() {
             <Typography sx={{ color: C.muted, fontSize:13 }}>Redirecting to dashboard…</Typography>
           </Card>
         ) : (
-          <Card sx={{ background: C.surface, border:`1px solid ${C.border}`, borderRadius:3, p:4,
-            maxWidth:900, mx:'auto' }}>
+          <Card sx={{ background: C.surface, border:`1px solid ${C.border}`, borderRadius:{ xs:2, sm:3 }, p:{ xs:'14px', sm:3, lg:4 }, maxWidth:900, mx:'auto' }}>
 
             {error && (
               <Alert severity="error" sx={{ mb:3, borderRadius:2, background:'rgba(248,113,113,0.1)',
@@ -271,17 +270,16 @@ export default function ScheduleInterviewPage() {
               <Divider sx={{ borderColor: C.border, my:3 }}/>
 
               {/* Actions */}
-              <Box sx={{ display:'flex', gap:2 }}>
-                <Button type="submit" variant="contained" disabled={loading}
-                  sx={{ px:4, py:1.5, borderRadius:2, textTransform:'none', fontWeight:700,
+              <Box sx={{ display:'flex', gap:{ xs:1, sm:2 }, flexWrap:'wrap' }}>
+                <Button type="submit" variant="contained" disabled={loading} fullWidth={false}
+                  sx={{ flex:{ xs:1, sm:'none' }, px:{ xs:2, sm:4 }, py:{ xs:1.25, sm:1.5 }, borderRadius:2, textTransform:'none', fontWeight:700, fontSize:{ xs:'0.78rem', sm:'0.875rem' },
                     background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`,
-                    boxShadow:`0 4px 16px ${C.primary}44`,
-                    '&:hover':{ transform:'translateY(-1px)', boxShadow:`0 8px 24px ${C.primary}66` },
-                    transition:'all 0.2s', '&:disabled':{ opacity:0.6 } }}>
-                  {loading ? 'Scheduling…' : '📅 Schedule & Notify Candidate'}
+                    boxShadow:`0 4px 16px ${C.primary}44`, minHeight:44,
+                    '&:hover':{ transform:'translateY(-1px)' }, transition:'all 0.2s', '&:disabled':{ opacity:0.6 } }}>
+                  {loading ? 'Scheduling…' : '📅 Schedule & Notify'}
                 </Button>
                 <Button variant="outlined" onClick={() => navigate('/dashboard')}
-                  sx={{ px:3, py:1.5, borderRadius:2, textTransform:'none',
+                  sx={{ px:{ xs:2, sm:3 }, py:{ xs:1.25, sm:1.5 }, borderRadius:2, textTransform:'none', fontSize:{ xs:'0.78rem', sm:'0.875rem' }, minHeight:44,
                     borderColor: C.border, color: C.muted,
                     '&:hover':{ borderColor: C.primary, color: C.primary } }}>
                   Cancel

@@ -82,10 +82,16 @@ export default function SavedJobs() {
   return (
     <Box sx={{ display:'flex', background: C.bg, minHeight:'100vh' }}>
       <Sidebar />
-      <Box sx={{ marginLeft:{ xs:0, lg:'240px' }, width:{ xs:'100%', lg:'calc(100% - 240px)' }, p:{ xs:'16px', sm:'24px', lg:'32px' }, pt:{ xs:'64px', lg:'32px' } }}>
-        <Box sx={{ mb:4 }}>
-          <Typography variant="h4" sx={{ fontWeight:700, color: C.text }}>Saved Jobs</Typography>
-          <Typography sx={{ color: C.muted, mt:0.5 }}>{jobs.length} job{jobs.length !== 1 ? 's' : ''} saved</Typography>
+      <Box sx={{ marginLeft:{ xs:0, lg:'240px' }, width:{ xs:'100%', lg:'calc(100% - 240px)' }, minWidth:0, p:{ xs:'12px', sm:'24px', lg:'32px' }, pt:{ xs:'64px', lg:'32px' }, overflowX:'hidden' }}>
+        <Box sx={{ mb:{ xs:2, sm:3 } }}>
+          <Box sx={{ display:{ xs:'flex', sm:'none' }, flexDirection:'column', alignItems:'center', textAlign:'center', gap:0.5 }}>
+            <Typography sx={{ fontWeight:700, color: C.text, fontSize:'1.2rem' }}>Saved Jobs</Typography>
+            <Typography sx={{ color: C.muted, fontSize:'0.75rem' }}>{jobs.length} job{jobs.length !== 1 ? 's' : ''} saved</Typography>
+          </Box>
+          <Box sx={{ display:{ xs:'none', sm:'block' } }}>
+            <Typography sx={{ fontWeight:700, color: C.text, fontSize:{ sm:'1.5rem', lg:'2rem' } }}>Saved Jobs</Typography>
+            <Typography sx={{ color: C.muted, mt:0.5, fontSize:'0.875rem' }}>{jobs.length} job{jobs.length !== 1 ? 's' : ''} saved</Typography>
+          </Box>
         </Box>
 
         {loading ? (
@@ -103,47 +109,47 @@ export default function SavedJobs() {
             </Button>
           </Card>
         ) : (
-          <Box sx={{ display:'grid', gridTemplateColumns:{ xs:'1fr', sm:'repeat(2,1fr)', lg:'repeat(3,1fr)' }, gap:{ xs:2, sm:3 } }}>
+          <Box sx={{ display:'grid', gridTemplateColumns:{ xs:'1fr', sm:'repeat(2,1fr)', lg:'repeat(3,1fr)' }, gap:{ xs:1.5, sm:2.5 } }}>
             {jobs.map(job => {
               const jid = job._id || job.id;
               return (
                 <Box key={jid} sx={{ display:'flex' }}>
-                  <Card sx={{ ...cardSx, p:3, width:'100%', display:'flex', flexDirection:'column', position:'relative',
+                  <Card sx={{ ...cardSx, p:{ xs:'12px', sm:3 }, width:'100%', display:'flex', flexDirection:'column', position:'relative',
                     '&:hover':{ borderColor: C.warning, transform:'translateY(-3px)', boxShadow:`0 12px 32px rgba(0,0,0,0.4)` } }}>
 
                     <Tooltip title="Remove from saved">
                       <IconButton size="small" onClick={() => handleUnsave(jid)}
-                        sx={{ position:'absolute', top:12, right:12, color: C.warning, '&:hover':{ background:`${C.warning}22` } }}>
-                        <Star size={18} fill={C.warning}/>
+                        sx={{ position:'absolute', top:{ xs:8, sm:12 }, right:{ xs:8, sm:12 }, color: C.warning, p:'4px', '&:hover':{ background:`${C.warning}22` } }}>
+                        <Star size={15} fill={C.warning}/>
                       </IconButton>
                     </Tooltip>
 
-                    <Box sx={{ pr:4, mb:1 }}>
-                      <Typography sx={{ fontWeight:700, color: C.text, fontSize:16, mb:0.5, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{job.title}</Typography>
-                      <Typography sx={{ color: C.muted, fontSize:13 }}>{job.company}</Typography>
+                    <Box sx={{ pr:{ xs:3, sm:4 }, mb:{ xs:0.75, sm:1 } }}>
+                      <Typography sx={{ fontWeight:700, color: C.text, fontSize:{ xs:'0.8rem', sm:'1rem' }, mb:0.25, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{job.title}</Typography>
+                      <Typography sx={{ color: C.muted, fontSize:{ xs:'0.68rem', sm:'0.8rem' } }}>{job.company}</Typography>
                     </Box>
 
-                    <Chip label={job.type} size="small" sx={{ background: typeColor(job.type).bg, color: typeColor(job.type).color, fontWeight:600, mb:1.5, alignSelf:'flex-start' }}/>
+                    <Chip label={job.type} size="small" sx={{ background: typeColor(job.type).bg, color: typeColor(job.type).color, fontWeight:600, mb:{ xs:1, sm:1.5 }, alignSelf:'flex-start', fontSize:{ xs:'0.58rem', sm:'0.7rem' }, height:{ xs:18, sm:22 } }}/>
 
-                    <Typography sx={{ color: C.muted, fontSize:13, mb:1.5, flexGrow:1, overflow:'hidden',
-                      display:'-webkit-box', WebkitLineClamp:3, WebkitBoxOrient:'vertical' }}>{job.description}</Typography>
+                    <Typography sx={{ color: C.muted, fontSize:{ xs:'0.68rem', sm:'0.8rem' }, mb:{ xs:1, sm:1.5 }, flexGrow:1, overflow:'hidden',
+                      display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>{job.description}</Typography>
 
-                    <Box sx={{ display:'flex', gap:2, mb:1.5 }}>
-                      <Box sx={{ display:'flex', alignItems:'center', gap:0.5, color: C.muted, fontSize:12 }}>
-                        <MapPin size={13} color={C.accent}/>{job.location}
+                    <Box sx={{ display:'flex', gap:{ xs:1, sm:2 }, mb:{ xs:0.75, sm:1.5 }, flexWrap:'wrap' }}>
+                      <Box sx={{ display:'flex', alignItems:'center', gap:0.5, color: C.muted, fontSize:{ xs:'0.65rem', sm:'0.75rem' } }}>
+                        <MapPin size={11} color={C.accent}/>{job.location}
                       </Box>
-                      <Box sx={{ color: C.muted, fontSize:12 }}>{job.salary}</Box>
+                      <Typography sx={{ color: C.muted, fontSize:{ xs:'0.65rem', sm:'0.75rem' } }}>{job.salary}</Typography>
                     </Box>
 
-                    <Box sx={{ display:'flex', gap:1, flexWrap:'wrap', mb:1.5, maxHeight:48, overflow:'hidden' }}>
+                    <Box sx={{ display:'flex', gap:0.5, flexWrap:'wrap', mb:{ xs:1, sm:1.5 }, maxHeight:{ xs:36, sm:48 }, overflow:'hidden' }}>
                       {(job.skills||job.tags||[]).map((s,i) => (
-                        <Chip key={i} label={s} size="small" sx={{ background:`${C.primary}22`, color: C.primary, fontSize:11 }}/>
+                        <Chip key={i} label={s} size="small" sx={{ background:`${C.primary}22`, color: C.primary, fontSize:{ xs:'0.58rem', sm:'0.68rem' }, height:{ xs:18, sm:22 } }}/>
                       ))}
                     </Box>
 
                     <Button onClick={() => openModal(job)} sx={{ mt:'auto',
                       background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:'#fff',
-                      borderRadius:1.5, textTransform:'none', fontWeight:600, boxShadow:'none', '&:hover':{ opacity:0.9 } }}>
+                      borderRadius:1.5, textTransform:'none', fontWeight:600, fontSize:{ xs:'0.7rem', sm:'0.875rem' }, minHeight:{ xs:30, sm:38 }, py:{ xs:0.5, sm:1 }, boxShadow:'none' }}>
                       Apply Now
                     </Button>
                   </Card>

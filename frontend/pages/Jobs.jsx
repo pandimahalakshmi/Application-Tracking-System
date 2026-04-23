@@ -137,7 +137,7 @@ export default function Jobs() {
   const pageWrap = (children) => (
     <Box sx={{ display:"flex", background: C.bg, minHeight:"100vh" }}>
       <Sidebar />
-      <Box sx={{ marginLeft:{ xs:0, lg:"240px" }, width:"100%", p:{ xs:"16px", sm:"24px", lg:"32px" }, pt:{ xs:"64px", lg:"32px" } }}>{children}</Box>
+      <Box sx={{ marginLeft:{ xs:0, lg:"240px" }, width:"100%", minWidth:0, p:{ xs:"12px", sm:"20px", lg:"32px" }, pt:{ xs:"64px", lg:"32px" }, overflowX:'hidden' }}>{children}</Box>
     </Box>
   );
 
@@ -150,59 +150,59 @@ export default function Jobs() {
   // ── Admin view ────────────────────────────────────────────────────────────
   if (role === "admin") return pageWrap(
     <>
-      <Box sx={{ mb:4, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+      <Box sx={{ mb:{ xs:2, sm:3 }, display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:'wrap', gap:1.5 }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight:700, color: C.text }}>Job Listings</Typography>
-          <Typography sx={{ color: C.muted, mt:0.5 }}>{jobs.length} jobs posted</Typography>
+          <Typography sx={{ fontWeight:700, color: C.text, fontSize:{ xs:'1.1rem', sm:'1.5rem', lg:'1.875rem' } }}>Job Listings</Typography>
+          <Typography sx={{ color: C.muted, mt:0.25, fontSize:{ xs:'0.72rem', sm:'0.875rem' } }}>{jobs.length} jobs posted</Typography>
         </Box>
         <Button variant="contained" onClick={() => window.location.href='/jobform'}
-          sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, borderRadius:2, textTransform:'none', fontWeight:600, boxShadow:'none' }}>
+          sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, borderRadius:2, textTransform:'none', fontWeight:600, fontSize:{ xs:'0.75rem', sm:'0.875rem' }, px:{ xs:2, sm:3 }, minHeight:38, boxShadow:'none' }}>
           + Post New Job
         </Button>
       </Box>
-      <Box sx={{ display:'grid', gridTemplateColumns:{ xs:'1fr', sm:'repeat(2,1fr)', lg:'repeat(3,1fr)' }, gap:{ xs:2, sm:3 } }}>
+      <Box sx={{ display:'grid', gridTemplateColumns:{ xs:'1fr', sm:'repeat(2,1fr)', lg:'repeat(3,1fr)' }, gap:{ xs:1.5, sm:2.5 } }}>
         {jobs.length === 0 && (
           <Box sx={{ gridColumn:'1 / -1' }}>
-            <Card sx={{ ...cardSx, p:6, textAlign:'center' }}>
-              <Briefcase size={48} color={C.border} style={{ marginBottom:16 }}/>
-              <Typography sx={{ color: C.muted }}>No jobs posted yet. Click "Post New Job" to get started.</Typography>
+            <Card sx={{ ...cardSx, p:{ xs:4, sm:6 }, textAlign:'center' }}>
+              <Briefcase size={36} color={C.border} style={{ marginBottom:12 }}/>
+              <Typography sx={{ color: C.muted, fontSize:{ xs:'0.8rem', sm:'0.875rem' } }}>No jobs posted yet.</Typography>
             </Card>
           </Box>
         )}
         {jobs.map(job => {
           const jid = job._id || job.id;
           return (
-            <Card key={jid} sx={{ ...cardSx, p:3, width:'100%', display:"flex", flexDirection:"column",
+            <Card key={jid} sx={{ ...cardSx, p:{ xs:'14px', sm:3 }, width:'100%', display:"flex", flexDirection:"column",
               '&:hover':{ borderColor: C.primary, transform:"translateY(-3px)", boxShadow:`0 12px 32px rgba(0,0,0,0.4)` } }}>
-              <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", mb:1.5 }}>
+              <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", mb:1 }}>
                 <Box sx={{ flex:1, minWidth:0 }}>
-                  <Typography sx={{ fontWeight:700, color: C.text, fontSize:15, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{job.title}</Typography>
-                  <Typography sx={{ color: C.muted, fontSize:12, mt:0.3 }}>{job.company}</Typography>
+                  <Typography sx={{ fontWeight:700, color: C.text, fontSize:{ xs:'0.82rem', sm:'0.9rem' }, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{job.title}</Typography>
+                  <Typography sx={{ color: C.muted, fontSize:{ xs:'0.68rem', sm:'0.75rem' }, mt:0.25 }}>{job.company}</Typography>
                 </Box>
                 <Tooltip title="Delete job">
                   <IconButton size="small" onClick={e => handleDelete(e, jid)}
-                    sx={{ color: C.danger, ml:1, flexShrink:0, '&:hover':{ background:`${C.danger}22` } }}>
-                    <Trash2 size={16}/>
+                    sx={{ color: C.danger, ml:0.5, flexShrink:0, p:'4px', '&:hover':{ background:`${C.danger}22` } }}>
+                    <Trash2 size={14}/>
                   </IconButton>
                 </Tooltip>
               </Box>
-              <Chip label={job.type} size="small" sx={{ background: typeColor(job.type).bg, color: typeColor(job.type).color, fontWeight:600, mb:1.5, alignSelf:'flex-start' }} />
-              <Typography sx={{ color: C.muted, fontSize:12, mb:1.5, flexGrow:1, overflow:'hidden',
-                display:'-webkit-box', WebkitLineClamp:3, WebkitBoxOrient:'vertical' }}>{job.description}</Typography>
-              <Box sx={{ display:"flex", gap:2, mb:1.5 }}>
-                <Box sx={{ display:"flex", alignItems:"center", gap:0.5, color: C.muted, fontSize:12 }}><MapPin size={13} color={C.accent}/>{job.location}</Box>
-                <Box sx={{ color: C.muted, fontSize:12 }}>{job.salary}</Box>
+              <Chip label={job.type} size="small" sx={{ background: typeColor(job.type).bg, color: typeColor(job.type).color, fontWeight:600, mb:1, alignSelf:'flex-start', fontSize:'0.62rem', height:20 }} />
+              <Typography sx={{ color: C.muted, fontSize:{ xs:'0.7rem', sm:'0.75rem' }, mb:1, flexGrow:1, overflow:'hidden',
+                display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>{job.description}</Typography>
+              <Box sx={{ display:"flex", gap:1.5, mb:1, flexWrap:'wrap' }}>
+                <Box sx={{ display:"flex", alignItems:"center", gap:0.5, color: C.muted, fontSize:{ xs:'0.65rem', sm:'0.72rem' } }}><MapPin size={11} color={C.accent}/>{job.location}</Box>
+                <Box sx={{ color: C.muted, fontSize:{ xs:'0.65rem', sm:'0.72rem' } }}>{job.salary}</Box>
               </Box>
-              <Box sx={{ display:"flex", gap:0.5, flexWrap:"wrap", mb:1.5, maxHeight:48, overflow:'hidden' }}>
-                {(job.skills||[]).map((s,i) => <Chip key={i} label={s} size="small" sx={{ background:`${C.primary}22`, color: C.primary, fontSize:11 }}/>)}
+              <Box sx={{ display:"flex", gap:0.5, flexWrap:"wrap", mb:1, maxHeight:40, overflow:'hidden' }}>
+                {(job.skills||[]).map((s,i) => <Chip key={i} label={s} size="small" sx={{ background:`${C.primary}22`, color: C.primary, fontSize:'0.6rem', height:18 }}/>)}
               </Box>
               <Box sx={{ display:'flex', alignItems:'center', justifyContent:'space-between', mt:'auto' }}>
-                <Typography sx={{ color: C.muted, fontSize:11 }}>{job.applications || 0} applicants</Typography>
+                <Typography sx={{ color: C.muted, fontSize:{ xs:'0.62rem', sm:'0.68rem' } }}>{job.applications || 0} applicants</Typography>
                 <Button size="small" onClick={() => navigate(`/jobform?id=${jid}`)}
                   sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:'#fff',
-                    borderRadius:1.5, textTransform:'none', fontWeight:600, px:2, fontSize:11,
-                    boxShadow:`0 4px 12px ${C.primary}44`, '&:hover':{ opacity:0.9 } }}>
-                  Edit Job
+                    borderRadius:1.5, textTransform:'none', fontWeight:600, px:{ xs:1.5, sm:2 }, fontSize:{ xs:'0.65rem', sm:'0.72rem' }, minHeight:28,
+                    boxShadow:`0 4px 12px ${C.primary}44` }}>
+                  Edit
                 </Button>
               </Box>
             </Card>
@@ -215,10 +215,10 @@ export default function Jobs() {
   // ── User view ─────────────────────────────────────────────────────────────
   return pageWrap(
     <>
-      <Box sx={{ mb:2, display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:2 }}>
+      <Box sx={{ mb:{ xs:2, sm:3 }, display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:1.5 }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight:700, color: C.text }}>Available Jobs</Typography>
-          <Typography sx={{ color: C.muted, mt:0.5 }}>{filtered.length} positions found</Typography>
+          <Typography sx={{ fontWeight:700, color: C.text, fontSize:{ xs:'1.1rem', sm:'1.5rem', lg:'1.875rem' } }}>Available Jobs</Typography>
+          <Typography sx={{ color: C.muted, mt:0.25, fontSize:{ xs:'0.72rem', sm:'0.875rem' } }}>{filtered.length} positions found</Typography>
         </Box>
       </Box>
       <JobFilters onApply={f => setAppliedFilters(f)} onClear={() => setAppliedFilters({ search:'', type:'', location:'', salary:'', dateFrom:'', dateTo:'' })} />
@@ -236,50 +236,49 @@ export default function Jobs() {
           const isSaved = savedIds.has(jid);
           return (
             <Box key={jid} sx={{ display:'flex' }}>
-              <Card sx={{ ...cardSx, p:3, width:"100%", display:"flex", flexDirection:"column", position:'relative',
+              <Card sx={{ ...cardSx, p:{ xs:'12px', sm:3 }, width:"100%", display:"flex", flexDirection:"column", position:'relative',
                 '&:hover':{ borderColor: C.primary, transform:"translateY(-4px)", boxShadow:`0 12px 32px rgba(0,0,0,0.4)` } }}>
 
-                {/* Star save button */}
                 <Tooltip title={isSaved ? "Unsave job" : "Save job"}>
                   <IconButton size="small" onClick={e => handleToggleSave(e, jid)}
-                    sx={{ position:'absolute', top:12, right:12, zIndex:1,
-                      color: isSaved ? C.warning : C.muted,
-                      '&:hover':{ color: C.warning, background:`${C.warning}22` },
-                      transition:'all 0.2s' }}>
-                    <Star size={18} fill={isSaved ? C.warning : 'none'} />
+                    sx={{ position:'absolute', top:{ xs:8, sm:12 }, right:{ xs:8, sm:12 }, zIndex:1,
+                      color: isSaved ? C.warning : C.muted, p:'4px',
+                      '&:hover':{ color: C.warning, background:`${C.warning}22` }, transition:'all 0.2s' }}>
+                    <Star size={15} fill={isSaved ? C.warning : 'none'} />
                   </IconButton>
                 </Tooltip>
 
-                <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", mb:1, pr:4 }}>
+                <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", mb:{ xs:0.75, sm:1 }, pr:{ xs:3, sm:4 } }}>
                   <Box sx={{ flex:1, minWidth:0 }}>
-                    <Typography sx={{ fontWeight:700, color: C.text, fontSize:15, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{job.title}</Typography>
-                    <Typography sx={{ color: C.muted, fontSize:12, mt:0.3 }}>{job.company}</Typography>
+                    <Typography className="job-card-title" sx={{ fontWeight:700, color: C.text, fontSize:{ xs:'0.8rem', sm:'0.95rem' }, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{job.title}</Typography>
+                    <Typography className="job-card-company" sx={{ color: C.muted, fontSize:{ xs:'0.68rem', sm:'0.8rem' }, mt:0.25 }}>{job.company}</Typography>
                   </Box>
-                  <Chip label={job.type} size="small" sx={{ background: typeColor(job.type).bg, color: typeColor(job.type).color, fontWeight:600, flexShrink:0, ml:1 }} />
+                  <Chip label={job.type} size="small" sx={{ background: typeColor(job.type).bg, color: typeColor(job.type).color, fontWeight:600, flexShrink:0, ml:0.5, fontSize:{ xs:'0.58rem', sm:'0.7rem' }, height:{ xs:18, sm:22 } }} />
                 </Box>
 
-                <Typography sx={{ color: C.muted, fontSize:12, mb:1.5, flexGrow:1, overflow:'hidden',
-                  display:'-webkit-box', WebkitLineClamp:3, WebkitBoxOrient:'vertical' }}>{job.description}</Typography>
+                <Typography className="job-card-desc" sx={{ color: C.muted, fontSize:{ xs:'0.68rem', sm:'0.8rem' }, mb:{ xs:1, sm:1.5 }, flexGrow:1, overflow:'hidden',
+                  display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>{job.description}</Typography>
 
-                <Box sx={{ display:"flex", gap:2, mb:1.5 }}>
-                  <Box sx={{ display:"flex", alignItems:"center", gap:0.5, color: C.muted, fontSize:12 }}>
-                    <MapPin size={13} color={C.accent}/>{job.location}
+                <Box sx={{ display:"flex", gap:{ xs:1, sm:2 }, mb:{ xs:0.75, sm:1.5 }, flexWrap:'wrap' }}>
+                  <Box className="job-card-meta" sx={{ display:"flex", alignItems:"center", gap:0.5, color: C.muted, fontSize:{ xs:'0.65rem', sm:'0.75rem' } }}>
+                    <MapPin size={11} color={C.accent}/>{job.location}
                   </Box>
-                  <Box sx={{ color: C.muted, fontSize:12 }}>{job.salary}</Box>
+                  <Typography className="job-card-meta" sx={{ color: C.muted, fontSize:{ xs:'0.65rem', sm:'0.75rem' } }}>{job.salary}</Typography>
                 </Box>
 
-                <Box sx={{ display:"flex", gap:0.5, flexWrap:"wrap", mb:1.5, maxHeight:48, overflow:'hidden' }}>
+                <Box sx={{ display:"flex", gap:0.5, flexWrap:"wrap", mb:{ xs:1, sm:1.5 }, maxHeight:{ xs:36, sm:48 }, overflow:'hidden' }}>
                   {(job.skills||job.tags||[]).map((t,i) => (
-                    <Chip key={i} label={t} size="small" sx={{ background:`${C.primary}22`, color: C.primary, fontSize:11 }}/>
+                    <Chip key={i} label={t} size="small" sx={{ background:`${C.primary}22`, color: C.primary, fontSize:{ xs:'0.58rem', sm:'0.68rem' }, height:{ xs:18, sm:22 } }}/>
                   ))}
                 </Box>
 
                 <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"center", mt:'auto' }}>
-                  <Typography sx={{ color: C.muted, fontSize:11 }}>{job.applications} applicants</Typography>
+                  <Typography sx={{ color: C.muted, fontSize:{ xs:'0.62rem', sm:'0.72rem' } }}>{job.applications} applicants</Typography>
                   <Button size="small" onClick={() => openModal(job)}
                     sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:"#fff",
-                      borderRadius:1.5, textTransform:"none", fontWeight:600, px:2,
-                      boxShadow:`0 4px 12px ${C.primary}44`, '&:hover':{ opacity:0.9 } }}>
+                      borderRadius:1.5, textTransform:"none", fontWeight:600,
+                      px:{ xs:1.5, sm:2 }, fontSize:{ xs:'0.68rem', sm:'0.8rem' }, minHeight:{ xs:28, sm:34 },
+                      boxShadow:`0 4px 12px ${C.primary}44` }}>
                     Apply Now
                   </Button>
                 </Box>

@@ -191,58 +191,59 @@ export default function Candidates() {
   return (
     <Box sx={{ display:"flex", background: C.bg, minHeight:"100vh" }}>
       <Sidebar />
-      <Box sx={{ marginLeft:{ xs:0, lg:"240px" }, width:"100%", p:{ xs:"16px", sm:"24px", lg:"32px" }, pt:{ xs:"64px", lg:"32px" } }}>
+      <Box sx={{ marginLeft:{ xs:0, lg:"240px" }, width:"100%", minWidth:0, p:{ xs:"12px", sm:"20px", lg:"32px" }, pt:{ xs:"64px", lg:"32px" }, overflowX:'hidden' }}>
 
-        <Box sx={{ mb:4 }}>
-          <Typography variant="h4" sx={{ fontWeight:700, color: C.text }}>Candidates</Typography>
-          <Typography sx={{ color: C.muted, mt:0.5 }}>{filtered.length} applicant{filtered.length!==1?'s':''}</Typography>
+        <Box sx={{ mb:{ xs:2, sm:3 } }}>
+          <Typography sx={{ fontWeight:700, color: C.text, fontSize:{ xs:'1.2rem', sm:'1.5rem', lg:'2rem' } }}>Candidates</Typography>
+          <Typography sx={{ color: C.muted, mt:0.5, fontSize:{ xs:'0.75rem', sm:'0.875rem' } }}>{filtered.length} applicant{filtered.length!==1?'s':''}</Typography>
         </Box>
 
         {/* Filters */}
-        <Box sx={{ mb:3, p:2.5, background: C.surface, border:`1px solid ${C.border}`, borderRadius:3 }}>
-          <Box sx={{ display:'flex', gap:2, flexWrap:'wrap', alignItems:'flex-end' }}>
+        <Box sx={{ mb:{ xs:2, sm:3 }, p:{ xs:'12px', sm:'20px' }, background: C.surface, border:`1px solid ${C.border}`, borderRadius:{ xs:2, sm:3 } }}>
+          <Box sx={{ display:'flex', gap:{ xs:1, sm:2 }, flexWrap:'wrap', alignItems:'flex-end' }}>
             <TextField placeholder="Search name, email, job..." value={localSearch}
               onChange={e => setLocalSearch(e.target.value)}
-              size="small" sx={{ ...fieldSx, minWidth:220 }}
-              InputProps={{ startAdornment: <InputAdornment position="start"><Search size={15} color={C.muted}/></InputAdornment> }}/>
-            <FormControl size="small" sx={{ minWidth:160, ...fieldSx }}>
-              <InputLabel sx={{ color: C.muted }}>Job Title</InputLabel>
+              size="small" sx={{ ...fieldSx, width:{ xs:'100%', sm:'auto' }, minWidth:{ sm:200 } }}
+              InputProps={{ startAdornment: <InputAdornment position="start"><Search size={14} color={C.muted}/></InputAdornment> }}/>
+            <FormControl size="small" sx={{ minWidth:{ xs:'calc(50% - 4px)', sm:150 }, ...fieldSx }}>
+              <InputLabel sx={{ color: C.muted, fontSize:'0.8rem' }}>Job Title</InputLabel>
               <Select value={localJob} onChange={e => setLocalJob(e.target.value)}
-                sx={{ color: C.text, background: C.bg, '& fieldset':{ borderColor: C.border } }} MenuProps={menuPropsSx}>
+                sx={{ color: C.text, background: C.bg, fontSize:'0.8rem', '& fieldset':{ borderColor: C.border } }} MenuProps={menuPropsSx}>
                 <MenuItem value="">All Jobs</MenuItem>
-                {uniqueJobs.map(j => <MenuItem key={j} value={j}>{j}</MenuItem>)}
+                {uniqueJobs.map(j => <MenuItem key={j} value={j} sx={{ fontSize:'0.8rem' }}>{j}</MenuItem>)}
               </Select>
             </FormControl>
-            <FormControl size="small" sx={{ minWidth:170, ...fieldSx }}>
-              <InputLabel sx={{ color: C.muted }}>Status</InputLabel>
+            <FormControl size="small" sx={{ minWidth:{ xs:'calc(50% - 4px)', sm:155 }, ...fieldSx }}>
+              <InputLabel sx={{ color: C.muted, fontSize:'0.8rem' }}>Status</InputLabel>
               <Select value={localStatus} onChange={e => setLocalStatus(e.target.value)}
-                sx={{ color: C.text, background: C.bg, '& fieldset':{ borderColor: C.border } }} MenuProps={menuPropsSx}>
+                sx={{ color: C.text, background: C.bg, fontSize:'0.8rem', '& fieldset':{ borderColor: C.border } }} MenuProps={menuPropsSx}>
                 <MenuItem value="All">All Status</MenuItem>
-                {statuses.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+                {statuses.map(s => <MenuItem key={s} value={s} sx={{ fontSize:'0.8rem' }}>{s}</MenuItem>)}
               </Select>
             </FormControl>
-            <TextField size="small" label="Applied From" type="date" value={localDateFrom}
+            <TextField size="small" label="From" type="date" value={localDateFrom}
               onChange={e => setLocalDateFrom(e.target.value)}
               InputLabelProps={{ shrink:true }}
-              sx={{ ...fieldSx, minWidth:155 }}/>
-            <TextField size="small" label="Applied To" type="date" value={localDateTo}
+              sx={{ ...fieldSx, width:{ xs:'calc(50% - 4px)', sm:'auto' }, minWidth:{ sm:140 } }}/>
+            <TextField size="small" label="To" type="date" value={localDateTo}
               onChange={e => setLocalDateTo(e.target.value)}
               InputLabelProps={{ shrink:true }}
-              sx={{ ...fieldSx, minWidth:155 }}/>
-            <Button onClick={handleApplyFilters}
-              startIcon={<Search size={15}/>}
-              sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:'#fff',
-                borderRadius:2, textTransform:'none', fontWeight:600, px:3, height:40,
-                boxShadow:`0 4px 12px ${C.primary}44`, '&:hover':{ opacity:0.9 } }}>
-              Apply Filters
-            </Button>
-            {hasLocalFilters && (
-              <Button size="small" onClick={handleClearFilters}
-                sx={{ color: C.muted, textTransform:'none', border:`1px solid ${C.border}`, borderRadius:2, height:40, px:2,
-                  '&:hover':{ borderColor: C.primary, color: C.text } }}>
-                Clear
+              sx={{ ...fieldSx, width:{ xs:'calc(50% - 4px)', sm:'auto' }, minWidth:{ sm:140 } }}/>
+            <Box sx={{ display:'flex', gap:1, width:{ xs:'100%', sm:'auto' } }}>
+              <Button onClick={handleApplyFilters} startIcon={<Search size={14}/>} fullWidth
+                sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:'#fff',
+                  borderRadius:2, textTransform:'none', fontWeight:600, height:38, fontSize:'0.8rem',
+                  boxShadow:`0 4px 12px ${C.primary}44` }}>
+                Apply
               </Button>
-            )}
+              {hasLocalFilters && (
+                <Button size="small" onClick={handleClearFilters}
+                  sx={{ color: C.muted, textTransform:'none', border:`1px solid ${C.border}`, borderRadius:2, height:38, px:2, fontSize:'0.8rem',
+                    '&:hover':{ borderColor: C.primary, color: C.text } }}>
+                  Clear
+                </Button>
+              )}
+            </Box>
           </Box>
         </Box>
 
@@ -252,106 +253,152 @@ export default function Candidates() {
             <Box sx={{ display:"flex", justifyContent:"center", p:6 }}><CircularProgress sx={{ color: C.primary }}/></Box>
           ) : filtered.length === 0 ? (
             <Box sx={{ textAlign:"center", py:8 }}>
-              <Briefcase size={48} color={C.border} style={{ marginBottom:12 }}/>
-              <Typography sx={{ color: C.muted }}>No applicants found</Typography>
+              <Briefcase size={40} color={C.border} style={{ marginBottom:12 }}/>
+              <Typography sx={{ color: C.muted, fontSize:'0.875rem' }}>No applicants found</Typography>
             </Box>
           ) : (
             <>
-              <Box sx={{ overflowX:'auto', WebkitOverflowScrolling:'touch' }}>
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ '& th':{ background:'#263348', color: C.muted, fontWeight:600, fontSize:12, borderBottom:`1px solid ${C.border}` } }}>
-                    <TableCell>Candidate</TableCell>
-                    <TableCell>Job Applied</TableCell>
-                    <TableCell>Applied Date</TableCell>
-                    <TableCell>Match Score</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell align="center">Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {paginated.map(app => {
-                    const sc = statusColors[app.status] || statusColors.Pending;
-                    const match = getSkillMatch(app);
-                    return (
-                      <TableRow key={app._id} sx={{ '& td':{ borderBottom:`1px solid ${C.border}`, color: C.text }, '&:hover':{ background:`${C.primary}08` } }}>
-                        <TableCell>
-                          <Box sx={{ display:"flex", alignItems:"center", gap:1.5 }}>
-                            <Avatar sx={{ width:36, height:36, fontSize:14, fontWeight:700, background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})` }}>
-                              {(app.userName||'?').charAt(0).toUpperCase()}
-                            </Avatar>
-                            <Box>
-                              <Typography sx={{ fontWeight:600, fontSize:13 }}>{app.userName}</Typography>
-                              <Typography sx={{ fontSize:11, color: C.muted }}>{app.userEmail}</Typography>
+              {/* Desktop table */}
+              <Box sx={{ display:{ xs:'none', md:'block' }, overflowX:'auto', WebkitOverflowScrolling:'touch' }}>
+                <Table>
+                  <TableHead>
+                    <TableRow sx={{ '& th':{ background:'#263348', color: C.muted, fontWeight:600, fontSize:12, borderBottom:`1px solid ${C.border}` } }}>
+                      <TableCell>Candidate</TableCell>
+                      <TableCell>Job Applied</TableCell>
+                      <TableCell>Applied Date</TableCell>
+                      <TableCell>Match</TableCell>
+                      <TableCell>Status</TableCell>
+                      <TableCell align="center">Actions</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {paginated.map(app => {
+                      const sc = statusColors[app.status] || statusColors.Pending;
+                      const match = getSkillMatch(app);
+                      return (
+                        <TableRow key={app._id} sx={{ '& td':{ borderBottom:`1px solid ${C.border}`, color: C.text }, '&:hover':{ background:`${C.primary}08` } }}>
+                          <TableCell>
+                            <Box sx={{ display:"flex", alignItems:"center", gap:1.5 }}>
+                              <Avatar sx={{ width:34, height:34, fontSize:13, fontWeight:700, background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})` }}>
+                                {(app.userName||'?').charAt(0).toUpperCase()}
+                              </Avatar>
+                              <Box>
+                                <Typography sx={{ fontWeight:600, fontSize:13 }}>{app.userName}</Typography>
+                                <Typography sx={{ fontSize:11, color: C.muted }}>{app.userEmail}</Typography>
+                              </Box>
                             </Box>
+                          </TableCell>
+                          <TableCell>
+                            <Typography sx={{ fontWeight:600, fontSize:13 }}>{app.jobTitle}</Typography>
+                            <Typography sx={{ fontSize:11, color: C.muted }}>{app.company}</Typography>
+                          </TableCell>
+                          <TableCell sx={{ color: C.muted, fontSize:12 }}>
+                            {new Date(app.createdAt).toLocaleDateString('en-US',{day:'numeric',month:'short',year:'numeric'})}
+                          </TableCell>
+                          <TableCell>
+                            <Box sx={{ display:'flex', alignItems:'center', gap:1 }}>
+                              <LinearProgress variant="determinate" value={match.score}
+                                sx={{ width:56, height:5, borderRadius:3, background: C.border,
+                                  '& .MuiLinearProgress-bar':{ background: match.score>=70?C.success:match.score>=50?C.warning:'#F87171', borderRadius:3 } }}/>
+                              <Typography sx={{ fontSize:11, fontWeight:600, color: match.score>=70?C.success:match.score>=50?C.warning:'#F87171' }}>
+                                {match.score}%
+                              </Typography>
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <Chip label={app.status} size="small" sx={{ background: sc.bg, color: sc.color, fontWeight:700, fontSize:11 }}/>
+                          </TableCell>
+                          <TableCell align="center">
+                            <Box sx={{ display:"flex", justifyContent:"center", gap:0.5 }}>
+                              <Tooltip title="View Details"><IconButton size="small" onClick={() => openDetail(app)} sx={{ color: C.primary, '&:hover':{ background:`${C.primary}22` } }}><Eye size={14}/></IconButton></Tooltip>
+                              <Tooltip title="Update Status"><IconButton size="small" onClick={() => { setSelected(app); setNewStatus(app.status); setOpenStatus(true); }} sx={{ color: C.warning, '&:hover':{ background:`${C.warning}22` } }}><Edit size={14}/></IconButton></Tooltip>
+                              <Tooltip title="Preview Resume"><IconButton size="small" onClick={() => handleViewResume(app)} sx={{ color: C.accent, '&:hover':{ background:`${C.accent}22` } }}><FileText size={14}/></IconButton></Tooltip>
+                              <Tooltip title="Download Resume"><IconButton size="small" onClick={() => handleDownload(app)} sx={{ color: C.success, '&:hover':{ background:`${C.success}22` } }}><Download size={14}/></IconButton></Tooltip>
+                              <Tooltip title="Delete"><IconButton size="small" onClick={() => handleDelete(app._id)} sx={{ color:'#F87171', '&:hover':{ background:'rgba(248,113,113,0.15)' } }}><Trash2 size={14}/></IconButton></Tooltip>
+                            </Box>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </Box>
+
+              {/* Mobile card list */}
+              <Box sx={{ display:{ xs:'flex', md:'none' }, flexDirection:'column', gap:1.5, p:'12px' }}>
+                {paginated.map(app => {
+                  const sc = statusColors[app.status] || statusColors.Pending;
+                  const match = getSkillMatch(app);
+                  return (
+                    <Box key={app._id} sx={{ p:'14px', borderRadius:2, background: C.bg, border:`1px solid ${C.border}` }}>
+                      {/* Top row */}
+                      <Box sx={{ display:'flex', alignItems:'center', justifyContent:'space-between', mb:1 }}>
+                        <Box sx={{ display:'flex', alignItems:'center', gap:1.25 }}>
+                          <Avatar sx={{ width:36, height:36, fontSize:14, fontWeight:700, background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})` }}>
+                            {(app.userName||'?').charAt(0).toUpperCase()}
+                          </Avatar>
+                          <Box>
+                            <Typography sx={{ fontWeight:700, color: C.text, fontSize:'0.82rem', lineHeight:1.2 }}>{app.userName}</Typography>
+                            <Typography sx={{ fontSize:'0.68rem', color: C.muted }}>{app.userEmail}</Typography>
                           </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Typography sx={{ fontWeight:600, fontSize:13 }}>{app.jobTitle}</Typography>
-                          <Typography sx={{ fontSize:11, color: C.muted }}>{app.company}</Typography>
-                        </TableCell>
-                        <TableCell sx={{ color: C.muted, fontSize:12 }}>
-                          {new Date(app.createdAt).toLocaleDateString('en-US',{day:'numeric',month:'short',year:'numeric'})}
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display:'flex', alignItems:'center', gap:1 }}>
-                            <LinearProgress variant="determinate" value={match.score}
-                              sx={{ width:60, height:6, borderRadius:3, background: C.border,
-                                '& .MuiLinearProgress-bar':{ background: match.score>=70?C.success:match.score>=50?C.warning:'#F87171', borderRadius:3 } }}/>
-                            <Typography sx={{ fontSize:12, fontWeight:600, color: match.score>=70?C.success:match.score>=50?C.warning:'#F87171' }}>
-                              {match.score}%
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Chip label={app.status} size="small" sx={{ background: sc.bg, color: sc.color, fontWeight:700, fontSize:11 }}/>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Box sx={{ display:"flex", justifyContent:"center", gap:0.5 }}>
-                            <Tooltip title="View Details"><IconButton size="small" onClick={() => openDetail(app)} sx={{ color: C.primary, '&:hover':{ background:`${C.primary}22` } }}><Eye size={15}/></IconButton></Tooltip>
-                            <Tooltip title="Update Status"><IconButton size="small" onClick={() => { setSelected(app); setNewStatus(app.status); setOpenStatus(true); }} sx={{ color: C.warning, '&:hover':{ background:`${C.warning}22` } }}><Edit size={15}/></IconButton></Tooltip>
-                            <Tooltip title="Preview Resume"><IconButton size="small" onClick={() => handleViewResume(app)} sx={{ color: C.accent, '&:hover':{ background:`${C.accent}22` } }}><FileText size={15}/></IconButton></Tooltip>
-                            <Tooltip title="Download Resume"><IconButton size="small" onClick={() => handleDownload(app)} sx={{ color: C.success, '&:hover':{ background:`${C.success}22` } }}><Download size={15}/></IconButton></Tooltip>
-                            <Tooltip title="Delete"><IconButton size="small" onClick={() => handleDelete(app._id)} sx={{ color:'#F87171', '&:hover':{ background:'rgba(248,113,113,0.15)' } }}><Trash2 size={15}/></IconButton></Tooltip>
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                        </Box>
+                        <Chip label={app.status} size="small" sx={{ background: sc.bg, color: sc.color, fontWeight:700, fontSize:'0.6rem', height:20 }}/>
+                      </Box>
+
+                      {/* Job + date */}
+                      <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:1 }}>
+                        <Typography sx={{ fontSize:'0.75rem', color: C.text, fontWeight:600 }}>{app.jobTitle}</Typography>
+                        <Typography sx={{ fontSize:'0.65rem', color: C.muted }}>
+                          {new Date(app.createdAt).toLocaleDateString('en-US',{day:'numeric',month:'short'})}
+                        </Typography>
+                      </Box>
+
+                      {/* Match score */}
+                      <Box sx={{ display:'flex', alignItems:'center', gap:1, mb:1.25 }}>
+                        <Typography sx={{ fontSize:'0.65rem', color: C.muted }}>Match:</Typography>
+                        <LinearProgress variant="determinate" value={match.score}
+                          sx={{ flex:1, height:5, borderRadius:3, background: C.border,
+                            '& .MuiLinearProgress-bar':{ background: match.score>=70?C.success:match.score>=50?C.warning:'#F87171', borderRadius:3 } }}/>
+                        <Typography sx={{ fontSize:'0.68rem', fontWeight:700, color: match.score>=70?C.success:match.score>=50?C.warning:'#F87171', flexShrink:0 }}>
+                          {match.score}%
+                        </Typography>
+                      </Box>
+
+                      {/* Actions */}
+                      <Box sx={{ display:'flex', gap:0.75, justifyContent:'flex-end' }}>
+                        <IconButton size="small" onClick={() => openDetail(app)} sx={{ color: C.primary, background:`${C.primary}18`, borderRadius:1.5, p:'6px' }}><Eye size={14}/></IconButton>
+                        <IconButton size="small" onClick={() => { setSelected(app); setNewStatus(app.status); setOpenStatus(true); }} sx={{ color: C.warning, background:`${C.warning}18`, borderRadius:1.5, p:'6px' }}><Edit size={14}/></IconButton>
+                        <IconButton size="small" onClick={() => handleViewResume(app)} sx={{ color: C.accent, background:`${C.accent}18`, borderRadius:1.5, p:'6px' }}><FileText size={14}/></IconButton>
+                        <IconButton size="small" onClick={() => handleDownload(app)} sx={{ color: C.success, background:`${C.success}18`, borderRadius:1.5, p:'6px' }}><Download size={14}/></IconButton>
+                        <IconButton size="small" onClick={() => handleDelete(app._id)} sx={{ color:'#F87171', background:'rgba(248,113,113,0.12)', borderRadius:1.5, p:'6px' }}><Trash2 size={14}/></IconButton>
+                      </Box>
+                    </Box>
+                  );
+                })}
               </Box>
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', px:3, py:2,
-                  borderTop:`1px solid ${C.border}` }}>
-                  <Typography sx={{ color: C.muted, fontSize:13 }}>
-                    Showing {(page-1)*PAGE_SIZE+1}–{Math.min(page*PAGE_SIZE, filtered.length)} of {filtered.length}
+                <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', px:{ xs:1.5, sm:3 }, py:{ xs:1.5, sm:2 },
+                  borderTop:`1px solid ${C.border}`, flexWrap:'wrap', gap:1 }}>
+                  <Typography sx={{ color: C.muted, fontSize:{ xs:'0.7rem', sm:'0.8rem' } }}>
+                    {(page-1)*PAGE_SIZE+1}–{Math.min(page*PAGE_SIZE, filtered.length)} of {filtered.length}
                   </Typography>
-                  <Box sx={{ display:'flex', gap:1, alignItems:'center' }}>
+                  <Box sx={{ display:'flex', gap:0.75, alignItems:'center', flexWrap:'wrap' }}>
                     <Button size="small" disabled={page === 1} onClick={() => setPage(p => p-1)}
-                      sx={{ minWidth:36, height:36, borderRadius:2, color: C.muted, border:`1px solid ${C.border}`,
-                        '&:not(:disabled):hover':{ borderColor: C.primary, color: C.primary },
-                        '&:disabled':{ opacity:0.3 } }}>
-                      ‹
-                    </Button>
+                      sx={{ minWidth:32, height:32, borderRadius:1.5, color: C.muted, border:`1px solid ${C.border}`, fontSize:'0.8rem',
+                        '&:not(:disabled):hover':{ borderColor: C.primary, color: C.primary }, '&:disabled':{ opacity:0.3 } }}>‹</Button>
                     {Array.from({ length: totalPages }, (_, i) => i+1).map(n => (
                       <Button key={n} size="small" onClick={() => setPage(n)}
-                        sx={{ minWidth:36, height:36, borderRadius:2, fontWeight: n===page ? 700 : 400,
+                        sx={{ minWidth:32, height:32, borderRadius:1.5, fontWeight: n===page ? 700 : 400, fontSize:'0.75rem',
                           background: n===page ? `linear-gradient(135deg, ${C.primary}, ${C.secondary})` : 'transparent',
                           color: n===page ? '#fff' : C.muted,
                           border: n===page ? 'none' : `1px solid ${C.border}`,
-                          '&:hover':{ borderColor: C.primary, color: n===page ? '#fff' : C.primary } }}>
-                        {n}
-                      </Button>
+                          '&:hover':{ borderColor: C.primary, color: n===page ? '#fff' : C.primary } }}>{n}</Button>
                     ))}
                     <Button size="small" disabled={page === totalPages} onClick={() => setPage(p => p+1)}
-                      sx={{ minWidth:36, height:36, borderRadius:2, color: C.muted, border:`1px solid ${C.border}`,
-                        '&:not(:disabled):hover':{ borderColor: C.primary, color: C.primary },
-                        '&:disabled':{ opacity:0.3 } }}>
-                      ›
-                    </Button>
+                      sx={{ minWidth:32, height:32, borderRadius:1.5, color: C.muted, border:`1px solid ${C.border}`, fontSize:'0.8rem',
+                        '&:not(:disabled):hover':{ borderColor: C.primary, color: C.primary }, '&:disabled':{ opacity:0.3 } }}>›</Button>
                   </Box>
                 </Box>
               )}
@@ -384,7 +431,7 @@ export default function Candidates() {
 
         {/* Detail Drawer */}
         <Drawer anchor="right" open={drawerOpen} onClose={() => setDrawerOpen(false)}
-          PaperProps={{ sx:{ width:420, background: C.surface, borderLeft:`1px solid ${C.border}`, p:3, overflowY:'auto' } }}>
+          PaperProps={{ sx:{ width:{ xs:'100%', sm:420 }, background: C.surface, borderLeft:`1px solid ${C.border}`, p:{ xs:2, sm:3 }, overflowY:'auto' } }}>
           {drawerApp && <>
             <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:3 }}>
               <Typography variant="h6" sx={{ fontWeight:700, color: C.text }}>Candidate Profile</Typography>

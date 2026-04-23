@@ -67,32 +67,29 @@ export function ApplicationStatusPie({ applications }) {
   );
 
   return (
-    <Box sx={{ display:'flex', alignItems:'center', gap:2 }}>
-      {/* Pie */}
+    <Box sx={{ display:'flex', alignItems:'center', gap:{ xs:1.5, sm:2 }, width:'100%' }}>
       <Box sx={{ flexShrink:0 }}>
-        <ResponsiveContainer width={130} height={130}>
+        <ResponsiveContainer width={110} height={110}>
           <PieChart>
-            <Pie data={statusData} cx="50%" cy="50%" innerRadius={35} outerRadius={58}
+            <Pie data={statusData} cx="50%" cy="50%" innerRadius={28} outerRadius={50}
               paddingAngle={3} dataKey="value"
-              cursor="pointer" onClick={handleClick}
-              strokeWidth={0}>
+              cursor="pointer" onClick={handleClick} strokeWidth={0}>
               {statusData.map((s, i) => <Cell key={i} fill={s.color} stroke="none"/>)}
             </Pie>
             <Tooltip content={<PieTooltip/>} wrapperStyle={{ outline:'none' }}/>
           </PieChart>
         </ResponsiveContainer>
       </Box>
-      {/* Legend with counts */}
-      <Box sx={{ flex:1, display:'flex', flexDirection:'column', gap:0.8 }}>
+      <Box sx={{ flex:1, display:'flex', flexDirection:'column', gap:0.6 }}>
         {statusData.map((s, i) => (
           <Box key={i} onClick={() => handleClick(s)}
-            sx={{ display:'flex', alignItems:'center', gap:1, cursor:'pointer',
-              px:1, py:0.5, borderRadius:2, transition:'all 0.2s',
+            sx={{ display:'flex', alignItems:'center', gap:0.75, cursor:'pointer',
+              px:0.75, py:0.4, borderRadius:1.5, transition:'all 0.2s',
               '&:hover':{ background:`${s.color}18` } }}>
-            <Box sx={{ width:9, height:9, borderRadius:'50%', background: s.color, flexShrink:0 }}/>
-            <Typography sx={{ color: C.text, fontSize:12, fontWeight:600, flex:1 }}>{s.name}</Typography>
-            <Box sx={{ px:1, py:0.2, borderRadius:10, background:`${s.color}22`, flexShrink:0 }}>
-              <Typography sx={{ color: s.color, fontSize:11, fontWeight:700 }}>{s.value}</Typography>
+            <Box sx={{ width:8, height:8, borderRadius:'50%', background: s.color, flexShrink:0 }}/>
+            <Typography sx={{ color: C.text, fontSize:{ xs:'0.65rem', sm:'0.75rem' }, fontWeight:600, flex:1 }}>{s.name}</Typography>
+            <Box sx={{ px:0.75, py:0.2, borderRadius:10, background:`${s.color}22`, flexShrink:0 }}>
+              <Typography sx={{ color: s.color, fontSize:{ xs:'0.6rem', sm:'0.68rem' }, fontWeight:700 }}>{s.value}</Typography>
             </Box>
           </Box>
         ))}
@@ -117,31 +114,31 @@ export default function AnalyticsCharts({ stats, jobs, applications }) {
   ];
 
   const chartCard = (title, children) => (
-    <Card sx={{ p:3, background: C.surface, border:`1px solid ${C.border}`, borderRadius:3 }}>
-      <Typography variant="h6" sx={{ fontWeight:700, color: C.text, mb:3 }}>{title}</Typography>
+    <Card sx={{ p:{ xs:'14px', sm:3 }, background: C.surface, border:`1px solid ${C.border}`, borderRadius:{ xs:2, sm:3 } }}>
+      <Typography sx={{ fontWeight:700, color: C.text, mb:{ xs:1.5, sm:2.5 }, fontSize:{ xs:'0.875rem', sm:'1.1rem' } }}>{title}</Typography>
       {children}
     </Card>
   );
 
   return (
-    <Box sx={{ display:'grid', gridTemplateColumns:{ xs:'1fr', lg:'2fr 1fr' }, gap:3, mt:3 }}>
+    <Box sx={{ display:'grid', gridTemplateColumns:{ xs:'1fr', lg:'2fr 1fr' }, gap:{ xs:1.5, sm:3 }, mt:{ xs:1.5, sm:3 } }}>
 
       {/* Applications per Job */}
-      {chartCard('Applications per Job — All Jobs',
+      {chartCard('Applications per Job',
         <Box>
           {allJobData.length === 0 ? (
             <Typography sx={{ color: C.muted, textAlign:'center', py:4 }}>No job data yet</Typography>
           ) : (
             <Box sx={{ overflowX:'auto', pb:1,
-              '&::-webkit-scrollbar':{ height:4 },
+              '&::-webkit-scrollbar':{ height:3 },
               '&::-webkit-scrollbar-thumb':{ background: C.border, borderRadius:2 } }}>
-              <Box sx={{ minWidth: Math.max(allJobData.length * 72, 400) }}>
-                <ResponsiveContainer width="100%" height={260}>
-                  <BarChart data={allJobData} margin={{ top:8, right:8, left:-20, bottom:8 }}>
-                    <XAxis dataKey="name" tick={{ fill: C.muted, fontSize:12, fontWeight:600 }} axisLine={false} tickLine={false} interval={0}/>
-                    <YAxis tick={{ fill: C.muted, fontSize:11 }} axisLine={false} tickLine={false} allowDecimals={false}/>
+              <Box sx={{ minWidth: Math.max(allJobData.length * 60, 280) }}>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={allJobData} margin={{ top:4, right:4, left:-24, bottom:4 }}>
+                    <XAxis dataKey="name" tick={{ fill: C.muted, fontSize:11, fontWeight:600 }} axisLine={false} tickLine={false} interval={0}/>
+                    <YAxis tick={{ fill: C.muted, fontSize:10 }} axisLine={false} tickLine={false} allowDecimals={false}/>
                     <Tooltip content={<CustomTooltip/>}/>
-                    <Bar dataKey="applications" radius={[6,6,0,0]} name="Applications" maxBarSize={48}>
+                    <Bar dataKey="applications" radius={[5,5,0,0]} name="Applications" maxBarSize={40}>
                       {allJobData.map((entry, i) => <Cell key={i} fill={entry.fill}/>)}
                     </Bar>
                   </BarChart>
@@ -150,11 +147,11 @@ export default function AnalyticsCharts({ stats, jobs, applications }) {
             </Box>
           )}
           {allJobData.length > 0 && (
-            <Box sx={{ display:'flex', flexWrap:'wrap', gap:1.5, mt:1 }}>
+            <Box sx={{ display:'flex', flexWrap:'wrap', gap:{ xs:1, sm:1.5 }, mt:1 }}>
               {allJobData.map((j, i) => (
                 <Box key={i} sx={{ display:'flex', alignItems:'center', gap:0.5 }}>
-                  <Box sx={{ width:8, height:8, borderRadius:'50%', background: j.fill, flexShrink:0 }}/>
-                  <Typography sx={{ color: C.muted, fontSize:11 }}>{j.fullName} ({j.applications})</Typography>
+                  <Box sx={{ width:7, height:7, borderRadius:'50%', background: j.fill, flexShrink:0 }}/>
+                  <Typography sx={{ color: C.muted, fontSize:{ xs:'0.6rem', sm:'0.68rem' } }}>{j.fullName} ({j.applications})</Typography>
                 </Box>
               ))}
             </Box>
@@ -165,22 +162,21 @@ export default function AnalyticsCharts({ stats, jobs, applications }) {
       {/* Platform Overview */}
       {chartCard('Platform Overview',
         <Box>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={overviewData} layout="vertical" margin={{ top:0, right:16, left:0, bottom:0 }}>
-              <XAxis type="number" tick={{ fill: C.muted, fontSize:11 }} axisLine={false} tickLine={false}/>
-              <YAxis type="category" dataKey="name" tick={{ fill: C.muted, fontSize:12 }} axisLine={false} tickLine={false} width={90}/>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={overviewData} layout="vertical" margin={{ top:0, right:12, left:0, bottom:0 }}>
+              <XAxis type="number" tick={{ fill: C.muted, fontSize:10 }} axisLine={false} tickLine={false}/>
+              <YAxis type="category" dataKey="name" tick={{ fill: C.muted, fontSize:11 }} axisLine={false} tickLine={false} width={80}/>
               <Tooltip content={<CustomTooltip/>}/>
               <Bar dataKey="value" radius={[0,4,4,0]} name="Count">
                 {overviewData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]}/>)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-          {/* Legend — same style as job chart */}
-          <Box sx={{ display:'flex', flexWrap:'wrap', gap:1.5, mt:1 }}>
+          <Box sx={{ display:'flex', flexWrap:'wrap', gap:{ xs:1, sm:1.5 }, mt:1 }}>
             {overviewData.map((d, i) => (
               <Box key={i} sx={{ display:'flex', alignItems:'center', gap:0.5 }}>
-                <Box sx={{ width:8, height:8, borderRadius:'50%', background: COLORS[i % COLORS.length], flexShrink:0 }}/>
-                <Typography sx={{ color: C.muted, fontSize:11 }}>{d.name} ({d.value})</Typography>
+                <Box sx={{ width:7, height:7, borderRadius:'50%', background: COLORS[i % COLORS.length], flexShrink:0 }}/>
+                <Typography sx={{ color: C.muted, fontSize:{ xs:'0.6rem', sm:'0.68rem' } }}>{d.name} ({d.value})</Typography>
               </Box>
             ))}
           </Box>

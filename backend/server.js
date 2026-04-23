@@ -20,33 +20,14 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = Number(process.env.PORT) || 5000;
 
-const frontendEnvOrigins = (process.env.FRONTEND_URLS || process.env.FRONTEND_URL || "")
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:3000",
-  ...frontendEnvOrigins,
-];
-
-app.use(cors({
-  origin: (origin, callback) => {
-    // allow requests with no origin (mobile apps, curl, Postman)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
-      return callback(null, true);
-    }
-    callback(new Error(`CORS blocked: ${origin}`));
-  },
-  credentials: true,
-}));
+// Allow all origins — works for both local and deployed frontend
+app.use(cors({ origin: '*', credentials: false }));
+app.options('*', cors());
 app.use(express.json({ limit: "10mb" }));
 
-// Serve uploaded resumes — absolute path
+// Serve uploaded resumes
 const uploadsPath = path.join(__dirname, "uploads");
 app.use("/uploads", express.static(uploadsPath));
-console.log(` 📂 Serving uploads from: ${uploadsPath}`);
 
 app.use("/api/auth",          authRoutes);
 app.use("/api/jobs",          jobRoutes);
