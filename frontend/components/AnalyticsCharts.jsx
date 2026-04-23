@@ -67,29 +67,29 @@ export function ApplicationStatusPie({ applications }) {
   );
 
   return (
-    <Box sx={{ display:'flex', alignItems:'center', gap:{ xs:1.5, sm:2 }, width:'100%' }}>
-      <Box sx={{ flexShrink:0 }}>
-        <ResponsiveContainer width={110} height={110}>
-          <PieChart>
-            <Pie data={statusData} cx="50%" cy="50%" innerRadius={28} outerRadius={50}
-              paddingAngle={3} dataKey="value"
-              cursor="pointer" onClick={handleClick} strokeWidth={0}>
-              {statusData.map((s, i) => <Cell key={i} fill={s.color} stroke="none"/>)}
-            </Pie>
-            <Tooltip content={<PieTooltip/>} wrapperStyle={{ outline:'none' }}/>
-          </PieChart>
-        </ResponsiveContainer>
-      </Box>
-      <Box sx={{ flex:1, display:'flex', flexDirection:'column', gap:0.6 }}>
+    <Box sx={{ display:'flex', flexDirection:'column', alignItems:'center', width:'100%' }}>
+      {/* Pie chart */}
+      <ResponsiveContainer width={130} height={130}>
+        <PieChart>
+          <Pie data={statusData} cx="50%" cy="50%" innerRadius={35} outerRadius={58}
+            paddingAngle={3} dataKey="value"
+            cursor="pointer" onClick={handleClick} strokeWidth={0}>
+            {statusData.map((s, i) => <Cell key={i} fill={s.color} stroke="none"/>)}
+          </Pie>
+          <Tooltip content={<PieTooltip/>} wrapperStyle={{ outline:'none' }}/>
+        </PieChart>
+      </ResponsiveContainer>
+      {/* Legend below */}
+      <Box sx={{ display:'flex', flexDirection:'column', gap:0.75, width:'100%', mt:1.5 }}>
         {statusData.map((s, i) => (
           <Box key={i} onClick={() => handleClick(s)}
-            sx={{ display:'flex', alignItems:'center', gap:0.75, cursor:'pointer',
-              px:0.75, py:0.4, borderRadius:1.5, transition:'all 0.2s',
+            sx={{ display:'flex', alignItems:'center', justifyContent:'center', gap:1, cursor:'pointer',
+              px:1, py:0.5, borderRadius:1.5, transition:'all 0.2s',
               '&:hover':{ background:`${s.color}18` } }}>
-            <Box sx={{ width:8, height:8, borderRadius:'50%', background: s.color, flexShrink:0 }}/>
-            <Typography sx={{ color: C.text, fontSize:{ xs:'0.65rem', sm:'0.75rem' }, fontWeight:600, flex:1 }}>{s.name}</Typography>
-            <Box sx={{ px:0.75, py:0.2, borderRadius:10, background:`${s.color}22`, flexShrink:0 }}>
-              <Typography sx={{ color: s.color, fontSize:{ xs:'0.6rem', sm:'0.68rem' }, fontWeight:700 }}>{s.value}</Typography>
+            <Box sx={{ width:7, height:7, borderRadius:'50%', background: s.color, flexShrink:0 }}/>
+            <Typography sx={{ color: C.text, fontSize:'0.7rem', fontWeight:600 }}>{s.name}</Typography>
+            <Box sx={{ px:0.75, py:0.2, borderRadius:8, background:`${s.color}22`, flexShrink:0 }}>
+              <Typography sx={{ color: s.color, fontSize:'0.65rem', fontWeight:700 }}>{s.value}</Typography>
             </Box>
           </Box>
         ))}

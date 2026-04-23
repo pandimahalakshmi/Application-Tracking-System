@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserDashboard from "./pages/UserDashboard";
@@ -18,7 +19,8 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/"       element={<AuthPage />} />
+        <Route path="/"       element={<LandingPage />} />
+        <Route path="/home"   element={<LandingPage />} />
         <Route path="/login"  element={<AuthPage />} />
         <Route path="/signup" element={<AuthPage mode="signup" />} />
         <Route path="/dashboard"           element={<AdminDashboard />} />
