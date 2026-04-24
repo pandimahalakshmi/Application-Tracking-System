@@ -2,30 +2,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
 import {
   LayoutDashboard, Briefcase, PlusCircle, Users,
-  User, LogOut, ChevronRight, ClipboardList, Star, Calendar, Menu, X,
+  User, LogOut, ChevronRight, ClipboardList, Star, Calendar, Menu, X, Settings,
 } from "lucide-react";
 import NotificationBell from "./NotificationBell";
-
-const C = {
-  bg: '#0F172A', surface: '#1E293B', border: '#334155',
-  primary: '#6366F1', text: '#F1F5F9', muted: '#94A3B8',
-};
-
-const adminMenu = [
-  { label: 'Dashboard',          route: '/dashboard',           icon: LayoutDashboard },
-  { label: 'Jobs',               route: '/jobs',                icon: Briefcase },
-  { label: 'Create Job',         route: '/jobform',             icon: PlusCircle },
-  { label: 'Candidates',         route: '/candidates',          icon: Users },
-  { label: 'Schedule Interview', route: '/schedule-interview',  icon: Calendar },
-];
-
-const userMenu = [
-  { label: 'Dashboard',       route: '/userdashboard',   icon: LayoutDashboard },
-  { label: 'View Jobs',       route: '/jobs',            icon: Briefcase },
-  { label: 'Saved Jobs',      route: '/saved-jobs',      icon: Star },
-  { label: 'My Applications', route: '/my-applications', icon: ClipboardList },
-  { label: 'My Profile',      route: '/user-profile',    icon: User },
-];
+import { useTheme } from "../context/ThemeContext";
 
 export default function Sidebar() {
   const navigate   = useNavigate();
@@ -34,6 +14,35 @@ export default function Sidebar() {
   const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
   const userName   = storedUser?.name || 'User';
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const { darkMode, themeColor } = useTheme();
+
+  const C = {
+    bg:      darkMode ? '#1E293B' : '#FFFFFF',
+    surface: darkMode ? '#263348' : '#F8FAFF',
+    border:  darkMode ? '#334155' : '#E2E8F0',
+    primary: themeColor,
+    text:    darkMode ? '#F1F5F9' : '#1E293B',
+    muted:   darkMode ? '#94A3B8' : '#64748B',
+  };
+
+  const adminMenu = [
+    { label: 'Dashboard',          route: '/dashboard',           icon: LayoutDashboard },
+    { label: 'Jobs',               route: '/jobs',                icon: Briefcase },
+    { label: 'Create Job',         route: '/jobform',             icon: PlusCircle },
+    { label: 'Candidates',         route: '/candidates',          icon: Users },
+    { label: 'Schedule Interview', route: '/schedule-interview',  icon: Calendar },
+    { label: 'Settings',           route: '/settings',            icon: Settings },
+  ];
+
+  const userMenu = [
+    { label: 'Dashboard',       route: '/userdashboard',   icon: LayoutDashboard },
+    { label: 'View Jobs',       route: '/jobs',            icon: Briefcase },
+    { label: 'Saved Jobs',      route: '/saved-jobs',      icon: Star },
+    { label: 'My Applications', route: '/my-applications', icon: ClipboardList },
+    { label: 'My Profile',      route: '/user-profile',    icon: User },
+    { label: 'Settings',        route: '/settings',        icon: Settings },
+  ];
 
   const menu = role === 'admin' ? adminMenu : userMenu;
   const logout = () => { localStorage.clear(); navigate('/'); };
@@ -121,7 +130,6 @@ export default function Sidebar() {
             <div style={{ color: C.text, fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{userName}</div>
             <div style={{ color: C.muted, fontSize: 11, textTransform: 'capitalize' }}>{role}</div>
           </div>
-          <NotificationBell userId={storedUser?.id || storedUser?._id} />
         </div>
         <div
           onClick={logout}
@@ -149,7 +157,7 @@ export default function Sidebar() {
           top: 12px;
           left: 12px;
           z-index: 1100;
-          background: linear-gradient(135deg, #6366F1, #8B5CF6);
+          background: linear-gradient(135deg, ${themeColor}, #8B5CF6);
           border: none;
           border-radius: 10px;
           width: 42px;
@@ -157,7 +165,7 @@ export default function Sidebar() {
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          box-shadow: 0 4px 16px rgba(99,102,241,0.45);
+          box-shadow: 0 4px 16px ${themeColor}70;
           transition: transform 0.15s;
         }
         .mobile-hamburger:active { transform: scale(0.93); }

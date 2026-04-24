@@ -14,16 +14,16 @@ import {
 } from "lucide-react";
 import { applicationService } from "../services/api";
 import { API_ORIGIN } from "../config/api";
-import { C, fieldSx, cardSx, menuPropsSx } from "../theme";
+import { useAppTheme } from "../hooks/useAppTheme";
 
 const statuses = ['Pending','Shortlisted','Interview Scheduled','Selected','Rejected'];
 
 const statusColors = {
-  Pending:              { bg:'rgba(148,163,184,0.15)', color:'#94A3B8' },
-  Shortlisted:          { bg:'rgba(245,158,11,0.15)',  color:'#F59E0B' },
-  'Interview Scheduled':{ bg:'rgba(6,182,212,0.15)',   color:'#06B6D4' },
-  Selected:             { bg:'rgba(16,185,129,0.15)',  color:'#10B981' },
-  Rejected:             { bg:'rgba(248,113,113,0.15)', color:'#F87171' },
+  Pending:              { bg:'rgba(100,116,139,0.1)',  color:'#64748B' },
+  Shortlisted:          { bg:'rgba(245,158,11,0.12)',  color:'#D97706' },
+  'Interview Scheduled':{ bg:'rgba(6,182,212,0.12)',   color:'#0891B2' },
+  Selected:             { bg:'rgba(16,185,129,0.12)',  color:'#059669' },
+  Rejected:             { bg:'rgba(239,68,68,0.12)',   color:'#DC2626' },
 };
 
 const getSkillMatch = (app) => {
@@ -40,6 +40,7 @@ export default function Candidates() {
   const role = localStorage.getItem("role");
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { C, fieldSx, cardSx, menuPropsSx } = useAppTheme();
 
   // Pre-apply status filter if navigated from pie chart
   const statusFromUrl = searchParams.get('status') || '';

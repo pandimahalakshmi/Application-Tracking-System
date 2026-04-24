@@ -7,18 +7,7 @@ import {
 import { useState, useEffect } from "react";
 import { Plus, Briefcase } from "lucide-react";
 import { jobService } from "../services/api";
-import { C, menuPropsSx } from "../theme";
-
-const fSx = {
-  '& .MuiOutlinedInput-root': {
-    borderRadius: 2, background: '#0F172A', color: '#F1F5F9',
-    '& fieldset': { borderColor: '#334155' },
-    '&:hover fieldset': { borderColor: '#6366F1' },
-    '&.Mui-focused fieldset': { borderColor: '#6366F1', borderWidth: 2 },
-  },
-  '& .MuiInputLabel-root': { color: '#94A3B8' },
-  '& .MuiInputLabel-root.Mui-focused': { color: '#6366F1' },
-};
+import { useAppTheme } from "../hooks/useAppTheme";
 
 const emptyForm = {
   title: '', company: '', location: '',
@@ -29,19 +18,19 @@ export default function JobForm() {
   const role = localStorage.getItem('role');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const editId = searchParams.get('id'); // present when editing
+  const editId = searchParams.get('id');
+  const { C, fieldSx: fSx, menuPropsSx } = useAppTheme();
 
-  const [form, setForm]           = useState(emptyForm);
-  const [tags, setTags]           = useState([]);
-  const [tagInput, setTagInput]   = useState('');
-  const [skills, setSkills]       = useState([]);
+  const [form, setForm]             = useState(emptyForm);
+  const [tags, setTags]             = useState([]);
+  const [tagInput, setTagInput]     = useState('');
+  const [skills, setSkills]         = useState([]);
   const [skillInput, setSkillInput] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading]     = useState(false);
-  const [fetching, setFetching]   = useState(!!editId);
-  const [error, setError]         = useState('');
+  const [submitted, setSubmitted]   = useState(false);
+  const [loading, setLoading]       = useState(false);
+  const [fetching, setFetching]     = useState(!!editId);
+  const [error, setError]           = useState('');
 
-  // Load existing job when editing
   useEffect(() => {
     if (!editId) return;
     jobService.getById(editId).then(r => {
@@ -78,7 +67,6 @@ export default function JobForm() {
   );
 
   const handle = e => setForm(p => ({ ...p, [e.target.name]: e.target.value }));
-
   const addTag   = () => { if (tagInput.trim())   { setTags(t   => [...t,   tagInput.trim()]);   setTagInput('');   } };
   const addSkill = () => { if (skillInput.trim()) { setSkills(s => [...s, skillInput.trim()]); setSkillInput(''); } };
 
@@ -86,21 +74,12 @@ export default function JobForm() {
     e.preventDefault();
     if (!form.title || !form.company || !form.description) { setError('Please fill required fields'); return; }
     setLoading(true); setError('');
-
     const payload = { ...form, tags, skills };
-    const r = editId
-      ? await jobService.update(editId, payload)
-      : await jobService.create(payload);
-
+    const r = editId ? await jobService.update(editId, payload) : await jobService.create(payload);
     if (r.success) {
       setSubmitted(true);
-      if (!editId) {
-        setForm(emptyForm);
-        setTags([]); setSkills([]);
-        setTimeout(() => setSubmitted(false), 3000);
-      } else {
-        setTimeout(() => navigate('/jobs'), 1200);
-      }
+      if (!editId) { setForm(emptyForm); setTags([]); setSkills([]); setTimeout(() => setSubmitted(false), 3000); }
+      else { setTimeout(() => navigate('/jobs'), 1200); }
     } else {
       setError(r.error || (editId ? 'Failed to update job' : 'Failed to create job'));
     }
@@ -112,7 +91,6 @@ export default function JobForm() {
       <Sidebar />
       <Box sx={{ marginLeft:{ xs:0, lg:'240px' }, width:'100%', minWidth:0, p:{ xs:'16px', sm:'24px', lg:'32px' }, pt:{ xs:'64px', lg:'32px' }, overflowX:'hidden' }}>
 
-        {/* Header */}
         <Box sx={{ mb:{ xs:2, sm:3 } }}>
           <Box sx={{ display:'flex', alignItems:'center', gap:1.25, mb:0.5 }}>
             <Box sx={{ p:{ xs:'6px', sm:'8px' }, borderRadius:2, background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})` }}>
@@ -133,7 +111,7 @@ export default function JobForm() {
 
               {submitted && (
                 <Box sx={{ mb:3, p:2, borderRadius:2, background:`${C.success}22`, border:`1px solid ${C.success}55`, color: C.success, fontWeight:600 }}>
-                  ✓ {editId ? 'Job updated successfully! Redirecting…' : 'Job posted successfully!'}
+                  {editId ? 'Job updated successfully! Redirecting...' : 'Job posted successfully!'}
                 </Box>
               )}
               {error && (
@@ -143,7 +121,6 @@ export default function JobForm() {
               )}
 
               <form onSubmit={handleSubmit}>
-                {/* Basic Info */}
                 <Typography sx={{ color: C.muted, fontSize:{ xs:'0.65rem', sm:'0.72rem' }, fontWeight:600, textTransform:'uppercase', letterSpacing:1, mb:{ xs:1.5, sm:2 } }}>
                   Basic Information
                 </Typography>
@@ -168,25 +145,22 @@ export default function JobForm() {
                     </FormControl>
                   </Grid>
                   <Grid item xs={12}>
-                    <TextField fullWidth label="Salary Range" name="salary" value={form.salary} onChange={handle} sx={fSx}
-                      placeholder="e.g. ₹5 LPA - ₹10 LPA"/>
+                    <TextField fullWidth label="Salary Range" name="salary" value={form.salary} onChange={handle} sx={fSx} placeholder="e.g. Rs.5 LPA - Rs.10 LPA"/>
                   </Grid>
                 </Grid>
 
                 <Divider sx={{ borderColor: C.border, mb:3 }}/>
 
-                {/* Job Details */}
                 <Typography sx={{ color: C.muted, fontSize:{ xs:'0.65rem', sm:'0.72rem' }, fontWeight:600, textTransform:'uppercase', letterSpacing:1, mb:{ xs:1.5, sm:2 } }}>
                   Job Details
                 </Typography>
                 <TextField fullWidth label="Job Description *" name="description" value={form.description}
-                  onChange={handle} multiline rows={{ xs:3, sm:5 }} sx={{ ...fSx, mb:{ xs:1.5, sm:2 } }}/>
+                  onChange={handle} multiline rows={5} sx={{ ...fSx, mb:{ xs:1.5, sm:2 } }}/>
                 <TextField fullWidth label="Requirements" name="requirements" value={form.requirements}
-                  onChange={handle} multiline rows={{ xs:3, sm:4 }} sx={{ ...fSx, mb:{ xs:2, sm:3 } }}/>
+                  onChange={handle} multiline rows={4} sx={{ ...fSx, mb:{ xs:2, sm:3 } }}/>
 
                 <Divider sx={{ borderColor: C.border, mb:3 }}/>
 
-                {/* Tags & Skills */}
                 <Typography sx={{ color: C.muted, fontSize:{ xs:'0.65rem', sm:'0.72rem' }, fontWeight:600, textTransform:'uppercase', letterSpacing:1, mb:{ xs:1.5, sm:2 } }}>
                   Tags & Skills
                 </Typography>
@@ -220,14 +194,13 @@ export default function JobForm() {
 
                 <Divider sx={{ borderColor: C.border, mb:3 }}/>
 
-                {/* Actions */}
                 <Box sx={{ display:'flex', gap:{ xs:1, sm:2 }, flexWrap:'wrap' }}>
                   <Button type="submit" variant="contained" disabled={loading}
                     sx={{ flex:{ xs:1, sm:'none' }, background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`,
                       px:{ xs:2, sm:4 }, py:{ xs:1.25, sm:1.5 }, borderRadius:2, textTransform:'none', fontWeight:700,
                       fontSize:{ xs:'0.8rem', sm:'0.875rem' }, minHeight:44,
                       boxShadow:`0 4px 16px ${C.primary}44`, transition:'all 0.2s' }}>
-                    {loading ? (editId ? 'Updating…' : 'Posting…') : (editId ? 'Update Job' : 'Post Job')}
+                    {loading ? (editId ? 'Updating...' : 'Posting...') : (editId ? 'Update Job' : 'Post Job')}
                   </Button>
                   <Button variant="outlined" onClick={() => navigate('/jobs')}
                     sx={{ borderColor: C.border, color: C.muted, px:{ xs:2, sm:3 }, py:{ xs:1.25, sm:1.5 }, borderRadius:2,

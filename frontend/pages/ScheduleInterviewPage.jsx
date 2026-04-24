@@ -8,25 +8,9 @@ import {
 } from '@mui/material';
 import { Calendar, Clock, User, CheckCircle, Video, Phone, Monitor, Users, Mic } from 'lucide-react';
 import { API_BASE_URL } from '../config/api';
-import { C, menuPropsSx } from '../theme';
+import { useAppTheme } from '../hooks/useAppTheme';
 
 const BASE = API_BASE_URL;
-
-const fSx = {
-  '& .MuiOutlinedInput-root': {
-    borderRadius: 2, background: '#0F172A', color: '#F1F5F9',
-    '& fieldset': { borderColor: '#334155' },
-    '&:hover fieldset': { borderColor: '#6366F1' },
-    '&.Mui-focused fieldset': { borderColor: '#6366F1', borderWidth: 2 },
-  },
-  '& .MuiInputLabel-root': { color: '#94A3B8' },
-  '& .MuiInputLabel-root.Mui-focused': { color: '#6366F1' },
-  '& .MuiSelect-icon': { color: '#94A3B8' },
-  '& input:-webkit-autofill': {
-    WebkitBoxShadow: '0 0 0 100px #0F172A inset',
-    WebkitTextFillColor: '#F1F5F9',
-  },
-};
 
 const INTERVIEW_TYPES = [
   'HR Interview',
@@ -45,16 +29,17 @@ const INTERVIEW_MODES = [
   { value: 'Face to Face Interview',icon: <Users size={15}/> },
 ];
 
-const sectionLabel = (text) => (
-  <Typography sx={{ color: C.muted, fontSize:11, fontWeight:700, textTransform:'uppercase',
-    letterSpacing:1.2, mb:2, display:'flex', alignItems:'center', gap:1 }}>
-    {text}
-  </Typography>
-);
-
 export default function ScheduleInterviewPage() {
   const navigate = useNavigate();
   const token    = localStorage.getItem('token');
+  const { C, fieldSx: fSx, menuPropsSx } = useAppTheme();
+
+  const sectionLabel = (text) => (
+    <Typography sx={{ color: C.muted, fontSize:11, fontWeight:700, textTransform:'uppercase',
+      letterSpacing:1.2, mb:2, display:'flex', alignItems:'center', gap:1 }}>
+      {text}
+    </Typography>
+  );
 
   const [applications, setApplications] = useState([]);
   const [form, setForm] = useState({

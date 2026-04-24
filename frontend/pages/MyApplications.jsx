@@ -10,7 +10,7 @@ import { Briefcase, Calendar, MapPin, Search, X, SlidersHorizontal, FileText, Ex
 import { applicationService } from '../services/api';
 import { API_ORIGIN } from '../config/api';
 
-const C = { bg:'#0F172A', surface:'#1E293B', border:'#334155', primary:'#6366F1', secondary:'#8B5CF6', accent:'#06B6D4', success:'#10B981', warning:'#F59E0B', danger:'#F87171', text:'#F1F5F9', muted:'#94A3B8' };
+const C = { bg:'#F8FAFF', surface:'#FFFFFF', border:'#E2E8F0', primary:'#6366F1', secondary:'#8B5CF6', accent:'#06B6D4', success:'#10B981', warning:'#F59E0B', danger:'#EF4444', text:'#1E293B', muted:'#64748B' };
 
 const statusConfig = {
   Pending:              { color: C.muted,   bg:`${C.muted}22` },
@@ -21,7 +21,7 @@ const statusConfig = {
 };
 
 const fSx = {
-  '& .MuiOutlinedInput-root':{ borderRadius:1.5, background: C.bg, color: C.text, '& fieldset':{ borderColor: C.border }, '&:hover fieldset':{ borderColor: C.primary }, '&.Mui-focused fieldset':{ borderColor: C.primary } },
+  '& .MuiOutlinedInput-root':{ borderRadius:1.5, background: '#FFFFFF', color: '#1E293B', '& fieldset':{ borderColor: '#E2E8F0' }, '&:hover fieldset':{ borderColor: C.primary }, '&.Mui-focused fieldset':{ borderColor: C.primary } },
   '& .MuiInputLabel-root':{ color: C.muted, fontSize:'0.75rem' },
   '& .MuiInputLabel-root.Mui-focused':{ color: C.primary },
   '& .MuiSelect-icon':{ color: C.muted },

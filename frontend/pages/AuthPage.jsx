@@ -15,9 +15,9 @@ const ER = '#FF6B6B';
 const GRAD = `linear-gradient(135deg,${P},${S})`;
 
 const inp = (focus) => ({
-  width:'100%', padding:'12px 14px 12px 40px', borderRadius:12,
+  width:'100%', padding:'9px 12px 9px 36px', borderRadius:10,
   border:`1.5px solid ${focus ? P : BR}`,
-  background: SF, color: TX, fontSize:14, outline:'none',
+  background: SF, color: TX, fontSize:13, outline:'none',
   boxSizing:'border-box', transition:'border-color 0.2s', fontFamily:'inherit',
 });
 
@@ -52,7 +52,7 @@ function GenderSelect({ value, onChange }) {
 }
 
 const SocialRow = () => (
-  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:16 }}>
+  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
     {[
       { name:'Google', icon:<svg width="17" height="17" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg> },
       { name:'Apple',  icon:<svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg> },
@@ -66,7 +66,7 @@ const SocialRow = () => (
 );
 
 const Divider = () => (
-  <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:16 }}>
+  <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
     <div style={{ flex:1, height:1, background: BR }}/>
     <span style={{ color: MU, fontSize:12 }}>Or</span>
     <div style={{ flex:1, height:1, background: BR }}/>
@@ -93,7 +93,7 @@ function GhostBtn({ onClick, children }) {
   );
 }
 
-const Logo = ({ size=48 }) => (
+const Logo = ({ size=44 }) => (
   <div style={{ width:size, height:size, borderRadius:size*0.3, background: GRAD, display:'flex', alignItems:'center', justifyContent:'center', boxShadow:`0 8px 24px ${P}55`, animation:'floatY 4s ease-in-out infinite' }}>
     <svg width={size*0.5} height={size*0.5} viewBox="0 0 32 32" fill="none">
       <circle cx="16" cy="16" r="13" stroke="rgba(255,255,255,0.3)" strokeWidth="2"/>
@@ -112,7 +112,7 @@ export default function AuthPage({ mode: modeProp }) {
   const location = useLocation();
   const mode     = modeProp || (location.pathname === '/signup' ? 'signup' : 'signin');
   const isSignup = mode === 'signup';
-  const goSignin = () => navigate('/');
+  const goSignin = () => navigate('/login');
   const goSignup = () => navigate('/signup');
 
   const [siEmail,  setSiEmail]  = useState('');
@@ -139,8 +139,8 @@ export default function AuthPage({ mode: modeProp }) {
   };
 
   const signup = async () => {
-    const { name, email, password, confirmPassword, phoneNumber, gender } = su;
-    if (!name||!email||!password||!confirmPassword||!phoneNumber||!gender) { setSuErr('Please fill all fields'); return; }
+    const { name, email, password, confirmPassword } = su;
+    if (!name||!email||!password||!confirmPassword) { setSuErr('Please fill all fields'); return; }
     if (password !== confirmPassword) { setSuErr('Passwords do not match'); return; }
     setSuLoad(true); setSuErr('');
     try {
@@ -158,14 +158,15 @@ export default function AuthPage({ mode: modeProp }) {
         @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
         @keyframes pulse{0%,100%{opacity:0.35;transform:scale(1)}50%{opacity:0.65;transform:scale(1.06)}}
         .auth-card{animation:fadeUp 0.45s ease;}
-        .overlay-panel{position:absolute;top:0;height:100%;width:45%;z-index:10;background:linear-gradient(135deg,${P},${S});display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;transition:left 0.6s cubic-bezier(0.4,0,0.2,1),border-radius 0.6s cubic-bezier(0.4,0,0.2,1);}
-        .overlay-panel.signin{left:55%;border-radius:20px 0 0 20px;}
+        .overlay-panel{position:absolute;top:0;height:100%;width:42%;z-index:10;background:linear-gradient(135deg,${P},${S});display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;transition:left 0.6s cubic-bezier(0.4,0,0.2,1),border-radius 0.6s cubic-bezier(0.4,0,0.2,1);}
+        .overlay-panel.signin{left:58%;border-radius:20px 0 0 20px;}
         .overlay-panel.signup{left:0%;border-radius:0 20px 20px 0;}
-        .form-panel{position:absolute;top:0;height:100%;width:55%;display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch;padding:24px 40px;overflow-y:auto;transition:opacity 0.4s ease,transform 0.4s ease;}
+        .form-panel{position:absolute;top:0;height:100%;width:58%;display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch;padding:20px 36px;overflow-y:auto;transition:opacity 0.4s ease,transform 0.4s ease;scrollbar-width:none;}
+        .form-panel::-webkit-scrollbar{display:none;}
         .form-panel .form-inner{margin:auto 0;padding:8px 0;}
         .form-panel.signin-form{left:0;opacity:${isSignup?0:1};transform:${isSignup?'translateX(-24px)':'none'};pointer-events:${isSignup?'none':'auto'};}
         .form-panel.signup-form{right:0;opacity:${isSignup?1:0};transform:${isSignup?'none':'translateX(24px)'};pointer-events:${isSignup?'auto':'none'};}
-        @media(min-width:600px) and (max-width:959px){.overlay-panel{width:42%;padding:24px 18px;}.overlay-panel.signin{left:58%;}.form-panel{width:58%;padding:20px 24px;}.overlay-desc{display:none!important;}}
+        @media(min-width:600px) and (max-width:959px){.overlay-panel{width:40%;padding:20px 16px;}.overlay-panel.signin{left:60%;}.form-panel{width:60%;padding:20px 22px;}.overlay-desc{display:none!important;}}
         @media(max-width:599px){
           .auth-wrapper{flex-direction:column!important;max-width:100%!important;min-height:100vh!important;border-radius:0!important;overflow-y:auto!important;background:${BG}!important;}
           .overlay-panel{display:none!important;}
@@ -188,7 +189,7 @@ export default function AuthPage({ mode: modeProp }) {
         <div style={{ position:'fixed', bottom:'-8%', right:'-4%', width:260, height:260, borderRadius:'50%', background:`radial-gradient(circle,${S}28 0%,transparent 70%)`, animation:'pulse 6s ease-in-out infinite 1.5s', pointerEvents:'none' }}/>
 
         {/* Card */}
-        <div className="auth-card auth-wrapper" style={{ display:'flex', width:'100%', maxWidth:920, minHeight:600, background: CARD, borderRadius:24, overflow:'hidden', boxShadow:'0 32px 80px rgba(0,0,0,0.65)', border:`1px solid ${BR}`, position:'relative' }}>
+        <div className="auth-card auth-wrapper" style={{ display:'flex', width:'100%', maxWidth:780, minHeight:520, background: CARD, borderRadius:24, overflow:'hidden', boxShadow:'0 32px 80px rgba(0,0,0,0.65)', border:`1px solid ${BR}`, position:'relative' }}>
 
           {/* Mobile tabs */}
           <div className="mobile-tabs" style={{ position:'sticky', top:0, left:0, right:0, zIndex:20, display:'none', background: CARD, borderBottom:`1px solid ${BR}` }}>
@@ -203,28 +204,28 @@ export default function AuthPage({ mode: modeProp }) {
           {/* ── SIGN IN FORM ── */}
           <div className={`form-panel signin-form${!isSignup?' active-mobile':''}`}>
             <div className="form-inner">
-            <div style={{ display:'flex', flexDirection:'column', alignItems:'center', marginBottom:24 }}>
-              <Logo size={52}/>
-              <span style={{ color:TX, fontWeight:800, fontSize:17, marginTop:10, letterSpacing:0.4 }}>RecruitHub</span>
-              <span style={{ color:S, fontWeight:600, fontSize:10, letterSpacing:2, marginTop:2 }}>CONNECT · HIRE · GROW</span>
+            <div style={{ display:'flex', flexDirection:'column', alignItems:'center', marginBottom:16 }}>
+              <Logo size={44}/>
+              <span style={{ color:TX, fontWeight:800, fontSize:15, marginTop:8, letterSpacing:0.4 }}>RecruitHub</span>
+              <span style={{ color:S, fontWeight:600, fontSize:9, letterSpacing:2, marginTop:2 }}>CONNECT · HIRE · GROW</span>
             </div>
-            <h2 style={{ color:TX, fontWeight:800, fontSize:22, margin:'0 0 4px', textAlign:'center' }}>Welcome Back</h2>
-            <p style={{ color:MU, fontSize:13, textAlign:'center', margin:'0 0 20px' }}>Login to view your recruitment updates.</p>
+            <h2 style={{ color:TX, fontWeight:800, fontSize:19, margin:'0 0 3px', textAlign:'center' }}>Welcome Back</h2>
+            <p style={{ color:MU, fontSize:12, textAlign:'center', margin:'0 0 14px' }}>Login to view your recruitment updates.</p>
 
             <SocialRow/>
             <Divider/>
 
-            <div style={{ marginBottom:14 }}>
+            <div style={{ marginBottom:10 }}>
               <Label>Email</Label>
               <Field icon={Mail} type="email" placeholder="Enter your email" value={siEmail} onChange={e => setSiEmail(e.target.value)}/>
             </div>
-            <div style={{ marginBottom:8 }}>
+            <div style={{ marginBottom:6 }}>
               <Label>Password</Label>
               <Field icon={Lock} type={siShowPw?'text':'password'} placeholder="Enter your Password" value={siPass} onChange={e => setSiPass(e.target.value)}
                 right={<button onClick={() => setSiShowPw(p=>!p)} style={{ background:'none', border:'none', cursor:'pointer', color:MU, display:'flex', padding:0 }}>{siShowPw?<EyeOff size={15}/>:<Eye size={15}/>}</button>}/>
             </div>
-            <div style={{ textAlign:'right', marginBottom:18 }}>
-              <span onClick={() => navigate('/forgot-password')} style={{ color:P, fontSize:12, fontWeight:600, cursor:'pointer' }}>Forgot Password?</span>
+            <div style={{ textAlign:'right', marginBottom:14 }}>
+              <span onClick={() => navigate('/forgot-password')} style={{ color:P, fontSize:11, fontWeight:600, cursor:'pointer' }}>Forgot Password?</span>
             </div>
             <ErrBox msg={siErr}/>
             <button className="pill-btn" onClick={login} disabled={siLoad}
@@ -240,26 +241,22 @@ export default function AuthPage({ mode: modeProp }) {
           {/* ── SIGN UP FORM ── */}
           <div className={`form-panel signup-form${isSignup?' active-mobile':''}`}>
             <div className="form-inner">
-            <div style={{ display:'flex', flexDirection:'column', alignItems:'center', marginBottom:20 }}>
-              <Logo size={48}/>
-              <span style={{ color:TX, fontWeight:800, fontSize:16, marginTop:10, letterSpacing:0.4 }}>RecruitHub</span>
-              <span style={{ color:S, fontWeight:600, fontSize:10, letterSpacing:2, marginTop:2 }}>CONNECT · HIRE · GROW</span>
+            <div style={{ display:'flex', flexDirection:'column', alignItems:'center', marginBottom:16 }}>
+              <Logo size={40}/>
+              <span style={{ color:TX, fontWeight:800, fontSize:15, marginTop:8, letterSpacing:0.4 }}>RecruitHub</span>
+              <span style={{ color:S, fontWeight:600, fontSize:9, letterSpacing:2, marginTop:2 }}>CONNECT · HIRE · GROW</span>
             </div>
-            <h2 style={{ color:TX, fontWeight:800, fontSize:22, margin:'0 0 4px', textAlign:'center' }}>Create Account</h2>
-            <p style={{ color:MU, fontSize:13, textAlign:'center', margin:'0 0 18px' }}>Create your account for daily updates.</p>
+            <h2 style={{ color:TX, fontWeight:800, fontSize:19, margin:'0 0 3px', textAlign:'center' }}>Create Account</h2>
+            <p style={{ color:MU, fontSize:12, textAlign:'center', margin:'0 0 14px' }}>Create your account for daily updates.</p>
 
             <SocialRow/>
             <Divider/>
 
-            <div style={{ marginBottom:12 }}><Label>Full Name</Label><Field icon={User} placeholder="Enter your full name" value={su.name} onChange={e => set('name',e.target.value)}/></div>
-            <div style={{ marginBottom:12 }}><Label>Email</Label><Field icon={Mail} type="email" placeholder="Enter your email" value={su.email} onChange={e => set('email',e.target.value)}/></div>
-            <div className="grid-2col" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:0 }}>
+            <div style={{ marginBottom:8 }}><Label>Full Name</Label><Field icon={User} placeholder="Enter your full name" value={su.name} onChange={e => set('name',e.target.value)}/></div>
+            <div style={{ marginBottom:8 }}><Label>Email</Label><Field icon={Mail} type="email" placeholder="Enter your email" value={su.email} onChange={e => set('email',e.target.value)}/></div>
+            <div className="grid-2col" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:0 }}>
               <div><Label>Password</Label><Field icon={Lock} type={suShowPw?'text':'password'} placeholder="Password" value={su.password} onChange={e => set('password',e.target.value)} right={<button onClick={() => setSuShowPw(p=>!p)} style={{ background:'none', border:'none', cursor:'pointer', color:MU, display:'flex', padding:0 }}>{suShowPw?<EyeOff size={14}/>:<Eye size={14}/>}</button>}/></div>
               <div><Label>Confirm</Label><Field icon={Lock} type={suShowCp?'text':'password'} placeholder="Confirm" value={su.confirmPassword} onChange={e => set('confirmPassword',e.target.value)} right={<button onClick={() => setSuShowCp(p=>!p)} style={{ background:'none', border:'none', cursor:'pointer', color:MU, display:'flex', padding:0 }}>{suShowCp?<EyeOff size={14}/>:<Eye size={14}/>}</button>}/></div>
-            </div>
-            <div className="grid-2col" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
-              <div><Label>Phone</Label><Field icon={Phone} placeholder="Phone number" value={su.phoneNumber} onChange={e => set('phoneNumber',e.target.value)}/></div>
-              <div><Label>Gender</Label><GenderSelect value={su.gender} onChange={e => set('gender',e.target.value)}/></div>
             </div>
             <ErrBox msg={suErr}/>
             <button className="pill-btn" onClick={signup} disabled={suLoad}

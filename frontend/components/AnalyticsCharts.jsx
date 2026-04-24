@@ -6,7 +6,7 @@ import {
   PieChart, Pie, Cell,
 } from 'recharts';
 
-const C = { bg:'#0F172A', surface:'#1E293B', border:'#334155', primary:'#6366F1', secondary:'#8B5CF6', accent:'#06B6D4', warning:'#F59E0B', success:'#10B981', danger:'#F87171', text:'#F1F5F9', muted:'#94A3B8' };
+const C = { bg:'#F8FAFF', surface:'#FFFFFF', border:'#E2E8F0', primary:'#6366F1', secondary:'#8B5CF6', accent:'#06B6D4', warning:'#F59E0B', success:'#10B981', danger:'#EF4444', text:'#1E293B', muted:'#64748B' };
 const COLORS = [C.primary, C.accent, C.warning, C.success, C.danger, C.secondary, '#EC4899', '#14B8A6', '#F97316', '#A78BFA'];
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -58,6 +58,8 @@ export function ApplicationStatusPie({ applications }) {
   ].map(s => ({ ...s, value: applications.filter(a => a.status === s.key).length }))
    .filter(s => s.value > 0);
 
+  const total = statusData.reduce((sum, s) => sum + s.value, 0);
+
   const handleClick = (data) => {
     if (data?.key) navigate(`/candidates?status=${encodeURIComponent(data.key)}`);
   };
@@ -67,32 +69,41 @@ export function ApplicationStatusPie({ applications }) {
   );
 
   return (
-    <Box sx={{ display:'flex', flexDirection:'column', alignItems:'center', width:'100%' }}>
-      {/* Pie chart */}
-      <ResponsiveContainer width={130} height={130}>
-        <PieChart>
-          <Pie data={statusData} cx="50%" cy="50%" innerRadius={35} outerRadius={58}
+    <Box sx={{ display:'flex', alignItems:'center', gap:2, width:'100%' }}>
+      {/* Pie */}
+      <Box sx={{ flexShrink:0, position:'relative' }}>
+        <PieChart width={130} height={130}>
+          <Pie data={statusData} cx={65} cy={65} innerRadius={38} outerRadius={58}
             paddingAngle={3} dataKey="value"
             cursor="pointer" onClick={handleClick} strokeWidth={0}>
             {statusData.map((s, i) => <Cell key={i} fill={s.color} stroke="none"/>)}
           </Pie>
           <Tooltip content={<PieTooltip/>} wrapperStyle={{ outline:'none' }}/>
         </PieChart>
-      </ResponsiveContainer>
-      {/* Legend below */}
-      <Box sx={{ display:'flex', flexDirection:'column', gap:0.75, width:'100%', mt:1.5 }}>
-        {statusData.map((s, i) => (
-          <Box key={i} onClick={() => handleClick(s)}
-            sx={{ display:'flex', alignItems:'center', justifyContent:'center', gap:1, cursor:'pointer',
-              px:1, py:0.5, borderRadius:1.5, transition:'all 0.2s',
-              '&:hover':{ background:`${s.color}18` } }}>
-            <Box sx={{ width:7, height:7, borderRadius:'50%', background: s.color, flexShrink:0 }}/>
-            <Typography sx={{ color: C.text, fontSize:'0.7rem', fontWeight:600 }}>{s.name}</Typography>
-            <Box sx={{ px:0.75, py:0.2, borderRadius:8, background:`${s.color}22`, flexShrink:0 }}>
-              <Typography sx={{ color: s.color, fontSize:'0.65rem', fontWeight:700 }}>{s.value}</Typography>
+        {/* Center total */}
+        <Box sx={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', textAlign:'center', pointerEvents:'none' }}>
+          <Typography sx={{ color: C.text, fontWeight:800, fontSize:'1rem', lineHeight:1 }}>{total}</Typography>
+          <Typography sx={{ color: C.muted, fontSize:'0.52rem', fontWeight:600, textTransform:'uppercase', letterSpacing:0.4 }}>Total</Typography>
+        </Box>
+      </Box>
+
+      {/* Legend — side by side */}
+      <Box sx={{ flex:1, display:'flex', flexDirection:'column', gap:0.6 }}>
+        {statusData.map((s, i) => {
+          const pct = total > 0 ? Math.round((s.value / total) * 100) : 0;
+          return (
+            <Box key={i} onClick={() => handleClick(s)}
+              sx={{ display:'flex', alignItems:'center', gap:1, cursor:'pointer', px:0.75, py:0.5,
+                borderRadius:1.5, transition:'all 0.2s', '&:hover':{ background:`${s.color}14` } }}>
+              <Box sx={{ width:8, height:8, borderRadius:'50%', background: s.color, flexShrink:0 }}/>
+              <Typography sx={{ color: C.text, fontSize:'0.72rem', fontWeight:600, flex:1 }}>{s.name}</Typography>
+              <Typography sx={{ color: C.muted, fontSize:'0.68rem', fontWeight:500, mr:0.5 }}>{pct}%</Typography>
+              <Box sx={{ px:0.75, py:0.15, borderRadius:8, background:`${s.color}20` }}>
+                <Typography sx={{ color: s.color, fontSize:'0.65rem', fontWeight:700 }}>{s.value}</Typography>
+              </Box>
             </Box>
-          </Box>
-        ))}
+          );
+        })}
       </Box>
     </Box>
   );

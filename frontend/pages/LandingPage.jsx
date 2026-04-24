@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
+import ChatWidget from "../components/ChatWidget";
 
 const C = {
   bg:'#FFFFFF', bg2:'#F8FAFF', bg3:'#EEF2FF',
@@ -96,12 +97,10 @@ export default function LandingPage() {
           .metrics-grid{grid-template-columns:repeat(4,1fr)!important;}
           .features-grid{grid-template-columns:repeat(3,1fr)!important;}
           .problems-grid{grid-template-columns:repeat(3,1fr)!important;}
-          .footer-grid{grid-template-columns:2fr 1fr 1fr 1fr!important;}
+          .footer-grid{display:grid!important;grid-template-columns:2fr 1fr 1fr 1fr!important;gap:40px!important;align-items:start!important;}
           .hero-inner{grid-template-columns:1fr 1fr!important;gap:60px!important;}
           .hide-desktop{display:none!important;}
           .show-desktop{display:flex!important;}
-          .testimonials-wrap{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:20px!important;}
-          .testimonials-wrap>div{min-width:unset!important;max-width:unset!important;}
         }
         @media(max-width:768px){
           .show-desktop{display:none!important;}
@@ -204,7 +203,7 @@ export default function LandingPage() {
             </FadeIn>
             {/* Mini dashboard card — desktop only */}
             <FadeIn delay={150}>
-              <div className="show-desktop" style={{ position:'relative' }}>
+              <div className="show-desktop" style={{ position:'relative', paddingTop:20, paddingRight:20 }}>
                 <div style={{ background:'#fff', borderRadius:20, padding:24, boxShadow:'0 24px 64px rgba(79,70,229,0.15)', border:`1px solid ${C.border}` }}>
                   <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:18 }}>
                     {['#F87171','#FBBF24','#34D399'].map(c => <div key={c} style={{ width:10, height:10, borderRadius:'50%', background:c }}/>)}
@@ -324,16 +323,107 @@ export default function LandingPage() {
       </section>
 
       {/* ── Testimonials ── */}
-      <section style={{ background:C.bg2, padding:'56px 0 56px 20px', overflow:'hidden' }}>
+      <section style={{ background:C.bg2, padding:'56px 20px' }}>
         <div style={{ maxWidth:1200, margin:'0 auto' }}>
           <FadeIn>
-            <div style={{ textAlign:'center', marginBottom:28, paddingRight:20 }}>
+            <div style={{ textAlign:'center', marginBottom:36 }}>
               <span style={{ color:C.primary, fontWeight:700, fontSize:12, textTransform:'uppercase', letterSpacing:1.5 }}>Testimonials</span>
               <h2 style={{ fontSize:'clamp(1.5rem,4vw,2.25rem)', fontWeight:800, color:C.text, marginTop:8 }}>Loved by Recruiting Teams</h2>
             </div>
           </FadeIn>
-          <div className="testimonials-wrap">
-            <TestimonialCarousel items={testimonials}/>
+          <div className="features-grid" style={{ display:'grid', gridTemplateColumns:'1fr', gap:16 }}>
+            {testimonials.map((t, i) => (
+              <FadeIn key={t.name} delay={i * 80}>
+                <div className="card" style={{ position:'relative' }}>
+                  <div style={{ display:'flex', gap:2, marginBottom:12 }}>
+                    {[1,2,3,4,5].map(s => <span key={s} style={{ color:'#FBBF24', fontSize:14 }}>★</span>)}
+                  </div>
+                  <p style={{ color:C.text2, fontSize:14, lineHeight:1.8, marginBottom:16, fontStyle:'italic' }}>"{t.quote}"</p>
+                  <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+                    <div style={{ width:40, height:40, borderRadius:'50%', background:`linear-gradient(135deg,${C.primary},${C.accent})`, display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontWeight:700, fontSize:16, flexShrink:0 }}>{t.avatar}</div>
+                    <div>
+                      <div style={{ fontWeight:700, fontSize:14, color:C.text }}>{t.name}</div>
+                      <div style={{ fontSize:12, color:C.muted }}>{t.role} · {t.company}</div>
+                    </div>
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Pricing ── */}
+      <section id="pricing" style={{ background:'#fff', padding:'56px 20px' }}>
+        <div style={{ maxWidth:1200, margin:'0 auto' }}>
+          <FadeIn>
+            <div style={{ textAlign:'center', marginBottom:36 }}>
+              <span style={{ color:C.primary, fontWeight:700, fontSize:12, textTransform:'uppercase', letterSpacing:1.5 }}>Pricing</span>
+              <h2 style={{ fontSize:'clamp(1.5rem,4vw,2.25rem)', fontWeight:800, color:C.text, marginTop:8, marginBottom:10 }}>Simple, Transparent Pricing</h2>
+              <p style={{ color:C.muted, fontSize:14, maxWidth:400, margin:'0 auto', lineHeight:1.7 }}>Start free, scale as you grow. No hidden fees.</p>
+            </div>
+          </FadeIn>
+          <div className="features-grid" style={{ display:'grid', gridTemplateColumns:'1fr', gap:16 }}>
+            {[
+              { plan:'Starter', price:'Free', desc:'Perfect for small teams just getting started.', features:['Up to 5 jobs','50 candidates','Basic analytics','Email support'], color:C.success, popular:false },
+              { plan:'Growth', price:'₹2,999/mo', desc:'For growing teams that need more power.', features:['Unlimited jobs','500 candidates','AI matching','Interview scheduling','Priority support'], color:C.primary, popular:true },
+              { plan:'Enterprise', price:'Custom', desc:'For large organizations with advanced needs.', features:['Unlimited everything','Custom integrations','Dedicated manager','SLA guarantee','API access'], color:'#8B5CF6', popular:false },
+            ].map(({ plan, price, desc, features, color, popular }, i) => (
+              <FadeIn key={plan} delay={i * 80}>
+                <div className="card" style={{ borderTop:`3px solid ${color}`, position:'relative' }}>
+                  {popular && (
+                    <div style={{ position:'absolute', top:-1, right:20, background:C.primary, color:'#fff', fontSize:11, fontWeight:700, padding:'3px 12px', borderRadius:'0 0 8px 8px' }}>Most Popular</div>
+                  )}
+                  <div style={{ marginBottom:16 }}>
+                    <div style={{ fontSize:13, fontWeight:700, color, textTransform:'uppercase', letterSpacing:1, marginBottom:4 }}>{plan}</div>
+                    <div style={{ fontSize:28, fontWeight:900, color:C.text, marginBottom:4 }}>{price}</div>
+                    <div style={{ fontSize:13, color:C.muted }}>{desc}</div>
+                  </div>
+                  <ul style={{ listStyle:'none', marginBottom:20 }}>
+                    {features.map(f => (
+                      <li key={f} style={{ display:'flex', alignItems:'center', gap:8, fontSize:13, color:C.text2, marginBottom:8 }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                  <button onClick={() => navigate('/signup')}
+                    style={{ width:'100%', padding:'12px', background: popular ? `linear-gradient(135deg,${C.primary},${C.pLight})` : 'transparent', color: popular ? '#fff' : color, border:`2px solid ${color}`, borderRadius:10, fontWeight:700, fontSize:14, cursor:'pointer', fontFamily:'inherit', transition:'all 0.2s' }}>
+                    {plan === 'Enterprise' ? 'Contact Sales' : 'Get Started'}
+                  </button>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── About ── */}
+      <section id="about" style={{ background:C.bg2, padding:'56px 20px' }}>
+        <div style={{ maxWidth:1200, margin:'0 auto' }}>
+          <FadeIn>
+            <div style={{ textAlign:'center', marginBottom:36 }}>
+              <span style={{ color:C.primary, fontWeight:700, fontSize:12, textTransform:'uppercase', letterSpacing:1.5 }}>About Us</span>
+              <h2 style={{ fontSize:'clamp(1.5rem,4vw,2.25rem)', fontWeight:800, color:C.text, marginTop:8, marginBottom:10 }}>Built for Modern Recruiters</h2>
+              <p style={{ color:C.muted, fontSize:14, maxWidth:560, margin:'0 auto', lineHeight:1.8 }}>
+                RecruitHub was founded with a simple mission — make hiring faster, smarter, and more human. We combine AI technology with intuitive design to help teams of all sizes find and hire the best talent.
+              </p>
+            </div>
+          </FadeIn>
+          <div className="features-grid" style={{ display:'grid', gridTemplateColumns:'1fr', gap:16 }}>
+            {[
+              { icon:'🎯', title:'Our Mission', desc:'Empower every recruiting team with AI tools that were previously only available to large enterprises.' },
+              { icon:'👥', title:'Our Team', desc:'A team of 50+ engineers, designers, and HR experts passionate about transforming the hiring experience.' },
+              { icon:'🌍', title:'Our Reach', desc:'Trusted by 1,000+ companies across 20+ countries, from startups to Fortune 500 enterprises.' },
+            ].map(({ icon, title, desc }, i) => (
+              <FadeIn key={title} delay={i * 80}>
+                <div className="card" style={{ textAlign:'center' }}>
+                  <div style={{ fontSize:36, marginBottom:12 }}>{icon}</div>
+                  <h3 style={{ fontSize:16, fontWeight:700, color:C.text, marginBottom:8 }}>{title}</h3>
+                  <p style={{ color:C.muted, fontSize:13, lineHeight:1.7 }}>{desc}</p>
+                </div>
+              </FadeIn>
+            ))}
           </div>
         </div>
       </section>
@@ -365,31 +455,54 @@ export default function LandingPage() {
       {/* ── Footer ── */}
       <footer style={{ background:'#111827', padding:'40px 20px 24px', color:'#9CA3AF' }}>
         <div style={{ maxWidth:1200, margin:'0 auto' }}>
-          <div className="footer-grid" style={{ display:'grid', gridTemplateColumns:'1fr', gap:28, marginBottom:32 }}>
-            <div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))', gap:32, marginBottom:32, alignItems:'start' }}>
+            {/* Logo col */}
+            <div style={{ gridColumn:'1 / -1' }} className="footer-logo-col">
               <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}>
                 <div style={{ width:30, height:30, borderRadius:8, background:`linear-gradient(135deg,${C.primary},${C.accent})`, display:'flex', alignItems:'center', justifyContent:'center' }}>
                   <svg width="13" height="13" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="8" stroke="rgba(255,255,255,0.7)" strokeWidth="2"/><circle cx="16" cy="16" r="3.5" fill="white"/></svg>
                 </div>
                 <span style={{ fontWeight:800, fontSize:16, color:'#fff' }}>RecruitHub</span>
               </div>
-              <p style={{ fontSize:13, lineHeight:1.7, maxWidth:260 }}>AI-powered ATS for modern recruiting teams. Connect. Hire. Grow.</p>
+              <p style={{ fontSize:13, lineHeight:1.7, maxWidth:240 }}>AI-powered ATS for modern recruiting teams. Connect. Hire. Grow.</p>
             </div>
-            <div style={{ display:'flex', gap:32, flexWrap:'wrap' }}>
-              {[['Product',['Features','Pricing','Integrations']],['Company',['About','Blog','Contact']],['Legal',['Privacy','Terms','Security']]].map(([title,links]) => (
-                <div key={title}>
-                  <div style={{ fontWeight:700, color:'#fff', fontSize:13, marginBottom:12 }}>{title}</div>
-                  {links.map(l => <div key={l} style={{ fontSize:13, marginBottom:8, cursor:'pointer' }}>{l}</div>)}
-                </div>
+            {/* Product */}
+            <div>
+              <div style={{ fontWeight:700, color:'#fff', fontSize:13, marginBottom:12 }}>Product</div>
+              {['Features','Pricing','Integrations','Changelog'].map(l => (
+                <div key={l} style={{ fontSize:13, marginBottom:8, cursor:'pointer', transition:'color 0.2s' }}
+                  onMouseEnter={e => e.target.style.color='#fff'} onMouseLeave={e => e.target.style.color='#9CA3AF'}>{l}</div>
+              ))}
+            </div>
+            {/* Company */}
+            <div>
+              <div style={{ fontWeight:700, color:'#fff', fontSize:13, marginBottom:12 }}>Company</div>
+              {['About','Blog','Careers','Contact'].map(l => (
+                <div key={l} style={{ fontSize:13, marginBottom:8, cursor:'pointer', transition:'color 0.2s' }}
+                  onMouseEnter={e => e.target.style.color='#fff'} onMouseLeave={e => e.target.style.color='#9CA3AF'}>{l}</div>
+              ))}
+            </div>
+            {/* Legal */}
+            <div>
+              <div style={{ fontWeight:700, color:'#fff', fontSize:13, marginBottom:12 }}>Legal</div>
+              {['Privacy','Terms','Security','Cookies'].map(l => (
+                <div key={l} style={{ fontSize:13, marginBottom:8, cursor:'pointer', transition:'color 0.2s' }}
+                  onMouseEnter={e => e.target.style.color='#fff'} onMouseLeave={e => e.target.style.color='#9CA3AF'}>{l}</div>
               ))}
             </div>
           </div>
-          <div style={{ borderTop:'1px solid #374151', paddingTop:20, display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:8 }}>
+          <style>{`
+            @media(min-width:769px){
+              .footer-logo-col{ grid-column: 1 / 2 !important; }
+            }
+          `}</style>          <div style={{ borderTop:'1px solid #374151', paddingTop:20, display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:8 }}>
             <span style={{ fontSize:12 }}>© 2025 RecruitHub. All rights reserved.</span>
             <span style={{ fontSize:12 }}>Connect. Hire. Grow.</span>
           </div>
         </div>
       </footer>
+
+      <ChatWidget />
     </div>
   );
 }

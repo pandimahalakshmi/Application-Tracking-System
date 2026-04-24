@@ -104,9 +104,15 @@ export default function NotificationBell({ userId }) {
     <ClickAwayListener onClickAway={() => setOpen(false)}>
       <Box>
         <IconButton ref={anchorRef} onClick={() => setOpen(o => !o)} size="small"
-          sx={{ background: open ? `${C.primary}22` : 'transparent', '&:hover':{ background:`${C.primary}22` } }}>
-          <Badge badgeContent={unread} color="error" max={9}>
-            <Bell size={20} color={unread > 0 ? C.primary : C.muted}/>
+          sx={{ p:0, background:'transparent', '&:hover':{ background:'transparent' } }}>
+          <Badge badgeContent={unread} color="error" max={9}
+            sx={{
+              '& .MuiBadge-badge': {
+                fontSize: '0.6rem', minWidth: 16, height: 16,
+                top: 2, right: 2, border: '2px solid transparent',
+              }
+            }}>
+            <Bell size={20} color="#ffffff"/>
           </Badge>
         </IconButton>
 

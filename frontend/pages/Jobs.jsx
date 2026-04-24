@@ -9,14 +9,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jobService, applicationService, savedJobService } from "../services/api";
 import { API_BASE_URL } from "../config/api";
-import { C, fieldSx, cardSx } from "../theme";
+import { useAppTheme } from "../hooks/useAppTheme";
 import JobFilters from "../components/JobFilters";
 import useSocket from "../hooks/useSocket";
 
-const fSx = {
-  ...fieldSx, mb: 2,
-  '& input:-webkit-autofill': { WebkitBoxShadow: '0 0 0 100px #1E293B inset', WebkitTextFillColor: '#F1F5F9' },
-};
 const emptyForm = { fullName:'', email:'', phone:'', coverLetter:'', portfolioLink:'', resume:null };
 
 export default function Jobs() {
@@ -24,6 +20,12 @@ export default function Jobs() {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const userId = user?.id || user?._id;
   const navigate = useNavigate();
+  const { C, fieldSx, cardSx } = useAppTheme();
+
+  const fSx = {
+    ...fieldSx, mb: 2,
+    '& input:-webkit-autofill': { WebkitBoxShadow: `0 0 0 100px ${C.surface} inset`, WebkitTextFillColor: C.text },
+  };
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters]       = useState({ search:'', type:'', location:'', salary:'', dateFrom:'', dateTo:'' });

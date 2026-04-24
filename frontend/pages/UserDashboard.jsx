@@ -48,17 +48,17 @@ export default function UserDashboard() {
   // C is derived from accentColor — defined inside component
   const theme = THEMES.find(t => t.primary === accentColor) || THEMES[0];
   const C = {
-    bg:       '#0F172A',
-    surface:  '#1E293B',
+    bg:       '#F8FAFF',
+    surface:  '#FFFFFF',
     primary:  theme.primary,
     secondary:theme.secondary,
     accent:   '#06B6D4',
     success:  '#10B981',
     warning:  '#F59E0B',
     danger:   '#EF4444',
-    text:     '#F1F5F9',
-    muted:    '#94A3B8',
-    border:   '#334155',
+    text:     '#1E293B',
+    muted:    '#64748B',
+    border:   '#E2E8F0',
   };
 
   const statusColor = {

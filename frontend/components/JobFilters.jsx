@@ -2,15 +2,15 @@ import { Box, TextField, Select, MenuItem, FormControl, InputLabel, Button, Inpu
 import { Search, X, SlidersHorizontal } from 'lucide-react';
 import { useState } from 'react';
 
-const C = { bg:'#0F172A', surface:'#1E293B', border:'#334155', primary:'#6366F1', secondary:'#8B5CF6', text:'#F1F5F9', muted:'#94A3B8' };
+const C = { bg:'#F8FAFF', surface:'#FFFFFF', border:'#E2E8F0', primary:'#6366F1', secondary:'#8B5CF6', text:'#1E293B', muted:'#64748B' };
 
 const fSx = {
-  '& .MuiOutlinedInput-root':{ borderRadius:1.5, background: C.bg, color: C.text, '& fieldset':{ borderColor: C.border }, '&:hover fieldset':{ borderColor: C.primary }, '&.Mui-focused fieldset':{ borderColor: C.primary } },
+  '& .MuiOutlinedInput-root':{ borderRadius:1.5, background: '#FFFFFF', color: '#1E293B', '& fieldset':{ borderColor: '#E2E8F0' }, '&:hover fieldset':{ borderColor: C.primary }, '&.Mui-focused fieldset':{ borderColor: C.primary } },
   '& .MuiInputLabel-root':{ color: C.muted, fontSize:'0.75rem' },
   '& .MuiInputLabel-root.Mui-focused':{ color: C.primary },
   '& .MuiSelect-icon':{ color: C.muted },
   '& .MuiInputBase-input':{ fontSize:'0.78rem', padding:'8px 12px' },
-  '& .MuiInputBase-input[type="date"]::-webkit-calendar-picker-indicator':{ filter:'invert(0.6)' },
+  '& .MuiInputBase-input[type="date"]::-webkit-calendar-picker-indicator':{ filter:'none' },
 };
 
 const menuProps = { PaperProps:{ sx:{ background: C.surface, border:`1px solid ${C.border}`, '& .MuiMenuItem-root':{ color: C.text, fontSize:'0.78rem', '&:hover':{ background:`${C.primary}22` } } } } };

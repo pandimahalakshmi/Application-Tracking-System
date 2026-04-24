@@ -2,7 +2,7 @@
 html { -webkit-text-size-adjust: 100%; font-size: 16px; }
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #0F172A;
+  background: #F8FAFF;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -30,9 +30,9 @@ body {
 /* ─── Scrollbar ─── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #475569; }
-* { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+* { scrollbar-width: thin; scrollbar-color: #CBD5E1 transparent; }
 
 /* ─── Mobile table scroll ─── */
 .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -66,9 +66,9 @@ button:active { transform: scale(0.96); }
 
 /* ─── Responsive MUI TextField input size ─── */
 @media (max-width: 599px) {
-  .MuiInputBase-input { font-size: 14px !important; padding: 10px 12px !important; }
-  .MuiInputLabel-root { font-size: 13px !important; }
-  .MuiOutlinedInput-root { border-radius: 8px !important; }
+  .MuiInputBase-input { font-size: 14px !important; padding: 10px 12px !important; color: #1E293B !important; }
+  .MuiInputLabel-root { font-size: 13px !important; color: #64748B !important; }
+  .MuiOutlinedInput-root { border-radius: 8px !important; background: #FFFFFF !important; }
   .MuiChip-root { font-size: 10px !important; height: 22px !important; }
   .MuiButton-root { font-size: 13px !important; }
 }

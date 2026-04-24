@@ -11,9 +11,9 @@ import { Search, Users, X, Download, FileText, Phone, Mail, ExternalLink } from 
 import { applicationService } from '../services/api';
 import { API_ORIGIN } from '../config/api';
 
-const C = { bg:'#0F172A', surface:'#1E293B', surface2:'#263348', border:'#334155', primary:'#6366F1', secondary:'#8B5CF6', accent:'#06B6D4', success:'#10B981', warning:'#F59E0B', danger:'#F87171', text:'#F1F5F9', muted:'#94A3B8' };
+const C = { bg:'#F8FAFF', surface:'#FFFFFF', surface2:'#F1F5FF', border:'#E2E8F0', primary:'#6366F1', secondary:'#8B5CF6', accent:'#06B6D4', success:'#10B981', warning:'#F59E0B', danger:'#EF4444', text:'#1E293B', muted:'#64748B' };
 const statuses = ['Pending','Shortlisted','Interview Scheduled','Selected','Rejected'];
-const statusColor = { Pending: C.muted, Shortlisted: C.warning, 'Interview Scheduled': C.accent, Selected: C.success, Rejected: C.danger };
+const statusColor = { Pending: '#64748B', Shortlisted: '#D97706', 'Interview Scheduled': '#0891B2', Selected: '#059669', Rejected: '#DC2626' };
 
 const BASE = API_ORIGIN;
 
