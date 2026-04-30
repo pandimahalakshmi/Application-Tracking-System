@@ -15,6 +15,7 @@ import SavedJobs from "./pages/SavedJobs";
 import ForgotPassword from "./pages/ForgotPassword";
 import SettingsPage from "./pages/SettingsPage";
 import ResetPassword from "./pages/ResetPassword";
+import JobDescriptionPage from "./pages/JobDescriptionPage";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <Route path="/userdashboard"       element={<UserDashboard />} />
         <Route path="/user-profile"        element={<UserProfile />} />
         <Route path="/jobs"                element={<Jobs />} />
+        <Route path="/jobs/:id"            element={<JobDescriptionPage />} />
         <Route path="/jobform"             element={<JobForm />} />
         <Route path="/candidates"          element={<Candidates />} />
         <Route path="/candidates/:id"      element={<CandidateDetailPage />} />

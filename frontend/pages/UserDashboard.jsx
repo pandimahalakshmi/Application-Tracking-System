@@ -339,7 +339,9 @@ export default function UserDashboard() {
                 {saved.length === 0 ? (
                   <Typography sx={{ color: C.muted, fontSize:'0.7rem', textAlign:'center', py:1.5 }}>No saved jobs yet</Typography>
                 ) : saved.slice(0,3).map((job, i) => (
-                  <Box key={i} sx={{ display:'flex', alignItems:'center', gap:1, mb:0.875, p:'7px 10px', borderRadius:1.5, background: C.bg, border:`1px solid ${C.border}` }}>
+                  <Box key={i} sx={{ display:'flex', alignItems:'center', gap:1, mb:0.875, p:'7px 10px', borderRadius:1.5, background: C.bg, border:`1px solid ${C.border}`,
+                    cursor:'pointer', transition:'all 0.2s', '&:hover':{ borderColor: C.primary, background:`${C.primary}06` } }}
+                    onClick={() => navigate(`/jobs/${job._id || job.id}`)}>
                     <Box sx={{ width:26, height:26, borderRadius:1, background:`${C.warning}22`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                       <Star size={11} color={C.warning} fill={C.warning}/>
                     </Box>
@@ -347,7 +349,7 @@ export default function UserDashboard() {
                       <Typography sx={{ fontWeight:600, color: C.text, fontSize:'0.7rem', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{job.title}</Typography>
                       <Typography sx={{ color: C.muted, fontSize:'0.6rem' }}>{job.company}</Typography>
                     </Box>
-                    <Eye size={12} color={C.muted} style={{ cursor:'pointer', flexShrink:0 }} onClick={() => navigate('/saved-jobs')}/>
+                    <Eye size={12} color={C.primary} style={{ cursor:'pointer', flexShrink:0 }}/>
                   </Box>
                 ))}
               </Card>

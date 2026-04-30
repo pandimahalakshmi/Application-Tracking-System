@@ -9,6 +9,7 @@ import {
   AlertTriangle, Save, Upload, Users, Wrench, Moon, Sun, Layout,
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
+import { authService } from "../services/api";
 
 const THEMES = [
   { name: 'Indigo',  color: '#6366F1' },
@@ -20,6 +21,48 @@ const THEMES = [
 ];
 
 const ROLES = ['admin', 'recruiter', 'viewer', 'user'];
+
+// â”€â”€ Defined OUTSIDE component so React doesn't remount on every render â”€â”€
+function SettingRow({ label, desc, checked, onChange, C }) {
+  return (
+    <Box sx={{
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      py: 1.5, borderBottom: `1px solid ${C.border}`, '&:last-child': { borderBottom: 'none' },
+    }}>
+      <Box sx={{ flex: 1, pr: 2 }}>
+        <Typography sx={{ color: C.text, fontSize: '0.85rem', fontWeight: 600 }}>{label}</Typography>
+        {desc && <Typography sx={{ color: C.muted, fontSize: '0.73rem', mt: 0.3 }}>{desc}</Typography>}
+      </Box>
+      <Switch checked={checked} onChange={e => onChange(e.target.checked)} size="small"
+        sx={{ flexShrink: 0,
+          '& .MuiSwitch-switchBase.Mui-checked': { color: C.primary },
+          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: C.primary },
+        }} />
+    </Box>
+  );
+}
+
+function SectionCard({ icon: Icon, title, color, children, C, isDark }) {
+  return (
+    <Card sx={{
+      borderRadius: 3, border: `1px solid ${C.border}`, background: C.surface,
+      boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.05)',
+      overflow: 'hidden', mb: 2.5,
+    }}>
+      <Box sx={{
+        display: 'flex', alignItems: 'center', gap: 1.5,
+        p: '14px 20px', background: C.surface2, borderBottom: `1px solid ${C.border}`,
+      }}>
+        <Box sx={{ width: 34, height: 34, borderRadius: 2, background: `${color}20`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <Icon size={17} color={color} />
+        </Box>
+        <Typography sx={{ fontWeight: 700, color: C.text, fontSize: '0.92rem' }}>{title}</Typography>
+      </Box>
+      <Box sx={{ p: '8px 20px 18px' }}>{children}</Box>
+    </Card>
+  );
+}
 
 export default function SettingsPage() {
   const role    = localStorage.getItem('role');
@@ -45,6 +88,7 @@ export default function SettingsPage() {
     danger:  '#EF4444',
   };
 
+  // Stable fSx â€” memoized so it doesn't recreate on every render
   const fSx = {
     '& .MuiOutlinedInput-root': {
       borderRadius: 2, background: C.surface, color: C.text, fontSize: '0.85rem',
@@ -61,8 +105,10 @@ export default function SettingsPage() {
   const [saved,  setSaved]  = useState(false);
   const logoRef = useRef(null);
 
-  const [pw,      setPw]      = useState({ current: '', next: '', confirm: '' });
-  const [twoFA,   setTwoFA]   = useState(false);
+  const [pw,       setPw]       = useState({ current: '', next: '', confirm: '' });
+  const [pwMsg,    setPwMsg]    = useState({ text: '', error: false });
+  const [pwLoading,setPwLoading]= useState(false);
+  const [twoFA,    setTwoFA]    = useState(false);
   const [notif,   setNotif]   = useState({ email: true, appStatus: true, interview: true, alerts: false });
   const [prefs,   setPrefs]   = useState({ sort: 'newest', quickApply: true, autosave: true });
   const [privacy, setPrivacy] = useState({ resumeDownload: true, profileVisible: true, dataConsent: true });
@@ -90,48 +136,31 @@ export default function SettingsPage() {
     setTimeout(() => { setSaving(false); setSaved(true); setTimeout(() => setSaved(false), 2500); }, 900);
   };
 
-  // ── sub-components scoped inside so they inherit C & fSx ──
+  const handleChangePassword = async () => {
+    setPwMsg({ text: '', error: false });
+    if (!pw.current || !pw.next || !pw.confirm) {
+      setPwMsg({ text: 'Please fill all password fields', error: true }); return;
+    }
+    if (pw.next !== pw.confirm) {
+      setPwMsg({ text: 'New passwords do not match', error: true }); return;
+    }
+    if (pw.next.length < 6) {
+      setPwMsg({ text: 'Password must be at least 6 characters', error: true }); return;
+    }
+    setPwLoading(true);
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const userId = user?.id || user?._id;
+    const r = await authService.changePassword(userId, pw.current, pw.next);
+    setPwLoading(false);
+    if (r.success) {
+      setPwMsg({ text: 'Password changed successfully', error: false });
+      setPw({ current: '', next: '', confirm: '' });
+    } else {
+      setPwMsg({ text: r.error || 'Failed to change password', error: true });
+    }
+  };
 
-  function SettingRow({ label, desc, checked, onChange }) {
-    return (
-      <Box sx={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        py: 1.5, borderBottom: `1px solid ${C.border}`, '&:last-child': { borderBottom: 'none' },
-      }}>
-        <Box sx={{ flex: 1, pr: 2 }}>
-          <Typography sx={{ color: C.text, fontSize: '0.85rem', fontWeight: 600 }}>{label}</Typography>
-          {desc && <Typography sx={{ color: C.muted, fontSize: '0.73rem', mt: 0.3 }}>{desc}</Typography>}
-        </Box>
-        <Switch checked={checked} onChange={e => onChange(e.target.checked)} size="small"
-          sx={{ flexShrink: 0,
-            '& .MuiSwitch-switchBase.Mui-checked': { color: C.primary },
-            '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: C.primary },
-          }} />
-      </Box>
-    );
-  }
-
-  function SectionCard({ icon: Icon, title, color, children }) {
-    return (
-      <Card sx={{
-        borderRadius: 3, border: `1px solid ${C.border}`, background: C.surface,
-        boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.05)',
-        overflow: 'hidden', mb: 2.5,
-      }}>
-        <Box sx={{
-          display: 'flex', alignItems: 'center', gap: 1.5,
-          p: '14px 20px', background: C.surface2, borderBottom: `1px solid ${C.border}`,
-        }}>
-          <Box sx={{ width: 34, height: 34, borderRadius: 2, background: `${color}20`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Icon size={17} color={color} />
-          </Box>
-          <Typography sx={{ fontWeight: 700, color: C.text, fontSize: '0.92rem' }}>{title}</Typography>
-        </Box>
-        <Box sx={{ p: '8px 20px 18px' }}>{children}</Box>
-      </Card>
-    );
-  }
+  // Pass C and isDark directly to the stable outside components â€” no inline wrappers
 
   return (
     <Box sx={{ display: 'flex', background: C.bg, minHeight: '100vh', transition: 'background 0.3s' }}>
@@ -143,7 +172,7 @@ export default function SettingsPage() {
         pt: { xs: '64px', lg: '32px' }, overflowX: 'hidden',
       }}>
 
-        {/* ── Header ── */}
+        {/* â”€â”€ Header â”€â”€ */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3.5, gap: 1.5 }}>
           <Box sx={{ minWidth: 0 }}>
             <Typography sx={{ fontWeight: 800, color: C.text, fontSize: { xs: '1rem', sm: '1.5rem' }, whiteSpace: 'nowrap' }}>
@@ -174,14 +203,14 @@ export default function SettingsPage() {
           </Button>
         </Box>
 
-        {/* ── Two-column grid on lg, single on mobile ── */}
+        {/* â”€â”€ Two-column grid on lg, single on mobile â”€â”€ */}
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, gap: { xs: 0, lg: '0 24px' } }}>
 
-          {/* ════ LEFT ════ */}
+          {/* â•â•â•â• LEFT â•â•â•â• */}
           <Box>
 
             {/* Security */}
-            <SectionCard icon={Shield} title="Security Settings" color={C.primary}>
+            <SectionCard C={C} isDark={isDark} icon={Shield} title="Security Settings" color={C.primary}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, pt: 1.5 }}>
                 <TextField fullWidth label="Current Password" type="password" size="small"
                   value={pw.current} onChange={e => setPw(p => ({ ...p, current: e.target.value }))} sx={fSx} />
@@ -189,42 +218,52 @@ export default function SettingsPage() {
                   value={pw.next} onChange={e => setPw(p => ({ ...p, next: e.target.value }))} sx={fSx} />
                 <TextField fullWidth label="Confirm New Password" type="password" size="small"
                   value={pw.confirm} onChange={e => setPw(p => ({ ...p, confirm: e.target.value }))} sx={fSx} />
-                <Button size="small" sx={{
-                  alignSelf: 'flex-start', background: `${C.primary}15`, color: C.primary,
-                  borderRadius: 2, textTransform: 'none', fontWeight: 600, fontSize: '0.8rem', px: 2,
-                  '&:hover': { background: `${C.primary}28` },
-                }}>Update Password</Button>
+                {pwMsg.text && (
+                  <Typography sx={{ fontSize: '0.78rem', color: pwMsg.error ? C.danger : C.success, fontWeight: 500 }}>
+                    {pwMsg.error ? 'âœ—' : 'âœ“'} {pwMsg.text}
+                  </Typography>
+                )}
+                <Button size="small" onClick={handleChangePassword} disabled={pwLoading}
+                  startIcon={pwLoading ? <CircularProgress size={12} color="inherit" /> : null}
+                  sx={{
+                    alignSelf: 'flex-start', background: `${C.primary}15`, color: C.primary,
+                    borderRadius: 2, textTransform: 'none', fontWeight: 600, fontSize: '0.8rem', px: 2,
+                    '&:hover': { background: `${C.primary}28` },
+                    '&:disabled': { opacity: 0.6 },
+                  }}>
+                  {pwLoading ? 'Updating...' : 'Update Password'}
+                </Button>
               </Box>
               <Divider sx={{ my: 2, borderColor: C.border }} />
-              <SettingRow label="Two-Factor Authentication" desc="Add an extra layer of security to your account"
+              <SettingRow C={C} label="Two-Factor Authentication" desc="Add an extra layer of security to your account"
                 checked={twoFA} onChange={setTwoFA} />
             </SectionCard>
 
             {/* Notifications */}
-            <SectionCard icon={Bell} title="Notification Settings" color={C.warning}>
-              <SettingRow label="Email Notifications" desc="Receive updates via email"
+            <SectionCard C={C} isDark={isDark} icon={Bell} title="Notification Settings" color={C.warning}>
+              <SettingRow C={C} label="Email Notifications" desc="Receive updates via email"
                 checked={notif.email} onChange={v => setNotif(n => ({ ...n, email: v }))} />
-              <SettingRow label="Application Status Updates" desc="Notify when application status changes"
+              <SettingRow C={C} label="Application Status Updates" desc="Notify when application status changes"
                 checked={notif.appStatus} onChange={v => setNotif(n => ({ ...n, appStatus: v }))} />
-              <SettingRow label="Interview Schedule Alerts" desc="Reminders for upcoming interviews"
+              <SettingRow C={C} label="Interview Schedule Alerts" desc="Reminders for upcoming interviews"
                 checked={notif.interview} onChange={v => setNotif(n => ({ ...n, interview: v }))} />
-              <SettingRow label="System Alerts" desc="Critical system notifications"
+              <SettingRow C={C} label="System Alerts" desc="Critical system notifications"
                 checked={notif.alerts} onChange={v => setNotif(n => ({ ...n, alerts: v }))} />
             </SectionCard>
 
             {/* Privacy */}
-            <SectionCard icon={Eye} title="Privacy Settings" color={C.success}>
-              <SettingRow label="Allow Resume Downloads" desc="Recruiters can download your resume"
+            <SectionCard C={C} isDark={isDark} icon={Eye} title="Privacy Settings" color={C.success}>
+              <SettingRow C={C} label="Allow Resume Downloads" desc="Recruiters can download your resume"
                 checked={privacy.resumeDownload} onChange={v => setPrivacy(p => ({ ...p, resumeDownload: v }))} />
-              <SettingRow label="Profile Visibility" desc="Allow companies to view your profile"
+              <SettingRow C={C} label="Profile Visibility" desc="Allow companies to view your profile"
                 checked={privacy.profileVisible} onChange={v => setPrivacy(p => ({ ...p, profileVisible: v }))} />
-              <SettingRow label="Data Privacy Consent" desc="Allow data processing for recruitment"
+              <SettingRow C={C} label="Data Privacy Consent" desc="Allow data processing for recruitment"
                 checked={privacy.dataConsent} onChange={v => setPrivacy(p => ({ ...p, dataConsent: v }))} />
             </SectionCard>
 
-            {/* User Role Management — admin only, left column */}
+            {/* User Role Management â€” admin only, left column */}
             {isAdmin && (
-              <SectionCard icon={Users} title="User Role Management" color={C.secondary}>
+              <SectionCard C={C} isDark={isDark} icon={Users} title="User Role Management" color={C.secondary}>
                 <Box sx={{ pt: 0.5 }}>
                   {roleUsers.map((u, i) => (
                     <Box key={u.email} sx={{
@@ -260,13 +299,13 @@ export default function SettingsPage() {
 
           </Box>
 
-          {/* ════ RIGHT ════ */}
+          {/* â•â•â•â• RIGHT â•â•â•â• */}
           <Box>
 
-            {/* Appearance — FULLY FUNCTIONAL */}
-            <SectionCard icon={Palette} title="Appearance Settings" color={C.secondary}>
+            {/* Appearance â€” FULLY FUNCTIONAL */}
+            <SectionCard C={C} isDark={isDark} icon={Palette} title="Appearance Settings" color={C.secondary}>
 
-              {/* Dark / Light toggle — visual card style */}
+              {/* Dark / Light toggle â€” visual card style */}
               <Box sx={{ pt: 1.5, mb: 1 }}>
                 <Typography sx={{ color: C.muted, fontSize: '0.72rem', fontWeight: 600, mb: 1.25,
                   textTransform: 'uppercase', letterSpacing: 0.6 }}>Color Mode</Typography>
@@ -345,7 +384,7 @@ export default function SettingsPage() {
             </SectionCard>
 
             {/* Application Preferences */}
-            <SectionCard icon={FileText} title="Application Preferences" color={C.primary}>
+            <SectionCard C={C} isDark={isDark} icon={FileText} title="Application Preferences" color={C.primary}>
               <Box sx={{ pt: 1.5, mb: 1.75 }}>
                 <Typography sx={{ color: C.muted, fontSize: '0.72rem', fontWeight: 600, mb: 1.25,
                   textTransform: 'uppercase', letterSpacing: 0.6 }}>Default Sort Order</Typography>
@@ -363,17 +402,17 @@ export default function SettingsPage() {
                   ))}
                 </Box>
               </Box>
-              <SettingRow label="Enable Quick Apply" desc="Apply to jobs with one click"
+              <SettingRow C={C} label="Enable Quick Apply" desc="Apply to jobs with one click"
                 checked={prefs.quickApply} onChange={v => setPrefs(p => ({ ...p, quickApply: v }))} />
-              <SettingRow label="Auto-save Drafts" desc="Automatically save application drafts"
+              <SettingRow C={C} label="Auto-save Drafts" desc="Automatically save application drafts"
                 checked={prefs.autosave} onChange={v => setPrefs(p => ({ ...p, autosave: v }))} />
             </SectionCard>
 
-            {/* ── Admin Only ── */}
+            {/* â”€â”€ Admin Only â”€â”€ */}
             {isAdmin && (
               <>
                 {/* Company Settings */}
-                <SectionCard icon={Building2} title="Company Settings" color={C.danger}>
+                <SectionCard C={C} isDark={isDark} icon={Building2} title="Company Settings" color={C.danger}>
                   <Box sx={{ pt: 1.5, mb: 2 }}>
                     <Typography sx={{ color: C.muted, fontSize: '0.72rem', fontWeight: 600, mb: 1.25,
                       textTransform: 'uppercase', letterSpacing: 0.6 }}>Company Logo</Typography>
@@ -422,13 +461,13 @@ export default function SettingsPage() {
                       </Select>
                     </FormControl>
                   </Box>
-                  <SettingRow label="AI Resume Filtering" desc="Auto-rank candidates using AI scoring"
+                  <SettingRow C={C} label="AI Resume Filtering" desc="Auto-rank candidates using AI scoring"
                     checked={admin.aiFilter} onChange={v => setAdmin(a => ({ ...a, aiFilter: v }))} />
                 </SectionCard>
 
-                {/* System Maintenance — right column, under Company Settings */}
-                <SectionCard icon={Wrench} title="System Maintenance" color={C.warning}>
-                  <SettingRow label="Maintenance Mode" desc="Disable user access temporarily for system updates"
+                {/* System Maintenance */}
+                <SectionCard C={C} isDark={isDark} icon={Wrench} title="System Maintenance" color={C.warning}>
+                  <SettingRow C={C} label="Maintenance Mode" desc="Disable user access temporarily for system updates"
                     checked={admin.maintenance} onChange={v => setAdmin(a => ({ ...a, maintenance: v }))} />
                   {admin.maintenance && (
                     <Box sx={{ mt: 1.5, p: '10px 14px', borderRadius: 2,

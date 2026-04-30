@@ -1,5 +1,5 @@
 import express from "express";
-import { signup, login, logout, getProfile, updateProfile, applyForJob, forgotPassword, resetPassword } from "../controllers/authController.js";
+import { signup, login, logout, getProfile, updateProfile, applyForJob, forgotPassword, resetPassword, changePassword, googleAuth } from "../controllers/authController.js";
 import { uploadResume } from "../middleware/upload.js";
 import { protect } from "../middleware/auth.js";
 
@@ -7,12 +7,14 @@ const router = express.Router();
 
 router.post("/signup",              signup);
 router.post("/login",               login);
+router.post("/google",              googleAuth);
 router.post("/logout",              logout);
 router.get("/profile/:id",          getProfile);
 router.put("/profile/:id",          protect, updateProfile);
 router.post("/profile/:id/apply",   protect, applyForJob);
 router.post("/forgot-password",     forgotPassword);
 router.post("/reset-password",      resetPassword);
+router.put("/change-password/:id",  protect, changePassword);
 
 // Resume upload
 router.post("/upload-resume", protect, uploadResume.single("resume"), (req, res) => {

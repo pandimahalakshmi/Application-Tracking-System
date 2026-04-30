@@ -22,10 +22,7 @@ export const signup = async (req, res) => {
       return res.status(400).json({ error: 'Passwords do not match' });
     const exists = await User.findOne({ email });
     if (exists) return res.status(400).json({ error: 'Email already registered' });
-
-    // Auto-assign admin role for admin email
     const role = email === 'admin@gmail.com' ? 'admin' : 'user';
-
     const user = await User.create({ name, email, password, phoneNumber, gender, role });
     res.status(201).json({ success: true, message: 'Signup successful', user: safeUser(user), token: generateToken(user._id) });
   } catch (err) {
@@ -97,39 +94,70 @@ export const applyForJob = async (req, res) => {
   }
 };
 
+export const googleAuth = async (req, res) => {
+  try {
+    const { name, email, googleId, photoURL } = req.body;
+    if (!email || !googleId) return res.status(400).json({ error: 'Invalid Google credentials' });
+    let user = await User.findOne({ email });
+    if (!user) {
+      const role = email === 'admin@gmail.com' ? 'admin' : 'user';
+      user = await User.create({
+        name:        name || email.split('@')[0],
+        email,
+        password:    googleId,
+        googleId,
+        photoURL,
+        phoneNumber: 'N/A',
+        gender:      'other',
+        role,
+      });
+    } else {
+      if (!user.googleId) { user.googleId = googleId; user.photoURL = photoURL; await user.save(); }
+    }
+    res.json({ success: true, user: safeUser(user), token: generateToken(user._id) });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword)
+      return res.status(400).json({ error: 'Current and new password are required' });
+    if (newPassword.length < 6)
+      return res.status(400).json({ error: 'New password must be at least 6 characters' });
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    const match = await user.matchPassword(currentPassword);
+    if (!match) return res.status(401).json({ error: 'Current password is incorrect' });
+    user.password = newPassword;
+    await user.save();
+    res.json({ success: true, message: 'Password changed successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: 'Email is required' });
-
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ error: 'No account found with that email address' });
-
     const token = crypto.randomBytes(32).toString('hex');
     user.resetToken = token;
-    user.resetTokenExpiry = Date.now() + 3600000; // 1 hour
+    user.resetTokenExpiry = Date.now() + 3600000;
     await user.save();
-
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${token}`;
-
-    const result = await sendPasswordResetEmail({
-      toEmail: user.email,
-      toName:  user.name,
-      resetUrl,
-    });
-
+    const result = await sendPasswordResetEmail({ toEmail: user.email, toName: user.name, resetUrl });
     if (!result.success) {
-      // Email failed — still return the URL in dev mode for testing
       if (process.env.NODE_ENV === 'development') {
         console.log(` 🔗 Dev reset URL: ${resetUrl}`);
-        return res.status(500).json({
-          error: `Email sending failed: ${result.error}. Check EMAIL_USER and EMAIL_PASS in .env`,
-          devResetUrl: resetUrl,
-        });
+        return res.status(500).json({ error: `Email sending failed: ${result.error}`, devResetUrl: resetUrl });
       }
       return res.status(500).json({ error: 'Failed to send reset email. Please try again.' });
     }
-
     res.json({ success: true, message: 'Password reset link sent to your email' });
   } catch (err) {
     console.error('forgotPassword error:', err);

@@ -18,11 +18,13 @@ const req = async (method, path, body) => {
 };
 
 export const authService = {
-  signup:        (data)        => req("POST", "/auth/signup", data).then(d => { if (d.token) localStorage.setItem("token", d.token); return d; }),
-  login:         (email, pass) => req("POST", "/auth/login", { email, password: pass }).then(d => { if (d.token) localStorage.setItem("token", d.token); return d; }),
-  logout:        ()            => { localStorage.removeItem("token"); return req("POST", "/auth/logout"); },
-  getProfile:    (id)          => req("GET",  `/auth/profile/${id}`),
-  updateProfile: (id, data)    => req("PUT",  `/auth/profile/${id}`, data),
+  signup:         (data)        => req("POST", "/auth/signup", data).then(d => { if (d.token) localStorage.setItem("token", d.token); return d; }),
+  login:          (email, pass) => req("POST", "/auth/login", { email, password: pass }).then(d => { if (d.token) localStorage.setItem("token", d.token); return d; }),
+  googleLogin:    (data)        => req("POST", "/auth/google", data).then(d => { if (d.token) localStorage.setItem("token", d.token); return d; }),
+  logout:         ()            => { localStorage.removeItem("token"); return req("POST", "/auth/logout"); },
+  getProfile:     (id)          => req("GET",  `/auth/profile/${id}`),
+  updateProfile:  (id, data)    => req("PUT",  `/auth/profile/${id}`, data),
+  changePassword: (id, currentPassword, newPassword) => req("PUT", `/auth/change-password/${id}`, { currentPassword, newPassword }),
 };
 
 export const jobService = {

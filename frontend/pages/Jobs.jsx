@@ -239,7 +239,9 @@ export default function Jobs() {
           return (
             <Box key={jid} sx={{ display:'flex' }}>
               <Card sx={{ ...cardSx, p:{ xs:'12px', sm:3 }, width:"100%", display:"flex", flexDirection:"column", position:'relative',
-                '&:hover':{ borderColor: C.primary, transform:"translateY(-4px)", boxShadow:`0 12px 32px rgba(0,0,0,0.4)` } }}>
+                cursor:'pointer',
+                '&:hover':{ borderColor: C.primary, transform:"translateY(-4px)", boxShadow:`0 12px 32px rgba(0,0,0,0.15)` } }}
+                onClick={() => navigate(`/jobs/${jid}`)}>
 
                 <Tooltip title={isSaved ? "Unsave job" : "Save job"}>
                   <IconButton size="small" onClick={e => handleToggleSave(e, jid)}
@@ -252,20 +254,20 @@ export default function Jobs() {
 
                 <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", mb:{ xs:0.75, sm:1 }, pr:{ xs:3, sm:4 } }}>
                   <Box sx={{ flex:1, minWidth:0 }}>
-                    <Typography className="job-card-title" sx={{ fontWeight:700, color: C.text, fontSize:{ xs:'0.8rem', sm:'0.95rem' }, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{job.title}</Typography>
-                    <Typography className="job-card-company" sx={{ color: C.muted, fontSize:{ xs:'0.68rem', sm:'0.8rem' }, mt:0.25 }}>{job.company}</Typography>
+                    <Typography sx={{ fontWeight:700, color: C.text, fontSize:{ xs:'0.8rem', sm:'0.95rem' }, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{job.title}</Typography>
+                    <Typography sx={{ color: C.muted, fontSize:{ xs:'0.68rem', sm:'0.8rem' }, mt:0.25 }}>{job.company}</Typography>
                   </Box>
                   <Chip label={job.type} size="small" sx={{ background: typeColor(job.type).bg, color: typeColor(job.type).color, fontWeight:600, flexShrink:0, ml:0.5, fontSize:{ xs:'0.58rem', sm:'0.7rem' }, height:{ xs:18, sm:22 } }} />
                 </Box>
 
-                <Typography className="job-card-desc" sx={{ color: C.muted, fontSize:{ xs:'0.68rem', sm:'0.8rem' }, mb:{ xs:1, sm:1.5 }, flexGrow:1, overflow:'hidden',
+                <Typography sx={{ color: C.muted, fontSize:{ xs:'0.68rem', sm:'0.8rem' }, mb:{ xs:1, sm:1.5 }, flexGrow:1, overflow:'hidden',
                   display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>{job.description}</Typography>
 
                 <Box sx={{ display:"flex", gap:{ xs:1, sm:2 }, mb:{ xs:0.75, sm:1.5 }, flexWrap:'wrap' }}>
-                  <Box className="job-card-meta" sx={{ display:"flex", alignItems:"center", gap:0.5, color: C.muted, fontSize:{ xs:'0.65rem', sm:'0.75rem' } }}>
+                  <Box sx={{ display:"flex", alignItems:"center", gap:0.5, color: C.muted, fontSize:{ xs:'0.65rem', sm:'0.75rem' } }}>
                     <MapPin size={11} color={C.accent}/>{job.location}
                   </Box>
-                  <Typography className="job-card-meta" sx={{ color: C.muted, fontSize:{ xs:'0.65rem', sm:'0.75rem' } }}>{job.salary}</Typography>
+                  <Typography sx={{ color: C.muted, fontSize:{ xs:'0.65rem', sm:'0.75rem' } }}>{job.salary}</Typography>
                 </Box>
 
                 <Box sx={{ display:"flex", gap:0.5, flexWrap:"wrap", mb:{ xs:1, sm:1.5 }, maxHeight:{ xs:36, sm:48 }, overflow:'hidden' }}>
@@ -276,13 +278,21 @@ export default function Jobs() {
 
                 <Box sx={{ display:"flex", justifyContent:"space-between", alignItems:"center", mt:'auto' }}>
                   <Typography sx={{ color: C.muted, fontSize:{ xs:'0.62rem', sm:'0.72rem' } }}>{job.applications} applicants</Typography>
-                  <Button size="small" onClick={() => openModal(job)}
-                    sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:"#fff",
-                      borderRadius:1.5, textTransform:"none", fontWeight:600,
-                      px:{ xs:1.5, sm:2 }, fontSize:{ xs:'0.68rem', sm:'0.8rem' }, minHeight:{ xs:28, sm:34 },
-                      boxShadow:`0 4px 12px ${C.primary}44` }}>
-                    Apply Now
-                  </Button>
+                  <Box sx={{ display:'flex', gap:1 }}>
+                    <Button size="small" onClick={e => { e.stopPropagation(); navigate(`/jobs/${jid}`); }}
+                      sx={{ color: C.primary, background:`${C.primary}12`, borderRadius:1.5, textTransform:'none',
+                        fontWeight:600, px:{ xs:1.25, sm:1.75 }, fontSize:{ xs:'0.65rem', sm:'0.75rem' }, minHeight:{ xs:26, sm:32 },
+                        '&:hover':{ background:`${C.primary}22` } }}>
+                      View
+                    </Button>
+                    <Button size="small" onClick={e => { e.stopPropagation(); openModal(job); }}
+                      sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:"#fff",
+                        borderRadius:1.5, textTransform:"none", fontWeight:600,
+                        px:{ xs:1.5, sm:2 }, fontSize:{ xs:'0.68rem', sm:'0.8rem' }, minHeight:{ xs:28, sm:34 },
+                        boxShadow:`0 4px 12px ${C.primary}44` }}>
+                      Apply
+                    </Button>
+                  </Box>
                 </Box>
               </Card>
             </Box>

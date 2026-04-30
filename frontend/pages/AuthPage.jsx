@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { authService } from "../services/api";
-import { Eye, EyeOff, Mail, Lock, User, Phone } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
+import { auth, provider, signInWithPopup } from "../config/firebase";
 
 const P  = '#6C63FF';
 const S  = '#3ECFCF';
@@ -51,17 +52,35 @@ function GenderSelect({ value, onChange }) {
   );
 }
 
-const SocialRow = () => (
+const SocialRow = ({ onGoogle, googleLoading }) => (
   <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
-    {[
-      { name:'Google', icon:<svg width="17" height="17" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg> },
-      { name:'Apple',  icon:<svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg> },
-    ].map(({ name, icon }) => (
-      <button key={name} className="social-btn"
-        style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:8, padding:'10px', borderRadius:12, border:`1px solid ${BR}`, background: SF, cursor:'pointer', transition:'all 0.2s', fontFamily:'inherit', color: TX, fontWeight:600, fontSize:13 }}>
-        {icon} {name}
-      </button>
-    ))}
+    <button
+      onClick={onGoogle}
+      disabled={googleLoading}
+      className="social-btn"
+      style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:8, padding:'10px',
+        borderRadius:12, border:`1px solid ${BR}`, background: SF, cursor: googleLoading ? 'not-allowed' : 'pointer',
+        transition:'all 0.2s', fontFamily:'inherit', color: TX, fontWeight:600, fontSize:13,
+        opacity: googleLoading ? 0.7 : 1 }}>
+      {googleLoading
+        ? <span style={{ width:17, height:17, border:`2px solid ${MU}`, borderTopColor: TX,
+            borderRadius:'50%', display:'inline-block', animation:'spin 0.7s linear infinite' }}/>
+        : <svg width="17" height="17" viewBox="0 0 24 24">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+      }
+      {googleLoading ? 'Signing in...' : 'Google'}
+    </button>
+    <button className="social-btn"
+      style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:8, padding:'10px',
+        borderRadius:12, border:`1px solid ${BR}`, background: SF, cursor:'pointer',
+        transition:'all 0.2s', fontFamily:'inherit', color: TX, fontWeight:600, fontSize:13 }}>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+      Apple
+    </button>
   </div>
 );
 
@@ -120,6 +139,34 @@ export default function AuthPage({ mode: modeProp }) {
   const [siShowPw, setSiShowPw] = useState(false);
   const [siErr,    setSiErr]    = useState('');
   const [siLoad,   setSiLoad]   = useState(false);
+  const [googleLoad, setGoogleLoad] = useState(false);
+
+  const handleGoogle = async () => {
+    setGoogleLoad(true); setSiErr(''); setSuErr('');
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const gUser  = result.user;
+      const r = await authService.googleLogin({
+        name:     gUser.displayName,
+        email:    gUser.email,
+        googleId: gUser.uid,
+        photoURL: gUser.photoURL,
+      });
+      if (r.success) {
+        localStorage.setItem('user', JSON.stringify(r.user));
+        localStorage.setItem('role', r.user.role);
+        navigate(r.user.role === 'admin' ? '/dashboard' : '/userdashboard');
+      } else {
+        setSiErr(r.error || 'Google login failed');
+        setSuErr(r.error || 'Google login failed');
+      }
+    } catch (err) {
+      const msg = err.code === 'auth/popup-closed-by-user'
+        ? 'Popup closed. Please try again.'
+        : err.message || 'Google login failed';
+      setSiErr(msg); setSuErr(msg);
+    } finally { setGoogleLoad(false); }
+  };
 
   const [su, setSu] = useState({ name:'', email:'', password:'', confirmPassword:'', phoneNumber:'', gender:'' });
   const [suShowPw, setSuShowPw] = useState(false);
@@ -176,6 +223,7 @@ export default function AuthPage({ mode: modeProp }) {
         }
         @media(min-width:600px){.mobile-tabs{display:none!important;}}
         .social-btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,0.4)!important;}
+        @keyframes spin{to{transform:rotate(360deg)}}
         .pill-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 28px ${P}66!important;}
         .pill-btn:active{transform:scale(0.98);}
         input::placeholder,select::placeholder{color:${MU};}
@@ -212,7 +260,7 @@ export default function AuthPage({ mode: modeProp }) {
             <h2 style={{ color:TX, fontWeight:800, fontSize:19, margin:'0 0 3px', textAlign:'center' }}>Welcome Back</h2>
             <p style={{ color:MU, fontSize:12, textAlign:'center', margin:'0 0 14px' }}>Login to view your recruitment updates.</p>
 
-            <SocialRow/>
+            <SocialRow onGoogle={handleGoogle} googleLoading={googleLoad}/>
             <Divider/>
 
             <div style={{ marginBottom:10 }}>
@@ -249,7 +297,7 @@ export default function AuthPage({ mode: modeProp }) {
             <h2 style={{ color:TX, fontWeight:800, fontSize:19, margin:'0 0 3px', textAlign:'center' }}>Create Account</h2>
             <p style={{ color:MU, fontSize:12, textAlign:'center', margin:'0 0 14px' }}>Create your account for daily updates.</p>
 
-            <SocialRow/>
+            <SocialRow onGoogle={handleGoogle} googleLoading={googleLoad}/>
             <Divider/>
 
             <div style={{ marginBottom:8 }}><Label>Full Name</Label><Field icon={User} placeholder="Enter your full name" value={su.name} onChange={e => set('name',e.target.value)}/></div>
