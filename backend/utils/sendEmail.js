@@ -1,16 +1,14 @@
 import nodemailer from 'nodemailer';
 
-// Create transporter — uses Gmail SMTP directly for reliability on Vercel
+// Create transporter — uses Gmail SMTP directly
 const createTransporter = () => {
-  const pass = (process.env.EMAIL_PASS || '').replace(/\s/g, '');
+  const user = process.env.EMAIL_USER || 'pandimahalakshmi5@gmail.com';
+  const pass = (process.env.EMAIL_PASS || 'emnn cmgj wyoq somp').replace(/\s/g, '');
   return nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
     secure: true,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass,
-    },
+    auth: { user, pass },
   });
 };
 
@@ -65,22 +63,19 @@ export const sendStatusEmail = async ({ toEmail, toName, jobTitle, company, stat
   }
 };
 
-// ── Forgot password email ─────────────────────────────────────────────────
 export const sendPasswordResetEmail = async ({ toEmail, toName, resetUrl }) => {
-  const emailUser = process.env.EMAIL_USER;
-  const emailPass = (process.env.EMAIL_PASS || '').replace(/\s/g, '');
+  const emailUser = process.env.EMAIL_USER || 'pandimahalakshmi5@gmail.com';
+  const emailPass = (process.env.EMAIL_PASS || 'emnn cmgj wyoq somp').replace(/\s/g, '');
 
-  console.log('📧 EMAIL_USER:', emailUser ? `${emailUser.substring(0,5)}...` : 'NOT SET');
-  console.log('📧 EMAIL_PASS:', emailPass ? 'SET (length:' + emailPass.length + ')' : 'NOT SET');
-
-  if (!emailUser || emailUser === 'your_gmail@gmail.com' || !emailPass) {
-    console.warn(' ⚠️  Email not configured. Reset URL:', resetUrl);
-    return { success: false, error: 'Email service not configured. Please set EMAIL_USER and EMAIL_PASS in Vercel environment variables.' };
-  }
+  console.log('📧 Sending reset email to:', toEmail);
 
   try {
-    const transporter = createTransporter();
-    await transporter.verify();
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: { user: emailUser, pass: emailPass },
+    });
     await transporter.sendMail({
       from: `"RecruitHub" <${emailUser}>`,
       to: toEmail,
@@ -93,13 +88,13 @@ export const sendPasswordResetEmail = async ({ toEmail, toName, resetUrl }) => {
             Reset Password
           </a>
         </div>
-        <p style="color:#6b7280;font-size:13px;">If you didn't request this, you can safely ignore this email. Your password won't change.</p>
+        <p style="color:#6b7280;font-size:13px;">If you didn't request this, you can safely ignore this email.</p>
         <p style="color:#9ca3af;font-size:12px;margin-top:16px;">Or copy this link:<br/><a href="${resetUrl}" style="color:#5B5BD6;word-break:break-all;">${resetUrl}</a></p>`),
     });
-    console.log(` 📧 Password reset email sent to ${toEmail}`);
+    console.log(`📧 Password reset email sent to ${toEmail}`);
     return { success: true };
   } catch (err) {
-    console.error(` ❌ Password reset email failed: ${err.message}`);
+    console.error(`❌ Password reset email failed: ${err.message}`);
     return { success: false, error: err.message };
   }
 };
