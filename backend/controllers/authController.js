@@ -159,14 +159,16 @@ export const forgotPassword = async (req, res) => {
 
     if (!result.success) {
       console.error('Reset email failed:', result.error);
-      // Token is saved — return error but include resetUrl for debugging
-      return res.status(500).json({
-        error: 'Failed to send reset email. Please check your email configuration.',
-        devResetUrl: process.env.NODE_ENV !== 'production' ? resetUrl : undefined,
+      // Token is saved in DB — return the reset URL directly so user can still reset
+      return res.json({
+        success: true,
+        emailSent: false,
+        resetUrl,
+        message: 'Email service unavailable. Use the reset link below to reset your password.',
       });
     }
 
-    res.json({ success: true, message: 'Password reset link sent to your email' });
+    res.json({ success: true, emailSent: true, message: 'Password reset link sent to your email' });
   } catch (err) {
     console.error('forgotPassword error:', err);
     res.status(500).json({ error: err.message });
