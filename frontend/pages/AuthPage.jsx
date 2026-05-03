@@ -227,6 +227,7 @@ export default function AuthPage({ mode: modeProp }) {
           .mt{display:flex!important;}
           .ac{height:auto!important;min-height:unset!important;flex-direction:column!important;}
           .pw-grid{grid-template-columns:1fr!important;}
+          .mob-logo{display:flex!important;}
         }
         @media(min-width:600px){.mt{display:none!important;}.mob-logo{display:none!important;}}
       `}</style>
@@ -249,8 +250,8 @@ export default function AuthPage({ mode: modeProp }) {
 
           {/* ── SIGN IN ── */}
           <div className={`fp si-f${!isSignup?' am':''}`}>
-            {/* Logo — mobile only */}
-            <div className="mob-logo" style={{ display:'flex', flexDirection:'column', alignItems:'center', marginBottom:16 }}>
+            {/* Logo — mobile only, hidden on desktop via .mob-logo CSS */}
+            <div className="mob-logo" style={{ display:'none', flexDirection:'column', alignItems:'center', marginBottom:16 }}>
               <div style={{ width:44, height:44, borderRadius:12, background:GRAD, display:'flex', alignItems:'center', justifyContent:'center', marginBottom:8, boxShadow:`0 6px 18px ${P}35` }}>
                 <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="13" stroke="rgba(255,255,255,0.35)" strokeWidth="2"/><circle cx="16" cy="16" r="8" stroke="rgba(255,255,255,0.6)" strokeWidth="2"/><circle cx="16" cy="16" r="3.5" fill="white"/><line x1="16" y1="3" x2="16" y2="8" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.5"/><line x1="16" y1="24" x2="16" y2="29" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.5"/><line x1="3" y1="16" x2="8" y2="16" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.5"/><line x1="24" y1="16" x2="29" y2="16" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.5"/></svg>
               </div>
@@ -287,7 +288,7 @@ export default function AuthPage({ mode: modeProp }) {
           {/* ── SIGN UP ── */}
           <div className={`fp su-f${isSignup?' am':''}`}>
             {/* Logo — mobile only */}
-            <div className="mob-logo" style={{ display:'flex', flexDirection:'column', alignItems:'center', marginBottom:14 }}>
+            <div className="mob-logo" style={{ display:'none', flexDirection:'column', alignItems:'center', marginBottom:14 }}>
               <div style={{ width:44, height:44, borderRadius:12, background:GRAD, display:'flex', alignItems:'center', justifyContent:'center', marginBottom:8, boxShadow:`0 6px 18px ${P}35` }}>
                 <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="13" stroke="rgba(255,255,255,0.35)" strokeWidth="2"/><circle cx="16" cy="16" r="8" stroke="rgba(255,255,255,0.6)" strokeWidth="2"/><circle cx="16" cy="16" r="3.5" fill="white"/><line x1="16" y1="3" x2="16" y2="8" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.5"/><line x1="16" y1="24" x2="16" y2="29" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.5"/><line x1="3" y1="16" x2="8" y2="16" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.5"/><line x1="24" y1="16" x2="29" y2="16" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.5"/></svg>
               </div>
