@@ -5,10 +5,10 @@ const createTransporter = () => nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    pass: (process.env.EMAIL_PASS || '').replace(/\s/g, ''),
   },
   tls: {
-    rejectUnauthorized: false, // fix: self-signed certificate error
+    rejectUnauthorized: false,
   },
 });
 

@@ -152,11 +152,8 @@ export const forgotPassword = async (req, res) => {
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${token}`;
     const result = await sendPasswordResetEmail({ toEmail: user.email, toName: user.name, resetUrl });
     if (!result.success) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(` 🔗 Dev reset URL: ${resetUrl}`);
-        return res.status(500).json({ error: `Email sending failed: ${result.error}`, devResetUrl: resetUrl });
-      }
-      return res.status(500).json({ error: 'Failed to send reset email. Please try again.' });
+      console.error('Reset email failed:', result.error);
+      return res.status(500).json({ error: `Failed to send reset email: ${result.error}` });
     }
     res.json({ success: true, message: 'Password reset link sent to your email' });
   } catch (err) {
