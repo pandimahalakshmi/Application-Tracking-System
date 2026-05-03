@@ -145,16 +145,27 @@ export const forgotPassword = async (req, res) => {
     if (!email) return res.status(400).json({ error: 'Email is required' });
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ error: 'No account found with that email address' });
+
+    // Always generate and save the token
     const token = crypto.randomBytes(32).toString('hex');
     user.resetToken = token;
     user.resetTokenExpiry = Date.now() + 86400000; // 24 hours
     await user.save();
-    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${token}`;
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const resetUrl = `${frontendUrl}/reset-password/${token}`;
+
     const result = await sendPasswordResetEmail({ toEmail: user.email, toName: user.name, resetUrl });
+
     if (!result.success) {
       console.error('Reset email failed:', result.error);
-      return res.status(500).json({ error: `Failed to send reset email: ${result.error}` });
+      // Token is saved — return error but include resetUrl for debugging
+      return res.status(500).json({
+        error: 'Failed to send reset email. Please check your email configuration.',
+        devResetUrl: process.env.NODE_ENV !== 'production' ? resetUrl : undefined,
+      });
     }
+
     res.json({ success: true, message: 'Password reset link sent to your email' });
   } catch (err) {
     console.error('forgotPassword error:', err);

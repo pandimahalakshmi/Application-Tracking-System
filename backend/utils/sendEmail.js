@@ -1,16 +1,18 @@
 import nodemailer from 'nodemailer';
 
-// Create transporter once — reused for all emails
-const createTransporter = () => nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: (process.env.EMAIL_PASS || '').replace(/\s/g, ''),
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-});
+// Create transporter — uses Gmail SMTP directly for reliability on Vercel
+const createTransporter = () => {
+  const pass = (process.env.EMAIL_PASS || '').replace(/\s/g, '');
+  return nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass,
+    },
+  });
+};
 
 // ── Status update email ───────────────────────────────────────────────────
 const statusMessages = {
@@ -65,26 +67,34 @@ export const sendStatusEmail = async ({ toEmail, toName, jobTitle, company, stat
 
 // ── Forgot password email ─────────────────────────────────────────────────
 export const sendPasswordResetEmail = async ({ toEmail, toName, resetUrl }) => {
-  if (!process.env.EMAIL_USER || process.env.EMAIL_USER === 'your_gmail@gmail.com') {
+  const emailUser = process.env.EMAIL_USER;
+  const emailPass = (process.env.EMAIL_PASS || '').replace(/\s/g, '');
+
+  console.log('📧 EMAIL_USER:', emailUser ? `${emailUser.substring(0,5)}...` : 'NOT SET');
+  console.log('📧 EMAIL_PASS:', emailPass ? 'SET (length:' + emailPass.length + ')' : 'NOT SET');
+
+  if (!emailUser || emailUser === 'your_gmail@gmail.com' || !emailPass) {
     console.warn(' ⚠️  Email not configured. Reset URL:', resetUrl);
-    return { success: false, error: 'Email service not configured. Please set EMAIL_USER and EMAIL_PASS in .env' };
+    return { success: false, error: 'Email service not configured. Please set EMAIL_USER and EMAIL_PASS in Vercel environment variables.' };
   }
 
   try {
-    await createTransporter().sendMail({
-      from: `"ATS System" <${process.env.EMAIL_USER}>`,
+    const transporter = createTransporter();
+    await transporter.verify();
+    await transporter.sendMail({
+      from: `"RecruitHub" <${emailUser}>`,
       to: toEmail,
-      subject: 'Password Reset Request — ATS System',
+      subject: 'Password Reset Request — RecruitHub',
       html: emailWrapper(`
         <p style="color:#374151;">Hi <strong>${toName}</strong>,</p>
         <p style="color:#374151;line-height:1.7;">We received a request to reset your password. Click the button below to set a new password. This link expires in <strong>24 hours</strong>.</p>
         <div style="text-align:center;margin:28px 0;">
-          <a href="${resetUrl}" style="display:inline-block;padding:14px 36px;background:linear-gradient(135deg,#6366F1,#8B5CF6);color:#fff;text-decoration:none;border-radius:8px;font-weight:bold;font-size:15px;">
+          <a href="${resetUrl}" style="display:inline-block;padding:14px 36px;background:linear-gradient(135deg,#5B5BD6,#7C3AED);color:#fff;text-decoration:none;border-radius:50px;font-weight:bold;font-size:15px;letter-spacing:0.3px;">
             Reset Password
           </a>
         </div>
         <p style="color:#6b7280;font-size:13px;">If you didn't request this, you can safely ignore this email. Your password won't change.</p>
-        <p style="color:#9ca3af;font-size:12px;margin-top:16px;">Or copy this link: <a href="${resetUrl}" style="color:#6366F1;">${resetUrl}</a></p>`),
+        <p style="color:#9ca3af;font-size:12px;margin-top:16px;">Or copy this link:<br/><a href="${resetUrl}" style="color:#5B5BD6;word-break:break-all;">${resetUrl}</a></p>`),
     });
     console.log(` 📧 Password reset email sent to ${toEmail}`);
     return { success: true };
