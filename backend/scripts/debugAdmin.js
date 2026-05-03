@@ -10,7 +10,7 @@ const debug = async () => {
   console.log('MongoDB connected');
 
   // Find admin
-  const admin = await User.findOne({ email: 'admin@gmail.com' });
+  const admin = await User.findOne({ email: 'recruithubadmin@gmail.com' });
   if (!admin) {
     console.log('❌ Admin NOT found in database');
     process.exit(1);
@@ -20,17 +20,17 @@ const debug = async () => {
   console.log('   Stored hash:', admin.password);
 
   // Test password
-  const match = await bcrypt.compare('admin123', admin.password);
-  console.log('   Password match for "admin123":', match);
+  const match = await bcrypt.compare('Admin@123', admin.password);
+  console.log('   Password match for "Admin@123":', match);
 
   if (!match) {
     console.log('\n🔧 Fixing: deleting and recreating admin...');
-    await User.deleteOne({ email: 'admin@gmail.com' });
+    await User.deleteOne({ email: 'recruithubadmin@gmail.com' });
 
     const newAdmin = new User({
       name: 'Admin User',
-      email: 'admin@gmail.com',
-      password: 'admin123',
+      email: 'recruithubadmin@gmail.com',
+      password: 'Admin@123',
       role: 'admin',
       phoneNumber: '0000000000',
       gender: 'male',
@@ -38,8 +38,8 @@ const debug = async () => {
     await newAdmin.save();
 
     // Verify
-    const saved = await User.findOne({ email: 'admin@gmail.com' });
-    const verify = await bcrypt.compare('admin123', saved.password);
+    const saved = await User.findOne({ email: 'recruithubadmin@gmail.com' });
+    const verify = await bcrypt.compare('Admin@123', saved.password);
     console.log('✅ New admin created. Password match:', verify);
     console.log('   New hash:', saved.password);
   }

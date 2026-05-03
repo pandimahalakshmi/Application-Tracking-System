@@ -1,12 +1,12 @@
 import Sidebar from "../components/Sidebar";
 import { useNavigate } from "react-router-dom";
-import { Box, Card, Typography, Button, Chip, Avatar, CircularProgress } from "@mui/material";
+import { Box, Card, Typography, Button, Chip, CircularProgress } from "@mui/material";
 import { Users, Briefcase, CheckCircle, PlusCircle, Calendar, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { applicationService } from "../services/api";
 import NotificationBell from "../components/NotificationBell";
 import { ApplicationStatusPie } from "../components/AnalyticsCharts";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { useAppTheme } from "../hooks/useAppTheme";
 
 const statusConfig = {
@@ -96,7 +96,7 @@ export default function AdminDashboard() {
             <Box>
               <Typography sx={{ color:'rgba(255,255,255,0.75)', fontSize:'0.68rem', fontWeight:600, textTransform:'uppercase', letterSpacing:1, mb:0.5 }}>OVERVIEW</Typography>
               <Typography sx={{ color:'#fff', fontWeight:800, fontSize:{ xs:'1.1rem', sm:'1.4rem' }, mb:0.25 }}>
-                Good morning, {adminUser?.name?.split(' ')[0] || 'Admin'} 👋
+                Good morning, Admin 👋
               </Typography>
               <Typography sx={{ color:'rgba(255,255,255,0.7)', fontSize:'0.75rem' }}>
                 Here's what's happening with your recruitment today.
@@ -180,7 +180,7 @@ export default function AdminDashboard() {
                 <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false}/>
                 <XAxis dataKey="month" tick={{ fill: C.muted, fontSize:10 }} axisLine={false} tickLine={false}/>
                 <YAxis tick={{ fill: C.muted, fontSize:9 }} axisLine={false} tickLine={false} allowDecimals={false}/>
-                <Tooltip contentStyle={{ background:'#fff', border:`1px solid ${C.border}`, borderRadius:8, fontSize:11 }}/>
+                <RechartsTooltip contentStyle={{ background:'#fff', border:`1px solid ${C.border}`, borderRadius:8, fontSize:11 }}/>
                 <Area type="monotone" dataKey="Applications" stroke={C.primary} strokeWidth={2} fill="url(#ag)" dot={{ fill: C.primary, r:2.5 }}/>
               </AreaChart>
             </ResponsiveContainer>

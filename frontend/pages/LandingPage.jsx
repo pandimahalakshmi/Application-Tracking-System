@@ -134,7 +134,7 @@ export default function LandingPage() {
       )}
 
       {/* ── Sticky Navbar ── */}
-      <nav style={{ position:'fixed', top:0, left:0, right:0, zIndex:100, background: scrolled?'rgba(255,255,255,0.96)':'transparent', backdropFilter: scrolled?'blur(12px)':'none', borderBottom: scrolled?`1px solid ${C.border}`:'none', transition:'all 0.3s', padding:'0 20px' }}>
+      <nav style={{ position:'fixed', top:0, left:0, right:0, zIndex:100, background: scrolled?'rgba(255,255,255,0.96)':'transparent', backdropFilter: scrolled?'blur(12px)':'none', transition:'all 0.3s', padding:'0 20px' }}>
         <div style={{ maxWidth:1200, margin:'0 auto', display:'flex', alignItems:'center', justifyContent:'space-between', height:60 }}>
           {/* Logo */}
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>

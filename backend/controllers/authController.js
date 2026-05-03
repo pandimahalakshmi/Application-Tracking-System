@@ -22,7 +22,7 @@ export const signup = async (req, res) => {
       return res.status(400).json({ error: 'Passwords do not match' });
     const exists = await User.findOne({ email });
     if (exists) return res.status(400).json({ error: 'Email already registered' });
-    const role = email === 'admin@gmail.com' ? 'admin' : 'user';
+    const role = email === 'recruithubadmin@gmail.com' ? 'admin' : 'user';
     const user = await User.create({ name, email, password, phoneNumber, gender, role });
     res.status(201).json({ success: true, message: 'Signup successful', user: safeUser(user), token: generateToken(user._id) });
   } catch (err) {
@@ -100,7 +100,7 @@ export const googleAuth = async (req, res) => {
     if (!email || !googleId) return res.status(400).json({ error: 'Invalid Google credentials' });
     let user = await User.findOne({ email });
     if (!user) {
-      const role = email === 'admin@gmail.com' ? 'admin' : 'user';
+      const role = email === 'recruithubadmin@gmail.com' ? 'admin' : 'user';
       user = await User.create({
         name:        name || email.split('@')[0],
         email,

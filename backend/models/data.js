@@ -152,7 +152,7 @@ export const jobsData = [
 export const usersData = [
   {
     id: 1,
-    email: "admin@gmail.com",
+    email: "recruithubadmin@gmail.com",
     password: "admin123",
     role: "admin",
     name: "Admin User",

@@ -200,12 +200,20 @@ export default function Jobs() {
               </Box>
               <Box sx={{ display:'flex', alignItems:'center', justifyContent:'space-between', mt:'auto' }}>
                 <Typography sx={{ color: C.muted, fontSize:{ xs:'0.62rem', sm:'0.68rem' } }}>{job.applications || 0} applicants</Typography>
-                <Button size="small" onClick={() => navigate(`/jobform?id=${jid}`)}
-                  sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:'#fff',
-                    borderRadius:1.5, textTransform:'none', fontWeight:600, px:{ xs:1.5, sm:2 }, fontSize:{ xs:'0.65rem', sm:'0.72rem' }, minHeight:28,
-                    boxShadow:`0 4px 12px ${C.primary}44` }}>
-                  Edit
-                </Button>
+                <Box sx={{ display:'flex', gap:1 }}>
+                  <Button size="small" onClick={() => navigate(`/jobs/${jid}`)}
+                    sx={{ border:`1px solid ${C.primary}`, color: C.primary,
+                      borderRadius:1.5, textTransform:'none', fontWeight:600, px:{ xs:1.5, sm:2 }, fontSize:{ xs:'0.65rem', sm:'0.72rem' }, minHeight:28,
+                      background:'transparent', '&:hover':{ background:`${C.primary}10` } }}>
+                    View Job
+                  </Button>
+                  <Button size="small" onClick={() => navigate(`/jobform?id=${jid}`)}
+                    sx={{ background:`linear-gradient(135deg, ${C.primary}, ${C.secondary})`, color:'#fff',
+                      borderRadius:1.5, textTransform:'none', fontWeight:600, px:{ xs:1.5, sm:2 }, fontSize:{ xs:'0.65rem', sm:'0.72rem' }, minHeight:28,
+                      boxShadow:`0 4px 12px ${C.primary}44` }}>
+                    Edit
+                  </Button>
+                </Box>
               </Box>
             </Card>
           );

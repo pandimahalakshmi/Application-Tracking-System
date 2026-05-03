@@ -17,11 +17,11 @@ const run = async () => {
   all.forEach(u => console.log(`   - ${u.email} | role: ${u.role} | hash: ${u.password?.slice(0,20)}...`));
 
   // Delete and recreate admin with fresh hash
-  await users.deleteOne({ email: 'admin@gmail.com' });
-  const adminHash = await bcrypt.hash('admin123', 10);
+  await users.deleteOne({ email: 'recruithubadmin@gmail.com' });
+  const adminHash = await bcrypt.hash('Admin@123', 10);
   await users.insertOne({
     name: 'Admin User',
-    email: 'admin@gmail.com',
+    email: 'recruithubadmin@gmail.com',
     password: adminHash,
     role: 'admin',
     phoneNumber: '0000000000',
@@ -40,11 +40,11 @@ const run = async () => {
   });
 
   // Verify
-  const admin = await users.findOne({ email: 'admin@gmail.com' });
-  const ok = await bcrypt.compare('admin123', admin.password);
+  const admin = await users.findOne({ email: 'recruithubadmin@gmail.com' });
+  const ok = await bcrypt.compare('Admin@123', admin.password);
   console.log(`\n✅ Admin recreated. Password check: ${ok ? 'PASS ✓' : 'FAIL ✗'}`);
-  console.log('   Email:    admin@gmail.com');
-  console.log('   Password: admin123\n');
+  console.log('   Email:    recruithubadmin@gmail.com');
+  console.log('   Password: Admin@123\n');
 
   // Also fix any user with broken hash (double-hashed)
   const allUsers = await users.find({ role: 'user' }).toArray();
