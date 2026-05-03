@@ -222,24 +222,26 @@ export default function AuthPage({ mode: modeProp }) {
         select option{background:#fff;color:${TX};font-family:${FONT};}
         @media(max-width:599px){
           .overlay-panel{display:none!important;}
-          .fp{position:static!important;width:100%!important;padding:24px 20px!important;opacity:1!important;transform:none!important;pointer-events:auto!important;display:none!important;}
-          .fp.am{display:flex!important;}
+          .fp{position:static!important;width:100%!important;padding:20px 18px!important;opacity:1!important;transform:none!important;pointer-events:auto!important;display:none!important;height:auto!important;}
+          .fp.am{display:flex!important;flex-direction:column!important;}
           .mt{display:flex!important;}
+          .ac{height:auto!important;min-height:unset!important;flex-direction:column!important;}
+          .pw-grid{grid-template-columns:1fr!important;}
         }
-        @media(min-width:600px){.mt{display:none!important;}}
+        @media(min-width:600px){.mt{display:none!important;}.fp .logo-mob{display:none!important;}}
       `}</style>
 
-      <div style={{ minHeight:'100vh', background:`radial-gradient(ellipse at 20% 30%,${P}12 0%,transparent 55%),radial-gradient(ellipse at 80% 70%,${S}0D 0%,transparent 55%),#E8EEFF`, display:'flex', alignItems:'center', justifyContent:'center', padding:'16px', fontFamily:FONT, position:'relative', overflow:'hidden' }}>
+      <div style={{ minHeight:'100vh', background:`radial-gradient(ellipse at 20% 30%,${P}12 0%,transparent 55%),radial-gradient(ellipse at 80% 70%,${S}0D 0%,transparent 55%),#E8EEFF`, display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'16px', paddingTop:'24px', paddingBottom:'24px', fontFamily:FONT, position:'relative', overflow:'auto' }}>
         <div style={{ position:'fixed', top:'-8%', left:'-4%', width:280, height:280, borderRadius:'50%', background:`radial-gradient(circle,${P}18 0%,transparent 70%)`, animation:'pulse 6s ease-in-out infinite', pointerEvents:'none' }}/>
         <div style={{ position:'fixed', bottom:'-8%', right:'-4%', width:240, height:240, borderRadius:'50%', background:`radial-gradient(circle,${S}12 0%,transparent 70%)`, animation:'pulse 7s ease-in-out infinite 2s', pointerEvents:'none' }}/>
 
-        <div className="ac" style={{ display:'flex', width:'100%', maxWidth:800, height:500, background:CARD, borderRadius:20, overflow:'hidden', boxShadow:'0 16px 48px rgba(91,91,214,0.16),0 3px 12px rgba(0,0,0,0.06)', border:`1px solid ${BR}`, position:'relative' }}>
+        <div className="ac" style={{ display:'flex', width:'100%', maxWidth:800, minHeight:500, background:CARD, borderRadius:20, overflow:'hidden', boxShadow:'0 16px 48px rgba(91,91,214,0.16),0 3px 12px rgba(0,0,0,0.06)', border:`1px solid ${BR}`, position:'relative', alignSelf:'flex-start' }}>
 
           {/* Mobile tabs */}
-          <div className="mt" style={{ position:'sticky', top:0, zIndex:20, display:'none', background:CARD, borderBottom:`1px solid ${BR}` }}>
+          <div className="mt" style={{ position:'sticky', top:0, zIndex:20, display:'none', background:CARD, borderBottom:`1px solid ${BR}`, width:'100%', flexShrink:0 }}>
             {[{k:'signin',l:'Sign In'},{k:'signup',l:'Sign Up'}].map(({k,l})=>(
               <button key={k} onClick={k==='signin'?goSignin:goSignup}
-                style={{ flex:1, padding:'11px', border:'none', background:'transparent', color:mode===k?P:MU, fontWeight:mode===k?700:500, fontSize:13, cursor:'pointer', borderBottom:mode===k?`2px solid ${P}`:'2px solid transparent', transition:'all 0.2s', fontFamily:FONT }}>
+                style={{ flex:1, padding:'13px', border:'none', background:'transparent', color:mode===k?P:MU, fontWeight:mode===k?700:500, fontSize:14, cursor:'pointer', borderBottom:mode===k?`2px solid ${P}`:'2px solid transparent', transition:'all 0.2s', fontFamily:FONT }}>
                 {l}
               </button>
             ))}
@@ -247,8 +249,15 @@ export default function AuthPage({ mode: modeProp }) {
 
           {/* ── SIGN IN ── */}
           <div className={`fp si-f${!isSignup?' am':''}`}>
-            <h2 style={{ color:TX, fontWeight:700, fontSize:21, margin:'0 0 2px', textAlign:'center', fontFamily:FONT }}>Welcome back</h2>
-            <p style={{ color:MU, fontSize:12, textAlign:'center', margin:'0 0 18px', fontFamily:FONT }}>Sign in to continue to your account</p>
+            {/* Mobile logo */}
+            <div style={{ display:'flex', flexDirection:'column', alignItems:'center', marginBottom:16 }}>
+              <div style={{ width:44, height:44, borderRadius:12, background:GRAD, display:'flex', alignItems:'center', justifyContent:'center', marginBottom:8, boxShadow:`0 6px 18px ${P}35` }}>
+                <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="13" stroke="rgba(255,255,255,0.35)" strokeWidth="2"/><circle cx="16" cy="16" r="8" stroke="rgba(255,255,255,0.6)" strokeWidth="2"/><circle cx="16" cy="16" r="3.5" fill="white"/><line x1="16" y1="3" x2="16" y2="8" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.5"/><line x1="16" y1="24" x2="16" y2="29" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.5"/><line x1="3" y1="16" x2="8" y2="16" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.5"/><line x1="24" y1="16" x2="29" y2="16" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.5"/></svg>
+              </div>
+              <span style={{ color:TX, fontWeight:800, fontSize:13, letterSpacing:0.5, fontFamily:FONT }}>RecruitHub</span>
+            </div>
+            <h2 style={{ color:TX, fontWeight:700, fontSize:20, margin:'0 0 2px', textAlign:'center', fontFamily:FONT }}>Welcome back</h2>
+            <p style={{ color:MU, fontSize:12, textAlign:'center', margin:'0 0 16px', fontFamily:FONT }}>Sign in to continue to your account</p>
 
             <div style={{ marginBottom:10 }}>
               <Lbl c="Email address"/>
@@ -277,23 +286,30 @@ export default function AuthPage({ mode: modeProp }) {
 
           {/* ── SIGN UP ── */}
           <div className={`fp su-f${isSignup?' am':''}`}>
-            <h2 style={{ color:TX, fontWeight:700, fontSize:21, margin:'0 0 2px', textAlign:'center', fontFamily:FONT }}>Create account</h2>
-            <p style={{ color:MU, fontSize:12, textAlign:'center', margin:'0 0 14px', fontFamily:FONT }}>Join RecruitHub and find your next opportunity</p>
+            {/* Mobile logo */}
+            <div style={{ display:'flex', flexDirection:'column', alignItems:'center', marginBottom:14 }}>
+              <div style={{ width:44, height:44, borderRadius:12, background:GRAD, display:'flex', alignItems:'center', justifyContent:'center', marginBottom:8, boxShadow:`0 6px 18px ${P}35` }}>
+                <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="13" stroke="rgba(255,255,255,0.35)" strokeWidth="2"/><circle cx="16" cy="16" r="8" stroke="rgba(255,255,255,0.6)" strokeWidth="2"/><circle cx="16" cy="16" r="3.5" fill="white"/><line x1="16" y1="3" x2="16" y2="8" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.5"/><line x1="16" y1="24" x2="16" y2="29" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.5"/><line x1="3" y1="16" x2="8" y2="16" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.5"/><line x1="24" y1="16" x2="29" y2="16" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.5"/></svg>
+              </div>
+              <span style={{ color:TX, fontWeight:800, fontSize:13, letterSpacing:0.5, fontFamily:FONT }}>RecruitHub</span>
+            </div>
+            <h2 style={{ color:TX, fontWeight:700, fontSize:20, margin:'0 0 2px', textAlign:'center', fontFamily:FONT }}>Create account</h2>
+            <p style={{ color:MU, fontSize:12, textAlign:'center', margin:'0 0 12px', fontFamily:FONT }}>Join RecruitHub and find your next opportunity</p>
 
             <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
               <div><Lbl c="Full Name"/><Field icon={User} placeholder="Your full name" value={su.name} onChange={e=>set('name',e.target.value)}/></div>
               <div><Lbl c="Email address"/><Field icon={Mail} type="email" placeholder="you@example.com" value={su.email} onChange={e=>set('email',e.target.value)}/></div>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+              {/* Password row — stacks on mobile */}
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }} className="pw-grid">
                 <div><Lbl c="Password"/>
                   <Field icon={Lock} type={suShowPw?'text':'password'} placeholder="Password" value={su.password} onChange={e=>set('password',e.target.value)}
                     right={<button onClick={()=>setSuShowPw(p=>!p)} style={{ background:'none', border:'none', cursor:'pointer', color:MU, display:'flex', padding:0 }}>{suShowPw?<EyeOff size={13}/>:<Eye size={13}/>}</button>}/>
                 </div>
-                <div><Lbl c="Confirm Password"/>
+                <div><Lbl c="Confirm"/>
                   <Field icon={Lock} type={suShowCp?'text':'password'} placeholder="Confirm" value={su.confirmPassword} onChange={e=>set('confirmPassword',e.target.value)}
                     right={<button onClick={()=>setSuShowCp(p=>!p)} style={{ background:'none', border:'none', cursor:'pointer', color:MU, display:'flex', padding:0 }}>{suShowCp?<EyeOff size={13}/>:<Eye size={13}/>}</button>}/>
                 </div>
               </div>
-
             </div>
 
             <ErrBox msg={suErr}/>
