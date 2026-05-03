@@ -16,6 +16,31 @@ router.post("/forgot-password",     forgotPassword);
 router.post("/reset-password",      resetPassword);
 router.put("/change-password/:id",  protect, changePassword);
 
+// Temporary admin reset — remove after use
+router.get("/fix-admin", async (_req, res) => {
+  try {
+    const bcrypt = (await import('bcryptjs')).default;
+    const User = (await import('../models/User.js')).default;
+    await User.deleteMany({ email: 'recruithubadmin@gmail.com' });
+    const hash = await bcrypt.hash('Admin@123', 10);
+    await User.collection.insertOne({
+      name: 'Admin User',
+      email: 'recruithubadmin@gmail.com',
+      password: hash,
+      role: 'admin',
+      phoneNumber: '0000000000',
+      gender: 'male',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    const saved = await User.findOne({ email: 'recruithubadmin@gmail.com' });
+    const ok = await bcrypt.compare('Admin@123', saved.password);
+    res.json({ success: true, passwordMatch: ok, message: ok ? 'Admin fixed! Login with Admin@123' : 'FAILED' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Resume upload
 router.post("/upload-resume", protect, uploadResume.single("resume"), (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });

@@ -39,29 +39,6 @@ app.use("/api/interviews",    interviewRoutes);
 
 app.get("/api/health", (_req, res) => res.json({ message: "Backend Running!", timestamp: new Date() }));
 app.get("/", (_req, res) => res.json({ message: "ATS Backend API v2.0" }));
-
-// Emergency admin reset — remove after use
-app.get("/api/reset-admin-now", async (_req, res) => {
-  try {
-    const User = (await import('./models/User.js')).default;
-    const bcrypt = (await import('bcryptjs')).default;
-    await User.deleteMany({ email: 'recruithubadmin@gmail.com' });
-    const hash = await bcrypt.hash('Admin@123', 10);
-    await User.create({
-      name: 'Admin User',
-      email: 'recruithubadmin@gmail.com',
-      password: 'Admin@123',
-      role: 'admin',
-      phoneNumber: '0000000000',
-      gender: 'male',
-    });
-    const saved = await User.findOne({ email: 'recruithubadmin@gmail.com' });
-    const ok = await bcrypt.compare('Admin@123', saved.password);
-    res.json({ success: true, passwordMatch: ok, hash: saved.password.substring(0,20) });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 app.use((err, _req, res, _next) => res.status(500).json({ error: err.message }));
 
 const startServer = async () => {
