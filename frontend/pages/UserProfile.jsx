@@ -13,20 +13,20 @@ import {
 } from 'lucide-react';
 import { authService, applicationService } from '../services/api';
 
-// ── Dark palette ──────────────────────────────────────────────────────────
+// ── Light palette ─────────────────────────────────────────────────────────
 const D = {
-  bg:      '#F8FAFF',
+  bg:      '#F0F4FF',
   surface: '#FFFFFF',
-  surface2:'#F1F5FF',
-  border:  '#E2E8F0',
-  primary: '#6366F1',
-  secondary:'#8B5CF6',
-  accent:  '#06B6D4',
-  success: '#10B981',
-  warning: '#F59E0B',
-  danger:  '#EF4444',
-  text:    '#1E293B',
-  muted:   '#64748B',
+  surface2:'#E8EEFF',
+  border:  '#D1D9F0',
+  primary: '#5B5BD6',
+  secondary:'#7C3AED',
+  accent:  '#0891B2',
+  success: '#059669',
+  warning: '#D97706',
+  danger:  '#DC2626',
+  text:    '#111827',
+  muted:   '#4B5563',
 };
 
 const tabConfig = [
@@ -56,30 +56,30 @@ const emptyProfile = {
 const fSx = {
   mb: 2,
   '& .MuiOutlinedInput-root': {
-    borderRadius: 2, background: '#FFFFFF', color: '#1E293B',
-    '& fieldset': { borderColor: '#E2E8F0' },
+    borderRadius: 2, background: '#FFFFFF', color: '#111827',
+    '& fieldset': { borderColor: '#D1D9F0' },
     '&:hover fieldset': { borderColor: D.primary },
     '&.Mui-focused fieldset': { borderColor: D.primary, borderWidth: 2 },
-    '&.Mui-disabled': { background: '#F1F5FF' },
-    '&.Mui-disabled fieldset': { borderColor: '#E2E8F0' },
+    '&.Mui-disabled': { background: '#E8EEFF' },
+    '&.Mui-disabled fieldset': { borderColor: '#D1D9F0' },
   },
-  '& .MuiInputLabel-root': { color: '#64748B' },
+  '& .MuiInputLabel-root': { color: '#4B5563' },
   '& .MuiInputLabel-root.Mui-focused': { color: D.primary },
-  '& .MuiInputBase-input.Mui-disabled': { WebkitTextFillColor: '#64748B' },
+  '& .MuiInputBase-input.Mui-disabled': { WebkitTextFillColor: '#4B5563' },
   '& input:-webkit-autofill': {
     WebkitBoxShadow: `0 0 0 100px #FFFFFF inset`,
-    WebkitTextFillColor: '#1E293B',
+    WebkitTextFillColor: '#111827',
   },
 };
 
 const cardSx = {
-  background: '#FFFFFF', border: `1px solid #E2E8F0`, borderRadius: 3,
-  p: 3, transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-  '&:hover': { boxShadow: `0 8px 24px rgba(99,102,241,0.1)` },
+  background: '#FFFFFF', border: `1px solid #D1D9F0`, borderRadius: 3,
+  p: 3, transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(91,91,214,0.08)',
+  '&:hover': { boxShadow: `0 8px 24px rgba(91,91,214,0.12)` },
 };
 
 const paperSx = {
-  background: '#F8FAFF', border: `1px solid #E2E8F0`, borderRadius: 2, p: 2.5,
+  background: '#F0F4FF', border: `1px solid #D1D9F0`, borderRadius: 2, p: 2.5,
 };
 
 // ── Field — defined OUTSIDE component to prevent remount on every render ──

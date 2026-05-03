@@ -7,12 +7,12 @@ import { applicationService, savedJobService, authService } from "../services/ap
 import NotificationBell from "../components/NotificationBell";
 
 const THEMES = [
-  { name:'Indigo', primary:'#6366F1', secondary:'#8B5CF6' },
-  { name:'Blue',   primary:'#3B82F6', secondary:'#06B6D4' },
-  { name:'Green',  primary:'#10B981', secondary:'#059669' },
+  { name:'Indigo', primary:'#5B5BD6', secondary:'#7C3AED' },
+  { name:'Blue',   primary:'#3B82F6', secondary:'#0891B2' },
+  { name:'Green',  primary:'#059669', secondary:'#0D9488' },
   { name:'Rose',   primary:'#F43F5E', secondary:'#EC4899' },
-  { name:'Orange', primary:'#F97316', secondary:'#F59E0B' },
-  { name:'Violet', primary:'#7C3AED', secondary:'#A855F7' },
+  { name:'Orange', primary:'#F97316', secondary:'#D97706' },
+  { name:'Violet', primary:'#7C3AED', secondary:'#9333EA' },
 ];
 
 const calcCompletion = (profile) => {
@@ -40,7 +40,7 @@ export default function UserDashboard() {
   const [profileData, setProfileData] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [customizeOpen, setCustomizeOpen] = useState(false);
-  const [accentColor, setAccentColor] = useState('#6366F1');
+  const [accentColor, setAccentColor] = useState('#5B5BD6');
   const [visibleSections, setVisibleSections] = useState({
     stats: true, recommended: true, activity: true, savedJobs: true,
   });
@@ -48,17 +48,17 @@ export default function UserDashboard() {
   // C is derived from accentColor — defined inside component
   const theme = THEMES.find(t => t.primary === accentColor) || THEMES[0];
   const C = {
-    bg:       '#F8FAFF',
+    bg:       '#F0F4FF',
     surface:  '#FFFFFF',
     primary:  theme.primary,
     secondary:theme.secondary,
-    accent:   '#06B6D4',
-    success:  '#10B981',
-    warning:  '#F59E0B',
-    danger:   '#EF4444',
-    text:     '#1E293B',
-    muted:    '#64748B',
-    border:   '#E2E8F0',
+    accent:   '#0891B2',
+    success:  '#059669',
+    warning:  '#D97706',
+    danger:   '#DC2626',
+    text:     '#111827',
+    muted:    '#4B5563',
+    border:   '#D1D9F0',
   };
 
   const statusColor = {

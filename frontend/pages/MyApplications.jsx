@@ -10,18 +10,18 @@ import { Briefcase, Calendar, MapPin, Search, X, SlidersHorizontal, FileText, Ex
 import { applicationService } from '../services/api';
 import { API_ORIGIN } from '../config/api';
 
-const C = { bg:'#F8FAFF', surface:'#FFFFFF', border:'#E2E8F0', primary:'#6366F1', secondary:'#8B5CF6', accent:'#06B6D4', success:'#10B981', warning:'#F59E0B', danger:'#EF4444', text:'#1E293B', muted:'#64748B' };
+const C = { bg:'#F0F4FF', surface:'#FFFFFF', border:'#D1D9F0', primary:'#5B5BD6', secondary:'#7C3AED', accent:'#0891B2', success:'#059669', warning:'#D97706', danger:'#DC2626', text:'#111827', muted:'#4B5563' };
 
 const statusConfig = {
-  Pending:              { color: C.muted,   bg:`${C.muted}22` },
-  Shortlisted:          { color: C.warning, bg:`${C.warning}22` },
-  'Interview Scheduled':{ color: C.accent,  bg:`${C.accent}22` },
-  Selected:             { color: C.success, bg:`${C.success}22` },
-  Rejected:             { color: C.danger,  bg:`${C.danger}22` },
+  Pending:              { color: '#4B5563',  bg:'rgba(75,85,99,0.12)' },
+  Shortlisted:          { color: '#D97706',  bg:'rgba(217,119,6,0.12)' },
+  'Interview Scheduled':{ color: '#0891B2',  bg:'rgba(8,145,178,0.12)' },
+  Selected:             { color: '#059669',  bg:'rgba(5,150,105,0.12)' },
+  Rejected:             { color: '#DC2626',  bg:'rgba(220,38,38,0.12)' },
 };
 
 const fSx = {
-  '& .MuiOutlinedInput-root':{ borderRadius:1.5, background: '#FFFFFF', color: '#1E293B', '& fieldset':{ borderColor: '#E2E8F0' }, '&:hover fieldset':{ borderColor: C.primary }, '&.Mui-focused fieldset':{ borderColor: C.primary } },
+  '& .MuiOutlinedInput-root':{ borderRadius:1.5, background: '#FFFFFF', color: '#111827', '& fieldset':{ borderColor: '#D1D9F0' }, '&:hover fieldset':{ borderColor: C.primary }, '&.Mui-focused fieldset':{ borderColor: C.primary } },
   '& .MuiInputLabel-root':{ color: C.muted, fontSize:'0.75rem' },
   '& .MuiInputLabel-root.Mui-focused':{ color: C.primary },
   '& .MuiSelect-icon':{ color: C.muted },

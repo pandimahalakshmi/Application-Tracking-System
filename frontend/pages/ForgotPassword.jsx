@@ -7,18 +7,18 @@ import { API_BASE_URL } from '../config/api';
 const C = {
   bg:      '#F0F4FF',
   card:    '#FFFFFF',
-  border:  '#E2E5F0',
+  border:  '#D1D9F0',
   primary: '#5B5BD6',
   secondary:'#7C3AED',
   text:    '#111827',
-  muted:   '#6B7280',
+  muted:   '#4B5563',
 };
 const BASE = API_BASE_URL;
 
 const fSx = {
   mb: 2,
   '& .MuiOutlinedInput-root': {
-    borderRadius: 2, background: '#F7F8FC', color: C.text,
+    borderRadius: 2, background: '#F0F4FF', color: C.text,
     '& fieldset': { borderColor: C.border },
     '&:hover fieldset': { borderColor: C.primary },
     '&.Mui-focused fieldset': { borderColor: C.primary, borderWidth: 2 },

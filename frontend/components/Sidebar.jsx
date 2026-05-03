@@ -19,11 +19,11 @@ export default function Sidebar() {
 
   const C = {
     bg:      darkMode ? '#1E293B' : '#FFFFFF',
-    surface: darkMode ? '#263348' : '#F8FAFF',
-    border:  darkMode ? '#334155' : '#E2E8F0',
+    surface: darkMode ? '#263348' : '#F0F4FF',
+    border:  darkMode ? '#334155' : '#D1D9F0',
     primary: themeColor,
-    text:    darkMode ? '#F1F5F9' : '#1E293B',
-    muted:   darkMode ? '#94A3B8' : '#64748B',
+    text:    darkMode ? '#F1F5F9' : '#111827',
+    muted:   darkMode ? '#94A3B8' : '#4B5563',
   };
 
   const adminMenu = [

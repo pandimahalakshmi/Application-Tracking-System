@@ -4,18 +4,18 @@ export function useAppTheme() {
   const { darkMode, themeColor } = useTheme();
 
   const C = {
-    bg:       darkMode ? '#0F172A' : '#F8FAFF',
+    bg:       darkMode ? '#0F172A' : '#F0F4FF',
     surface:  darkMode ? '#1E293B' : '#FFFFFF',
-    surface2: darkMode ? '#263348' : '#F1F5FF',
-    border:   darkMode ? '#334155' : '#E2E8F0',
+    surface2: darkMode ? '#263348' : '#E8EEFF',
+    border:   darkMode ? '#334155' : '#D1D9F0',
     primary:  themeColor,
-    secondary:'#8B5CF6',
-    accent:   '#06B6D4',
-    warning:  '#F59E0B',
-    success:  '#10B981',
-    danger:   '#EF4444',
-    text:     darkMode ? '#F1F5F9' : '#1E293B',
-    muted:    darkMode ? '#94A3B8' : '#64748B',
+    secondary:'#7C3AED',
+    accent:   '#0891B2',
+    warning:  '#D97706',
+    success:  '#059669',
+    danger:   '#DC2626',
+    text:     darkMode ? '#F1F5F9' : '#111827',
+    muted:    darkMode ? '#94A3B8' : '#4B5563',
   };
 
   const fieldSx = {
@@ -39,7 +39,7 @@ export function useAppTheme() {
     border: `1px solid ${C.border}`,
     borderRadius: 3,
     transition: 'all 0.2s',
-    boxShadow: darkMode ? '0 2px 12px rgba(0,0,0,0.3)' : '0 1px 4px rgba(0,0,0,0.06)',
+    boxShadow: darkMode ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 8px rgba(91,91,214,0.08)',
   };
 
   const menuPropsSx = {
@@ -47,7 +47,7 @@ export function useAppTheme() {
       sx: {
         background: C.surface,
         border: `1px solid ${C.border}`,
-        boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+        boxShadow: darkMode ? '0 8px 24px rgba(0,0,0,0.4)' : '0 8px 24px rgba(91,91,214,0.12)',
         '& .MuiMenuItem-root': {
           color: C.text,
           '&:hover': { background: `${C.primary}18` },

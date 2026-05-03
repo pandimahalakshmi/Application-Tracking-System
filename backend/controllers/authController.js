@@ -147,7 +147,7 @@ export const forgotPassword = async (req, res) => {
     if (!user) return res.status(404).json({ error: 'No account found with that email address' });
     const token = crypto.randomBytes(32).toString('hex');
     user.resetToken = token;
-    user.resetTokenExpiry = Date.now() + 3600000;
+    user.resetTokenExpiry = Date.now() + 86400000; // 24 hours
     await user.save();
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${token}`;
     const result = await sendPasswordResetEmail({ toEmail: user.email, toName: user.name, resetUrl });

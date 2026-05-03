@@ -10,7 +10,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveCo
 import { useAppTheme } from "../hooks/useAppTheme";
 
 const statusConfig = {
-  Pending:              { color:'#64748B', bg:'#F1F5F9' },
+  Pending:              { color:'#4B5563', bg:'#E8EEFF' },
   Shortlisted:          { color:'#D97706', bg:'#FEF3C7' },
   'Interview Scheduled':{ color:'#0891B2', bg:'#CFFAFE' },
   Selected:             { color:'#059669', bg:'#D1FAE5' },
@@ -71,11 +71,11 @@ export default function AdminDashboard() {
   });
 
   const barStages = [
-    { label:'Applied',    value: allApps.length, color:'#6366F1' },
-    { label:'Shortlisted',value: shortlisted,     color:'#F59E0B' },
-    { label:'Interview',  value: interviews,      color:'#06B6D4' },
-    { label:'Selected',   value: selected,        color:'#10B981' },
-    { label:'Rejected',   value: rejected,        color:'#EF4444' },
+    { label:'Applied',    value: allApps.length, color:'#5B5BD6' },
+    { label:'Shortlisted',value: shortlisted,     color:'#D97706' },
+    { label:'Interview',  value: interviews,      color:'#0891B2' },
+    { label:'Selected',   value: selected,        color:'#059669' },
+    { label:'Rejected',   value: rejected,        color:'#DC2626' },
   ];
 
   return (

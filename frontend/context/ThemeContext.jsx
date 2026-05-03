@@ -5,12 +5,12 @@ const ThemeContext = createContext(null);
 export function ThemeProvider({ children }) {
   const [darkMode, setDarkMode]   = useState(() => localStorage.getItem('darkMode') === 'true');
   const [compact, setCompact]     = useState(() => localStorage.getItem('compact') === 'true');
-  const [themeColor, setThemeColor] = useState(() => localStorage.getItem('themeColor') || '#6366F1');
+  const [themeColor, setThemeColor] = useState(() => localStorage.getItem('themeColor') || '#5B5BD6');
 
   useEffect(() => {
     localStorage.setItem('darkMode', darkMode);
     document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
-    document.body.style.background = darkMode ? '#0F172A' : '#F8FAFF';
+    document.body.style.background = darkMode ? '#0F172A' : '#F0F4FF';
   }, [darkMode]);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export const useTheme = () => {
   if (!ctx) return {
     darkMode: false, setDarkMode: () => {},
     compact: false, setCompact: () => {},
-    themeColor: '#6366F1', setThemeColor: () => {},
+    themeColor: '#5B5BD6', setThemeColor: () => {},
   };
   return ctx;
 };

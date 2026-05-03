@@ -12,9 +12,9 @@ import { useTheme } from "../context/ThemeContext";
 import { authService } from "../services/api";
 
 const THEMES = [
-  { name: 'Indigo',  color: '#6366F1' },
+  { name: 'Indigo',  color: '#5B5BD6' },
   { name: 'Blue',    color: '#3B82F6' },
-  { name: 'Green',   color: '#10B981' },
+  { name: 'Green',   color: '#059669' },
   { name: 'Rose',    color: '#F43F5E' },
   { name: 'Orange',  color: '#F97316' },
   { name: 'Violet',  color: '#7C3AED' },
@@ -75,17 +75,17 @@ export default function SettingsPage() {
   const isDark = darkMode;
 
   const C = {
-    bg:      isDark ? '#0F172A' : '#F8FAFF',
+    bg:      isDark ? '#0F172A' : '#F0F4FF',
     surface: isDark ? '#1E293B' : '#FFFFFF',
-    surface2:isDark ? '#263348' : '#F1F5FF',
-    border:  isDark ? '#334155' : '#E2E8F0',
-    text:    isDark ? '#F1F5F9' : '#1E293B',
-    muted:   isDark ? '#94A3B8' : '#64748B',
+    surface2:isDark ? '#263348' : '#E8EEFF',
+    border:  isDark ? '#334155' : '#D1D9F0',
+    text:    isDark ? '#F1F5F9' : '#111827',
+    muted:   isDark ? '#94A3B8' : '#4B5563',
     primary: P,
-    secondary:'#8B5CF6',
-    success: '#10B981',
-    warning: '#F59E0B',
-    danger:  '#EF4444',
+    secondary:'#7C3AED',
+    success: '#059669',
+    warning: '#D97706',
+    danger:  '#DC2626',
   };
 
   // Stable fSx â€” memoized so it doesn't recreate on every render

@@ -12,7 +12,7 @@ import { C, cardSx, fieldSx } from '../theme';
 
 const fSx = {
   ...fieldSx, mb:2,
-  '& input:-webkit-autofill':{ WebkitBoxShadow:'0 0 0 100px #FFFFFF inset', WebkitTextFillColor:'#1E293B' },
+  '& input:-webkit-autofill':{ WebkitBoxShadow:'0 0 0 100px #FFFFFF inset', WebkitTextFillColor:'#111827' },
 };
 const emptyForm = { fullName:'', email:'', phone:'', coverLetter:'', portfolioLink:'', resume:null };
 

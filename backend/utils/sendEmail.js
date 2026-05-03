@@ -77,7 +77,7 @@ export const sendPasswordResetEmail = async ({ toEmail, toName, resetUrl }) => {
       subject: 'Password Reset Request — ATS System',
       html: emailWrapper(`
         <p style="color:#374151;">Hi <strong>${toName}</strong>,</p>
-        <p style="color:#374151;line-height:1.7;">We received a request to reset your password. Click the button below to set a new password. This link expires in <strong>1 hour</strong>.</p>
+        <p style="color:#374151;line-height:1.7;">We received a request to reset your password. Click the button below to set a new password. This link expires in <strong>24 hours</strong>.</p>
         <div style="text-align:center;margin:28px 0;">
           <a href="${resetUrl}" style="display:inline-block;padding:14px 36px;background:linear-gradient(135deg,#6366F1,#8B5CF6);color:#fff;text-decoration:none;border-radius:8px;font-weight:bold;font-size:15px;">
             Reset Password

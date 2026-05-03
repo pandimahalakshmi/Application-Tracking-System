@@ -8,16 +8,16 @@ const FONT = "'Poppins', sans-serif";
 const P    = '#5B5BD6';
 const S    = '#7C3AED';
 const CARD = '#FFFFFF';
-const BR   = '#E2E5F0';
-const TX   = '#1A1A2E';
-const MU   = '#6B7280';
+const BR   = '#D1D9F0';
+const TX   = '#111827';
+const MU   = '#4B5563';
 const ER   = '#DC2626';
 const GRAD = `linear-gradient(135deg, ${P} 0%, ${S} 100%)`;
-const PANEL= `linear-gradient(160deg, #6366F1 0%, #8B5CF6 55%, #A855F7 100%)`;
+const PANEL= `linear-gradient(160deg, #5B5BD6 0%, #7C3AED 55%, #9333EA 100%)`;
 
 const inp = (focus) => ({
   width: '100%', padding: '9px 12px 9px 34px', borderRadius: 8,
-  border: `1.5px solid ${focus ? P : BR}`, background: focus ? '#FAFBFF' : '#F7F8FC',
+  border: `1.5px solid ${focus ? P : BR}`, background: focus ? '#F5F7FF' : '#F8FAFF',
   color: TX, fontSize: 13, outline: 'none', boxSizing: 'border-box',
   transition: 'all 0.2s', fontFamily: FONT, boxShadow: focus ? `0 0 0 3px ${P}18` : 'none',
 });
@@ -229,11 +229,11 @@ export default function AuthPage({ mode: modeProp }) {
         @media(min-width:600px){.mt{display:none!important;}}
       `}</style>
 
-      <div style={{ minHeight:'100vh', background:`radial-gradient(ellipse at 20% 30%,${P}12 0%,transparent 55%),radial-gradient(ellipse at 80% 70%,${S}0D 0%,transparent 55%),#EEEEFF`, display:'flex', alignItems:'center', justifyContent:'center', padding:'16px', fontFamily:FONT, position:'relative', overflow:'hidden' }}>
+      <div style={{ minHeight:'100vh', background:`radial-gradient(ellipse at 20% 30%,${P}12 0%,transparent 55%),radial-gradient(ellipse at 80% 70%,${S}0D 0%,transparent 55%),#E8EEFF`, display:'flex', alignItems:'center', justifyContent:'center', padding:'16px', fontFamily:FONT, position:'relative', overflow:'hidden' }}>
         <div style={{ position:'fixed', top:'-8%', left:'-4%', width:280, height:280, borderRadius:'50%', background:`radial-gradient(circle,${P}18 0%,transparent 70%)`, animation:'pulse 6s ease-in-out infinite', pointerEvents:'none' }}/>
         <div style={{ position:'fixed', bottom:'-8%', right:'-4%', width:240, height:240, borderRadius:'50%', background:`radial-gradient(circle,${S}12 0%,transparent 70%)`, animation:'pulse 7s ease-in-out infinite 2s', pointerEvents:'none' }}/>
 
-        <div className="ac" style={{ display:'flex', width:'100%', maxWidth:800, height:500, background:CARD, borderRadius:20, overflow:'hidden', boxShadow:'0 16px 48px rgba(91,91,214,0.14),0 3px 12px rgba(0,0,0,0.06)', border:`1px solid ${BR}`, position:'relative' }}>
+        <div className="ac" style={{ display:'flex', width:'100%', maxWidth:800, height:500, background:CARD, borderRadius:20, overflow:'hidden', boxShadow:'0 16px 48px rgba(91,91,214,0.16),0 3px 12px rgba(0,0,0,0.06)', border:`1px solid ${BR}`, position:'relative' }}>
 
           {/* Mobile tabs */}
           <div className="mt" style={{ position:'sticky', top:0, zIndex:20, display:'none', background:CARD, borderBottom:`1px solid ${BR}` }}>
