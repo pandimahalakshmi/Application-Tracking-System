@@ -2,8 +2,8 @@ import nodemailer from 'nodemailer';
 
 // Create transporter — uses Gmail SMTP directly
 const createTransporter = () => {
-  const user = process.env.EMAIL_USER || 'pandimahalakshmi5@gmail.com';
-  const pass = (process.env.EMAIL_PASS || 'emnn cmgj wyoq somp').replace(/\s/g, '');
+  const user = process.env.EMAIL_USER;
+  const pass = (process.env.EMAIL_PASS || '').replace(/\s/g, '');
   return nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
@@ -64,10 +64,15 @@ export const sendStatusEmail = async ({ toEmail, toName, jobTitle, company, stat
 };
 
 export const sendPasswordResetEmail = async ({ toEmail, toName, resetUrl }) => {
-  const emailUser = process.env.EMAIL_USER || 'pandimahalakshmi5@gmail.com';
-  const emailPass = (process.env.EMAIL_PASS || 'emnn cmgj wyoq somp').replace(/\s/g, '');
+  const emailUser = process.env.EMAIL_USER;
+  const emailPass = (process.env.EMAIL_PASS || '').replace(/\s/g, '');
 
   console.log('📧 Sending reset email to:', toEmail);
+
+  if (!emailUser || !emailPass) {
+    console.warn('⚠️ EMAIL_USER or EMAIL_PASS not set in environment variables');
+    return { success: false, error: 'Email service not configured' };
+  }
 
   try {
     const transporter = nodemailer.createTransport({
