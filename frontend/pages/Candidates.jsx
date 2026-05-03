@@ -263,7 +263,7 @@ export default function Candidates() {
               <Box sx={{ display:{ xs:'none', md:'block' }, overflowX:'auto', WebkitOverflowScrolling:'touch' }}>
                 <Table>
                   <TableHead>
-                    <TableRow sx={{ '& th':{ background:'#263348', color: C.muted, fontWeight:600, fontSize:12, borderBottom:`1px solid ${C.border}` } }}>
+                    <TableRow sx={{ '& th':{ background:`${C.primary}12`, color: C.text, fontWeight:700, fontSize:12, borderBottom:`2px solid ${C.primary}30` } }}>
                       <TableCell>Candidate</TableCell>
                       <TableCell>Job Applied</TableCell>
                       <TableCell>Applied Date</TableCell>
