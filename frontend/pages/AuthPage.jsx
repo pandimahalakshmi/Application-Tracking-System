@@ -203,7 +203,7 @@ export default function AuthPage({ mode: modeProp }) {
   return (
     <>
       <style>{`
-        *,*::before,*::after{box-sizing:border-box;}body{margin:0;}
+        *,*::before,*::after{box-sizing:border-box;}body{margin:0;}html,body,#root{height:100%;}
         @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
         @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
         @keyframes spin{to{transform:rotate(360deg)}}
@@ -232,11 +232,11 @@ export default function AuthPage({ mode: modeProp }) {
         @media(min-width:600px){.mt{display:none!important;}.mob-logo{display:none!important;}}
       `}</style>
 
-      <div style={{ minHeight:'100vh', background:`radial-gradient(ellipse at 20% 30%,${P}12 0%,transparent 55%),radial-gradient(ellipse at 80% 70%,${S}0D 0%,transparent 55%),#E8EEFF`, display:'flex', alignItems:'center', justifyContent:'center', padding:'24px 16px', fontFamily:FONT, position:'relative', overflow:'auto' }}>
+      <div style={{ minHeight:'100vh', background:`radial-gradient(ellipse at 20% 30%,${P}12 0%,transparent 55%),radial-gradient(ellipse at 80% 70%,${S}0D 0%,transparent 55%),#E8EEFF`, display:'flex', alignItems:'center', justifyContent:'center', padding:'24px 16px', boxSizing:'border-box', fontFamily:FONT, position:'relative', overflow:'hidden' }}>
         <div style={{ position:'fixed', top:'-8%', left:'-4%', width:280, height:280, borderRadius:'50%', background:`radial-gradient(circle,${P}18 0%,transparent 70%)`, animation:'pulse 6s ease-in-out infinite', pointerEvents:'none' }}/>
         <div style={{ position:'fixed', bottom:'-8%', right:'-4%', width:240, height:240, borderRadius:'50%', background:`radial-gradient(circle,${S}12 0%,transparent 70%)`, animation:'pulse 7s ease-in-out infinite 2s', pointerEvents:'none' }}/>
 
-        <div className="ac" style={{ display:'flex', width:'100%', maxWidth:800, minHeight:500, background:CARD, borderRadius:20, overflow:'hidden', boxShadow:'0 16px 48px rgba(91,91,214,0.16),0 3px 12px rgba(0,0,0,0.06)', border:`1px solid ${BR}`, position:'relative', alignSelf:'flex-start' }}>
+        <div className="ac" style={{ display:'flex', width:'100%', maxWidth:800, minHeight:500, background:CARD, borderRadius:20, overflow:'hidden', boxShadow:'0 16px 48px rgba(91,91,214,0.16),0 3px 12px rgba(0,0,0,0.06)', border:`1px solid ${BR}`, position:'relative' }}>
 
           {/* Mobile tabs */}
           <div className="mt" style={{ position:'sticky', top:0, zIndex:20, display:'none', background:CARD, borderBottom:`1px solid ${BR}`, width:'100%', flexShrink:0 }}>
