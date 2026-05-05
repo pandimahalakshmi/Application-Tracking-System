@@ -5,9 +5,15 @@ import { Bell, CheckCheck, Trash2 } from 'lucide-react';
 import { notificationService } from '../services/api';
 
 const C = {
-  bg:'#0F172A', surface:'#1E293B', border:'#334155',
-  primary:'#6366F1', text:'#F1F5F9', muted:'#94A3B8',
-  success:'#10B981', warning:'#F59E0B', danger:'#F87171',
+  bg:      '#F0F4FF',
+  surface: '#FFFFFF',
+  border:  '#D1D9F0',
+  primary: '#5B5BD6',
+  text:    '#111827',
+  muted:   '#4B5563',
+  success: '#059669',
+  warning: '#D97706',
+  danger:  '#DC2626',
 };
 
 const typeColor = (type) => ({
@@ -104,15 +110,21 @@ export default function NotificationBell({ userId }) {
     <ClickAwayListener onClickAway={() => setOpen(false)}>
       <Box>
         <IconButton ref={anchorRef} onClick={() => setOpen(o => !o)} size="small"
-          sx={{ p:0, background:'transparent', '&:hover':{ background:'transparent' } }}>
+          sx={{
+            p: '7px',
+            background: `${C.primary}12`,
+            border: `1px solid ${C.border}`,
+            borderRadius: 2,
+            '&:hover':{ background: `${C.primary}22`, borderColor: C.primary },
+          }}>
           <Badge badgeContent={unread} color="error" max={9}
             sx={{
               '& .MuiBadge-badge': {
                 fontSize: '0.6rem', minWidth: 16, height: 16,
-                top: 2, right: 2, border: '2px solid transparent',
+                top: 2, right: 2, border: `2px solid #fff`,
               }
             }}>
-            <Bell size={20} color="#ffffff"/>
+            <Bell size={20} color="#5B5BD6"/>
           </Badge>
         </IconButton>
 
@@ -120,7 +132,7 @@ export default function NotificationBell({ userId }) {
           style={{ zIndex:9999 }}
           modifiers={[{ name:'offset', options:{ offset:[0, 8] } }]}>
           <Paper sx={{ width:360, background: C.surface, border:`1px solid ${C.border}`,
-            borderRadius:2, boxShadow:'0 16px 48px rgba(0,0,0,0.6)', overflow:'hidden' }}>
+            borderRadius:2, boxShadow:'0 16px 48px rgba(91,91,214,0.16), 0 3px 12px rgba(0,0,0,0.08)', overflow:'hidden' }}>
 
             {/* Header */}
             <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', p:2, pb:1.5 }}>
@@ -156,9 +168,9 @@ export default function NotificationBell({ userId }) {
                     sx={{
                       p:2, borderBottom:`1px solid ${C.border}`,
                       cursor: isClickable ? 'pointer' : (n.read ? 'default' : 'pointer'),
-                      background: n.read ? C.surface : '#1e3a5f',
+                      background: n.read ? C.surface : `${C.primary}08`,
                       transition:'background 0.25s',
-                      '&:hover':{ background: n.read ? '#263348' : '#1a3356' },
+                      '&:hover':{ background: n.read ? C.bg : `${C.primary}14` },
                     }}>
                     <Box sx={{ display:'flex', gap:1.5, alignItems:'flex-start' }}>
 
