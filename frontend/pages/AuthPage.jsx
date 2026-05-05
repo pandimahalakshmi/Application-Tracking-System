@@ -232,7 +232,7 @@ export default function AuthPage({ mode: modeProp }) {
         @media(min-width:600px){.mt{display:none!important;}.mob-logo{display:none!important;}}
       `}</style>
 
-      <div style={{ minHeight:'100vh', background:`radial-gradient(ellipse at 20% 30%,${P}12 0%,transparent 55%),radial-gradient(ellipse at 80% 70%,${S}0D 0%,transparent 55%),#E8EEFF`, display:'flex', alignItems:'flex-start', justifyContent:'center', padding:'16px', paddingTop:'24px', paddingBottom:'24px', fontFamily:FONT, position:'relative', overflow:'auto' }}>
+      <div style={{ minHeight:'100vh', background:`radial-gradient(ellipse at 20% 30%,${P}12 0%,transparent 55%),radial-gradient(ellipse at 80% 70%,${S}0D 0%,transparent 55%),#E8EEFF`, display:'flex', alignItems:'center', justifyContent:'center', padding:'24px 16px', fontFamily:FONT, position:'relative', overflow:'auto' }}>
         <div style={{ position:'fixed', top:'-8%', left:'-4%', width:280, height:280, borderRadius:'50%', background:`radial-gradient(circle,${P}18 0%,transparent 70%)`, animation:'pulse 6s ease-in-out infinite', pointerEvents:'none' }}/>
         <div style={{ position:'fixed', bottom:'-8%', right:'-4%', width:240, height:240, borderRadius:'50%', background:`radial-gradient(circle,${S}12 0%,transparent 70%)`, animation:'pulse 7s ease-in-out infinite 2s', pointerEvents:'none' }}/>
 
